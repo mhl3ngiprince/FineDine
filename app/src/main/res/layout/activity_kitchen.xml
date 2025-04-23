@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/light_green">
+
+    <!-- Title Section -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="kitchen_orders"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_green"
+        android:layout_marginBottom="24dp"
+        android:shadowColor="@color/primary_green_20"
+        android:shadowRadius="4"
+        android:shadowDx="0"
+        android:shadowDy="2"/>
+
+    <!-- Orders List Container -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvOrders"
+        android:layout_width="match_parent"
+        android:layout_height="586dp"
+        android:background="@drawable/rounded_container"
+        android:clipToPadding="false"
+        android:padding="8dp"
+        android:scrollbars="vertical"
+        tools:listitem="@layout/item_order" />
+
+    <!-- Bottom Shadow Overlay -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom"
+        android:background="@drawable/shadow_gradient" />
+
+</LinearLayout>

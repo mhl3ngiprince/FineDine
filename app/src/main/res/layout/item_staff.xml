@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_margin="8dp"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="6dp"
+    app:strokeColor="@color/primary_green_10"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Staff Information Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvStaffName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/dark_gray"
+                android:drawableStart="@drawable/ic_person"
+                android:drawablePadding="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                tools:text="Marco Pierre"/>
+
+            <TextView
+                android:id="@+id/tvStaffRole"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="14sp"
+                android:textColor="@color/medium_gray"
+                android:drawableStart="@drawable/ic_role"
+                android:drawablePadding="8dp"
+                tools:text="Sous Chef"/>
+
+            <TextView
+                android:id="@+id/tvStaffEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="14sp"
+                android:textColor="@color/medium_gray"
+                android:drawableStart="@drawable/ic_email"
+                android:drawablePadding="8dp"
+                android:autoLink="email"
+                tools:text="marco@restaurant.com"/>
+        </LinearLayout>
+
+        <!-- Action Buttons Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEdit"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Edit"
+                android:icon="@drawable/ic_edit"
+                android:iconTint="@color/primary_green"
+                app:strokeColor="@color/primary_green"
+                app:cornerRadius="8dp"
+                android:layout_marginEnd="8dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDelete"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Delete"
+                android:icon="@drawable/ic_delete"
+                android:iconTint="@color/red_600"
+                app:strokeColor="@color/red_600"
+                app:cornerRadius="8dp"/>
+        </LinearLayout>
+
+        <!-- Bottom Shadow Overlay -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:background="@drawable/shadow_gradient"
+            android:layout_gravity="bottom"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

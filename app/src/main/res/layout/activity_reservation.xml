@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/light_green"
+    android:padding="24dp"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Customer Information Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp"
+            app:strokeColor="@color/primary_green_10"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="Customer Information"
+                    android:textColor="@color/primary_green"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Full Name"
+                    app:boxStrokeColor="@color/primary_green"
+                    app:hintTextColor="@color/primary_green">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCustomerName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/dark_gray"
+                        android:textColorHint="@color/medium_gray" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:hint="Phone Number"
+                    app:boxStrokeColor="@color/primary_green"
+                    app:hintTextColor="@color/primary_green">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etPhone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="phone"
+                        android:textColor="@color/dark_gray"
+                        android:textColorHint="@color/medium_gray" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:hint="Email"
+                    app:boxStrokeColor="@color/primary_green"
+                    app:hintTextColor="@color/primary_green">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textEmailAddress"
+                        android:textColor="@color/dark_gray"
+                        android:textColorHint="@color/medium_gray" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Reservation Details Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp"
+            app:strokeColor="@color/primary_green"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Reservation Details"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary_green"
+                    android:layout_marginBottom="16dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnDate"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Select Date"
+                        android:drawableStart="@drawable/ic_calendar"
+                        android:drawablePadding="8dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        app:strokeColor="@color/primary_green"
+                        app:cornerRadius="8dp"
+                        android:layout_marginEnd="8dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnTime"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Select Time"
+                        android:drawableStart="@drawable/ic_clock"
+                        android:drawablePadding="8dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        app:strokeColor="@color/primary_green"
+                        app:cornerRadius="8dp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="16dp"
+                    android:weightSum="2">
+
+                    <TextView
+                        android:id="@+id/tvSelectedDate"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="16sp"
+                        android:textColor="@color/dark_gray"/>
+
+                    <TextView
+                        android:id="@+id/tvSelectedTime"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="16sp"
+                        android:textColor="@color/dark_gray"/>
+
+                </LinearLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:hint="Party Size"
+                    app:boxStrokeColor="@color/primary_green"
+                    app:hintTextColor="@color/primary_green">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etPartySize"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:textColor="@color/dark_gray"
+                        android:textColorHint="@color/medium_gray"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Special Requests Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp"
+            app:strokeColor="@color/primary_green"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Special Requests"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary_green"
+                    android:layout_marginBottom="16dp"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Any special requirements?"
+                    app:boxStrokeColor="@color/primary_green"
+                    app:hintTextColor="@color/primary_green">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etSpecialRequests"
+                        android:layout_width="match_parent"
+                        android:layout_height="120dp"
+                        android:gravity="start"
+                        android:inputType="textMultiLine"
+                        android:maxLines="4"
+                        android:textColor="@color/dark_gray"
+                        android:textColorHint="@color/medium_gray"
+                        android:padding="8dp"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Submit Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSubmitReservation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Confirm Reservation"
+            android:backgroundTint="@color/primary_green"
+            android:textColor="@color/white"
+            app:cornerRadius="12dp"
+            android:paddingVertical="14dp"
+            android:elevation="2dp"/>
+
+        <!-- Bottom Shadow Overlay -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:background="@drawable/shadow_gradient"
+            android:layout_gravity="bottom"/>
+
+    </LinearLayout>
+</ScrollView>

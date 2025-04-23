@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Item Name -->
+    <TextView
+        android:id="@+id/tvItemName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Dish Name"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/dark_gray"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/ibDelete"
+        app:layout_constraintWidth_percent="0.6"/>
+
+    <!-- Quantity Input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilQuantity"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:boxStrokeColor="@color/primary_green"
+        app:hintTextColor="@color/primary_green"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvItemName">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etQuantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="Qty"
+            android:textAlignment="center"
+            android:textColor="@color/dark_gray"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Item Price -->
+    <TextView
+        android:id="@+id/tvItemPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="$0.00"
+        android:textSize="16sp"
+        android:textColor="@color/primary_green"
+        android:layout_marginStart="16dp"
+        app:layout_constraintBottom_toBottomOf="@id/tilQuantity"
+        app:layout_constraintStart_toEndOf="@id/tilQuantity"/>
+
+    <!-- Delete Button -->
+    <ImageButton
+        android:id="@+id/ibDelete"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_delete"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/divider"
+        app:tint="@color/red" />
+
+    <!-- Divider -->
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/primary_green"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

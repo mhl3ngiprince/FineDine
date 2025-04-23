@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.finedine.rms">
+
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.INTERNET" /> 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" /> 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" /> 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+
+    <application
+        android:name=".FineDineApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/logoj"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/logoj"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat">
+
+        <!-- Splash Activity -->
+        <activity
+            android:name=".LoginActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+      <!-- Login Activity -->
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat"
+            tools:ignore="MissingClass" />
+
+        <!-- Order Details Activity -->
+        <activity
+            android:name=".OrderActivity"
+            android:exported="true"
+            android:parentActivityName=".LoginActivity" />
+
+        <activity
+            android:name=".KitchenActivity"
+            android:exported="true"
+            android:parentActivityName=".LoginActivity" />
+
+        <activity
+            android:name=".ManagerDashboardActivity"
+            android:exported="true"
+            android:parentActivityName=".LoginActivity" />
+
+        <activity
+            android:name=".MenuManagementActivity"
+            android:exported="true"
+            android:parentActivityName=".LoginActivity" />
+
+        <activity
+            android:name=".ReservationActivity"
+            android:exported="true"
+            android:parentActivityName=".LoginActivity" />
+
+        <activity
+            android:name=".StaffManagementActivity"
+            android:exported="true"
+            android:parentActivityName=".LoginActivity" />
+
+        <activity
+            android:name=".EditStaffActivity"
+            android:exported="true"
+            android:parentActivityName=".LoginActivity" />
+
+        <activity
+            android:name=".InventoryActivity"
+            android:exported="true"
+            android:parentActivityName=".LoginActivity" />
+        
+
+        <!-- Firebase Messaging Service -->
+        <service
+            android:name=".MyFirebaseMessagingService"
+            android:exported="false"
+            tools:ignore="MissingClass">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Notification Receiver -->
+        <receiver
+            android:name=".NotificationReceiver"
+            android:exported="true"
+            tools:ignore="MissingClass">
+            <intent-filter>
+                <action android:name="com.finedine.rms.NOTIFICATION_ACTION" />
+            </intent-filter>
+        </receiver>
+
+        <!-- File Provider for image handling -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!-- Meta-data for Firebase -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/primary_green" />
+    </application>
+</manifest>

@@ -1,0 +1,333 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "a86338ee7ef57187bfe44d49a8d066ba",
+    "entities": [
+      {
+        "tableName": "users",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`user_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `email` TEXT, `password_hash` TEXT, `role` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "user_id",
+            "columnName": "user_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "password_hash",
+            "columnName": "password_hash",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "role",
+            "columnName": "role",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "user_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "reservations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reservation_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `user_id` INTEGER NOT NULL, `reservation_date` TEXT, `reservation_time` TEXT, `number_of_guests` INTEGER NOT NULL, `status` TEXT, `customerName` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "reservation_id",
+            "columnName": "reservation_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "user_id",
+            "columnName": "user_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reservation_date",
+            "columnName": "reservation_date",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reservation_time",
+            "columnName": "reservation_time",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "number_of_guests",
+            "columnName": "number_of_guests",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "customerName",
+            "columnName": "customerName",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "reservation_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "menu_items",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`item_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `description` TEXT, `price` REAL NOT NULL, `availability` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "item_id",
+            "columnName": "item_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "price",
+            "columnName": "price",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "availability",
+            "columnName": "availability",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "item_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "orders",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`orderId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tableNumber` INTEGER NOT NULL, `status` TEXT, `timestamp` INTEGER NOT NULL, `order_time` INTEGER NOT NULL, `waiterId` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "orderId",
+            "columnName": "orderId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tableNumber",
+            "columnName": "tableNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "order_time",
+            "columnName": "order_time",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "waiterId",
+            "columnName": "waiterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "orderId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_orders_orderId",
+            "unique": true,
+            "columnNames": [
+              "orderId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_orders_orderId` ON `${TABLE_NAME}` (`orderId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "order_items",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`item_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `quantity` INTEGER NOT NULL, `orderId` TEXT, FOREIGN KEY(`orderId`) REFERENCES `orders`(`orderId`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`item_id`) REFERENCES `menu_items`(`item_id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "item_id",
+            "columnName": "item_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "quantity",
+            "columnName": "quantity",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "orderId",
+            "columnName": "orderId",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "item_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_order_items_orderId",
+            "unique": false,
+            "columnNames": [
+              "orderId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_order_items_orderId` ON `${TABLE_NAME}` (`orderId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "orders",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "orderId"
+            ],
+            "referencedColumns": [
+              "orderId"
+            ]
+          },
+          {
+            "table": "menu_items",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "item_id"
+            ],
+            "referencedColumns": [
+              "item_id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "inventory",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`item_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `item_name` TEXT, `quantity_in_stock` REAL NOT NULL, `reorder_threshold` REAL NOT NULL, `last_updated` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "item_id",
+            "columnName": "item_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "item_name",
+            "columnName": "item_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "quantity_in_stock",
+            "columnName": "quantity_in_stock",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reorder_threshold",
+            "columnName": "reorder_threshold",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "last_updated",
+            "columnName": "last_updated",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "item_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a86338ee7ef57187bfe44d49a8d066ba')"
+    ]
+  }
+}

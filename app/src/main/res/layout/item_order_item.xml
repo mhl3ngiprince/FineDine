@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_margin="8dp"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:strokeColor="@color/primary_green_10"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- Item Name -->
+        <TextView
+            android:id="@+id/tvItemName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/dark_gray"
+            android:drawableStart="@drawable/ic_food"
+            android:drawablePadding="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            tools:text="Truffle Fries"/>
+
+        <!-- Quantity -->
+        <TextView
+            android:id="@+id/tvQuantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/primary_green"
+            android:drawableStart="@drawable/ic_quantity"
+            android:drawablePadding="4dp"
+            android:layout_marginStart="24dp"
+            tools:text="× 2"/>
+
+        <!-- Bottom Shadow Overlay -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:background="@drawable/shadow_gradient"
+            android:layout_gravity="bottom"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="6dp"
+    app:strokeColor="@color/primary_green_10"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Item Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/inventoryItemName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/dark_gray"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                tools:text="Heirloom Tomatoes"/>
+
+            <ImageView
+                android:id="@+id/warningIcon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="16dp"
+                android:src="@drawable/ic_warning"
+                android:visibility="gone"
+                android:contentDescription="@string/low_stock_warning"
+                app:tint="@color/red_600" />
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="16dp"
+            android:background="@color/primary_green_20"/>
+
+        <!-- Quantity Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/quantityText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/medium_gray"
+                android:textSize="16sp"
+                android:drawableStart="@drawable/ic_inventory"
+                android:drawablePadding="8dp"
+                tools:text="Current Stock: 5.0 kg"/>
+
+            <TextView
+                android:id="@+id/thresholdText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/primary_green"
+                android:textSize="16sp"
+                android:drawableStart="@drawable/ic_threshold"
+                android:drawablePadding="8dp"
+                tools:text="Reorder at: 10.0 kg"/>
+        </LinearLayout>
+
+        <!-- Last Updated -->
+        <TextView
+            android:id="@+id/lastUpdatedText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/medium_gray"
+            android:textSize="14sp"
+            android:drawableStart="@drawable/ic_clock"
+            android:drawablePadding="4dp"
+            tools:text="Last updated: May 15, 2023 08:30 AM"/>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

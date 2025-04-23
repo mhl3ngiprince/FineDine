@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/light_green"
+    android:padding="24dp">
+
+    <!-- Table Header -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Table #12"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_green"
+        android:layout_marginBottom="24dp"
+        android:shadowColor="@color/primary_green_20"
+        android:shadowRadius="4"
+        android:shadowDx="0"
+        android:shadowDy="2"/>
+
+    <!-- Order Items List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/menuRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@drawable/rounded_container"
+        android:clipToPadding="false"
+        android:padding="12dp"
+        android:scrollbars="vertical"
+        tools:listitem="@layout/item_order_entry"/>
+
+    <!-- Action Button -->
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Submit Order"
+        android:onClick="submitOrder"
+        android:backgroundTint="@color/primary_green"
+        android:textColor="@color/white"
+        app:cornerRadius="12dp"
+        android:paddingVertical="14dp"
+        android:layout_marginTop="24dp"
+        android:elevation="2dp"/>
+
+    <!-- Bottom Shadow Overlay -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:background="@drawable/shadow_gradient"
+        android:layout_gravity="bottom"/>
+
+</LinearLayout>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_margin="8dp"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:strokeColor="@color/primary_green_10"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Top Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_calendar"
+                android:contentDescription="@string/reservation_date"
+                app:tint="@color/primary_green" />
+
+            <TextView
+                android:id="@+id/tvDateTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:textSize="14sp"
+                android:textColor="@color/medium_gray"
+                android:textStyle="bold"
+                tools:text="2023-05-15 19:30"/>
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/primary_green"
+                android:textStyle="bold"
+                android:drawableEnd="@drawable/ic_status_indicator"
+                android:drawablePadding="4dp"
+                tools:text="Confirmed"/>
+        </LinearLayout>
+
+        <!-- Customer Information -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_user"
+                android:contentDescription="@string/customer_icon"
+                app:tint="@color/primary_green" />
+
+            <TextView
+                android:id="@+id/tvCustomerName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:textSize="16sp"
+                android:textColor="@color/dark_gray"
+                android:textStyle="bold"
+                tools:text="John Doe"/>
+        </LinearLayout>
+
+        <!-- Reservation Details -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_people"
+                android:contentDescription="@string/party_size"
+                app:tint="@color/primary_green" />
+
+            <TextView
+                android:id="@+id/tvPartySize"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:textSize="14sp"
+                android:textColor="@color/medium_gray"
+                tools:text="Party of 4"/>
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="24dp"
+                android:src="@drawable/ic_clock"
+                android:contentDescription="@string/reservation_time"
+                app:tint="@color/primary_green" />
+
+            <TextView
+                android:id="@+id/tvReservationTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textSize="14sp"
+                android:textColor="@color/medium_gray"
+                tools:text="7:30 PM"/>
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="@color/primary_green_20"/>
+
+        <!-- Bottom Shadow Overlay -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:background="@drawable/shadow_gradient"
+            android:layout_gravity="bottom"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

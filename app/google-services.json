@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "706633259780",
+    "firebase_url": "https://finedinerms-default-rtdb.firebaseio.com",
+    "project_id": "finedinerms",
+    "storage_bucket": "finedinerms.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:706633259780:android:8cd578d4f8cf17d74f0e51",
+        "android_client_info": {
+          "package_name": "com.finedine.rms"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYhN2AoyDtbhYMGw-HQEwWS50cAc8t0vI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/light_green"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Profile Image Section -->
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:contentDescription="TODO"
+            android:src="@drawable/ic_profile_placeholder"
+            android:background="@drawable/circle_green"
+            android:padding="12dp"
+            android:elevation="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="32dp"/>
+
+        <!-- Name Field -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/full_name"
+            android:id="@id/etName"
+            app:boxStrokeColor="@color/primary_green"
+            app:hintTextColor="@color/primary_green"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_marginBottom="16dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/dark_gray"
+                android:textColorHint="@color/medium_gray"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Email Field -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/email_address"
+            app:boxStrokeColor="@color/primary_green"
+            app:hintTextColor="@color/primary_green"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_marginBottom="16dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:textColor="@color/dark_gray"
+                android:textColorHint="@color/medium_gray"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Password Field -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="new_password_optional"
+            app:boxStrokeColor="@color/primary_green"
+            app:hintTextColor="@color/primary_green"
+            app:passwordToggleEnabled="true"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_marginBottom="24dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@color/dark_gray"
+                android:textColorHint="@color/medium_gray"
+                tools:ignore="ExtraText" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Role Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="user_role"
+            android:textColor="@color/primary_green"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginBottom="8dp"/>
+
+        <Spinner
+            android:id="@+id/spinnerRole"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/spinner_green_border"
+            android:popupBackground="@color/light_green"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Save Button -->
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="save_changes"
+            android:backgroundTint="@color/primary_green"
+            android:textColor="@color/white"
+            app:cornerRadius="12dp"
+            android:paddingVertical="14dp"
+            android:elevation="2dp"/>
+
+        <!-- Divider Line -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/primary_green"
+            android:layout_marginVertical="24dp"/>
+
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/light_green">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="176dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/circle_green"
+        android:elevation="4dp"
+        android:padding="16dp"
+        android:src="@drawable/logoj" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/nameInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/full_name"
+        android:textColor="@color/green"
+        android:textColorHint="@color/green" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:boxStrokeColor="@color/primary_green"
+        app:hintTextColor="@color/primary_green">
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:boxStrokeColor="@color/primary_green"
+        app:hintTextColor="@color/primary_green">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/emailInput"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:hint="@string/email"
+            android:inputType="textEmailAddress"
+            android:textColor="@color/green"
+            android:textColorHint="@color/green" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:boxStrokeColor="@color/primary_green"
+        app:hintTextColor="@color/primary_green"
+        app:passwordToggleEnabled="true">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/passwordInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/password"
+            android:inputType="textPassword"
+            android:textColor="@color/green"
+            android:textColorHint="@color/green"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        app:boxStrokeColor="@color/primary_green"
+        app:hintTextColor="@color/primary_green"
+        app:passwordToggleEnabled="true">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/confirmPasswordInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/confirm_password"
+            android:inputType="textPassword"
+            android:textColor="@color/green"
+            android:textColorHint="@color/green"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select Role:"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"/>
+
+    <Spinner
+        android:id="@+id/roleSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:minHeight="48dp"
+        android:contentDescription="User role selection" />
+
+    <Button
+        android:id="@+id/registerButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/register"
+        android:onClick="attemptRegistration"
+        android:backgroundTint="@color/primary_green"
+        android:textColor="@color/white"
+        app:cornerRadius="8dp"
+        android:paddingVertical="12dp"/>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/loginTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/already_have_an_account_login"
+        android:textColor="@color/primary_green"
+        android:onClick="goToLogin"
+        android:drawableStart="@drawable/ic_arrow_forward"
+        android:drawablePadding="4dp"
+        android:textStyle="bold"/>
+</LinearLayout>

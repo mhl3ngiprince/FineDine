@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="6dp"
+    app:strokeColor="@color/primary_green_10"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="670dp"
+        android:orientation="horizontal"
+        android:padding="24dp">
+
+        <!-- Status Icon -->
+        <ImageView
+            android:id="@+id/ivStatusIcon"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="24dp"
+            android:background="@drawable/circle_green"
+            android:contentDescription="@string/order_status"
+            android:padding="12dp"
+            android:src="@drawable/ic_table_status"
+            app:tint="@color/white" />
+
+        <!-- Order Details -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvTableNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Table 12"
+                android:textColor="@color/dark_gray"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                tools:text="Table 12" />
+
+            <TextView
+                android:id="@+id/tvOrderTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/medium_gray"
+                android:textSize="14sp"
+                tools:text="Ordered at 08:30 AM" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Preparing"
+                android:textColor="@color/primary_green"
+                android:textSize="14sp"
+                app:backgroundTint="@android:color/transparent"
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/primary_green"
+                app:strokeWidth="1dp"
+                tools:text="Preparing" />
+
+        </LinearLayout>
+
+        <!-- Bottom Shadow Overlay -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/shadow_gradient" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
