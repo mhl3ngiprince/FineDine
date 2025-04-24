@@ -7,8 +7,8 @@
     android:orientation="vertical"
     android:padding="24dp"
     android:gravity="center"
-    android:background="@color/black"
-    tools:context="com.finedine.rms.ui.theme.MainActivity">
+    android:background="@color/primary_green"
+    tools:context="com.finedine.rms.LoginActivity">
 
     <ImageView
         android:layout_width="306dp"
@@ -49,8 +49,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/password"
             android:inputType="textPassword"
-            android:textColor="@color/dark_gray"
-            android:textColorHint="@color/medium_gray"/>
+            android:textColor="@color/primary_green_dark"
+            android:textColorHint="@color/black"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
@@ -58,11 +58,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/login"
-        android:onClick="attemptLogin"
+
         android:backgroundTint="@color/white"
-        android:textColor="@color/green"
+        android:textColor="@color/primary_green"
         app:cornerRadius="8dp"
-        android:textStyle="italic"
+        android:textStyle="bold"
         android:paddingVertical="12dp"/>
 
     <ProgressBar
@@ -73,14 +73,19 @@
         android:visibility="gone" />
 
     <Button
+        android:id="@+id/registerText"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-
         android:drawablePadding="4dp"
-        android:onClick="goToRegister"
-        android:id="@+id/registerText"
+
         android:text="Create account"
-        android:textColor="@color/primary_green"
-        android:textStyle="italic"/>
+        android:textColor="@color/white"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/text_phone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 </LinearLayout>

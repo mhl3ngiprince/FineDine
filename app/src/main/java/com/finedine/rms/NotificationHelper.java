@@ -16,7 +16,7 @@ import android.content.pm.PackageManager;
 import androidx.core.app.ActivityCompat;
 
 public class NotificationHelper {
-    private static final String CHANNEL_ID = "finedine_channel_01";
+    private static final String CHANNEL_ID = "fine dine_channel_01";
     private static final String CHANNEL_NAME = "FineDine Notifications";
 
     public static void createNotificationChannel(Context context) {

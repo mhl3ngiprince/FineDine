@@ -133,7 +133,7 @@ public class RegisterActivity extends AppCompatActivity {
         Toast.makeText(this, "Registration successful as " + roleToUse, Toast.LENGTH_SHORT).show();
 
         // Launch the appropriate activity directly based on the selected role
-        Intent intent = null;
+       /* Intent intent = null;
 
         if (roleToUse.equals("manager")) {
             intent = new Intent(this, ManagerDashboardActivity.class);
@@ -152,7 +152,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Start the activity
         startActivity(intent);
-        finish();
+        finish();*/
     }
 
     public void goToLogin(View view) {

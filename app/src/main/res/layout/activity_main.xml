@@ -8,8 +8,8 @@
     tools:context="com.finedine.rms.ui.theme.MainActivity">
 
     <ImageView
-        android:layout_width="306dp"
-        android:layout_height="266dp"
+        android:layout_width="match_parent"
+        android:layout_height="259dp"
         android:layout_marginBottom="32dp"
         android:background="@drawable/circle_green"
         android:contentDescription="@string/todo"

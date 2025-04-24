@@ -5,11 +5,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="24dp"
-    android:background="@color/black">
+    android:background="@color/green">
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="176dp"
+        android:layout_width="335dp"
+        android:layout_height="173dp"
         android:layout_marginBottom="32dp"
         android:background="@drawable/circle_green"
         android:elevation="4dp"
@@ -21,8 +21,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/full_name"
-        android:textColor="@color/green"
-        android:textColorHint="@color/green" />
+        android:textColor="@color/black"
+        android:textColorHint="@color/gray_light" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
@@ -127,7 +127,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="@string/already_have_an_account_login"
-        android:textColor="@color/primary_green"
+        android:textColor="@color/gray_light"
         android:onClick="goToLogin"
         android:drawableStart="@drawable/ic_arrow_forward"
         android:drawablePadding="4dp"

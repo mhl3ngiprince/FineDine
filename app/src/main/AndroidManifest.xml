@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.finedine.rms">
+    android:installLocation="auto"
+    >
 
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" /> 
@@ -20,23 +21,22 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat">
 
-        <!-- Splash Activity -->
+        <!-- Login Activity as launcher -->
         <activity
             android:name=".LoginActivity"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat">
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-      <!-- Login Activity -->
+        <!-- Register Activity -->
         <activity
             android:name=".RegisterActivity"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat"
-            tools:ignore="MissingClass" />
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar" />
 
         <!-- Order Details Activity -->
         <activity

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_dashboard"
+            android:icon="@drawable/ic_menu"
+            android:title="Dashboard" />
+
+        <item
+            android:id="@+id/nav_staff"
+            android:icon="@drawable/ic_people"
+            android:title="Staff Management" />
+
+        <item
+            android:id="@+id/nav_menu"
+            android:icon="@drawable/ic_menu_item"
+            android:title="Menu Management" />
+
+        <item
+            android:id="@+id/nav_orders"
+            android:icon="@drawable/ic_food"
+            android:title="Orders" />
+
+        <item
+            android:id="@+id/nav_reservations"
+            android:icon="@drawable/ic_calendar"
+            android:title="Reservations" />
+
+        <item
+            android:id="@+id/nav_inventory"
+            android:icon="@drawable/ic_inventory"
+            android:title="Inventory" />
+    </group>
+
+    <item android:title="Account">
+        <menu>
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_menu"
+                android:title="Logout" />
+        </menu>
+    </item>
+</menu>

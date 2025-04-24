@@ -21,7 +21,7 @@
         android:shadowRadius="4"
         android:shadowDx="0"
         android:shadowDy="2"
-        tools:text="Table 5 - 2 items"/>
+       />
 
     <!-- Order Items Section -->
     <TextView

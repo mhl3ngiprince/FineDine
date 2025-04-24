@@ -49,7 +49,7 @@
         android:id="@+id/tvItemPrice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="$0.00"
+        android:text="R0.00"
         android:textSize="16sp"
         android:textColor="@color/primary_green"
         android:layout_marginStart="16dp"

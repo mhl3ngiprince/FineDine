@@ -23,6 +23,7 @@ public class MenuItem {
         return new MenuItem[]{
                 // Starters
                 new MenuItem(
+
                         "Seared Scallops",
                         "Day boat scallops with cauliflower purée, truffle foam, and micro herbs",
                         28.50,

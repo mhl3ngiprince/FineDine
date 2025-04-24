@@ -1,19 +1,27 @@
-package com.finedine;
+package com.finedine.rms;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.finedine.rms.KitchenActivity;
 import com.finedine.rms.LoginActivity;
+import com.finedine.rms.ManagerDashboardActivity;
 
+import com.finedine.rms.OrderActivity;
 import com.finedine.rms.R;
 
 import com.finedine.rms.ui.theme.MainActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import com.finedine.rms.utils.RoleManager;
+import com.finedine.rms.utils.SharedPrefsManager;
 
 public class SplashActivity extends AppCompatActivity {
 

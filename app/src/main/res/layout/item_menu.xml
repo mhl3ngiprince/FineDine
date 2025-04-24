@@ -58,7 +58,7 @@
                 android:textColor="@color/primary_green"
                 android:drawableStart="@drawable/ic_price_tag"
                 android:drawablePadding="4dp"
-                tools:text="$18.99"/>
+                tools:text="R18.99"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"
