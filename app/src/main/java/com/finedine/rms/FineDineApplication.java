@@ -32,6 +32,19 @@ public class FineDineApplication extends Application {
                         .build()
                 );
 
+                // Log a reminder about Firebase Security Rules
+                Log.w(TAG, "IMPORTANT: Make sure your Firebase Security Rules allow read/write access. " +
+                        "Current rules may be causing PERMISSION_DENIED errors.");
+                Log.i(TAG, "Suggested Firestore Rules:\n" +
+                        "rules_version = '2';\n" +
+                        "service cloud.firestore {\n" +
+                        "  match /databases/{database}/documents {\n" +
+                        "    match /{document=**} {\n" +
+                        "      allow read, write: if request.auth != null;\n" +
+                        "    }\n" +
+                        "  }\n" +
+                        "}");
+
                 // Enable offline persistence for Realtime Database
                 FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 

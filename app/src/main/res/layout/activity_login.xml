@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:padding="24dp"
     android:gravity="center"
-    android:background="@color/light_green"
+    android:background="@color/black"
     tools:context="com.finedine.rms.ui.theme.MainActivity">
 
     <ImageView
@@ -32,8 +32,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/Email"
             android:inputType="textEmailAddress"
-            android:textColor="@color/dark_gray"
-            android:textColorHint="@color/medium_gray"/>
+            android:textColor="@color/primary_green_dark"
+            android:textColorHint="@color/black"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -59,9 +59,10 @@
         android:layout_height="wrap_content"
         android:text="@string/login"
         android:onClick="attemptLogin"
-        android:backgroundTint="@color/primary_green"
-        android:textColor="@color/white"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/green"
         app:cornerRadius="8dp"
+        android:textStyle="italic"
         android:paddingVertical="12dp"/>
 
     <ProgressBar
@@ -71,14 +72,15 @@
         android:layout_gravity="center"
         android:visibility="gone" />
 
-    <TextView
+    <Button
         android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:drawableStart="@drawable/ic_arrow_forward"
+
         android:drawablePadding="4dp"
         android:onClick="goToRegister"
-        android:text="don_t_have_an_account_register"
+        android:id="@+id/registerText"
+        android:text="Create account"
         android:textColor="@color/primary_green"
-        android:textStyle="bold" />
+        android:textStyle="italic"/>
 </LinearLayout>

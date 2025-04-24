@@ -3,23 +3,25 @@ package com.finedine.rms;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.finedine.rms.R;
-import com.finedine.rms.OrderItem;
-
 import java.util.List;
-
-
 
 public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.OrderItemViewHolder> {
     private final List<OrderItem> orderItems;
+    private final OnItemDeleteListener deleteListener;
 
-    public OrderItemAdapter(List<OrderItem> orderItems) {
+    public interface OnItemDeleteListener {
+        void onDeleteClick(int position);
+    }
+
+    public OrderItemAdapter(List<OrderItem> orderItems, OnItemDeleteListener deleteListener) {
         this.orderItems = orderItems;
+        this.deleteListener = deleteListener;
     }
 
     @NonNull
@@ -33,25 +35,30 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
     @Override
     public void onBindViewHolder(@NonNull OrderItemViewHolder holder, int position) {
         OrderItem item = orderItems.get(position);
-        holder.bind(item);
+        holder.bind(item, position, deleteListener);
     }
 
     @Override
-    public int getItemCount() { return orderItems.size(); }
+    public int getItemCount() {
+        return orderItems.size();
+    }
 
     static class OrderItemViewHolder extends RecyclerView.ViewHolder {
-        private final TextView tvItemName;
-        private final TextView tvQuantity;
+        private final TextView itemName;
+        private final TextView itemQuantity;
+        private final ImageButton deleteButton;
 
         public OrderItemViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvItemName = itemView.findViewById(R.id.tvItemName);
-            tvQuantity = itemView.findViewById(R.id.tvQuantity);
+            itemName = itemView.findViewById(R.id.tvOrderItemName);
+            itemQuantity = itemView.findViewById(R.id.tvOrderItemQuantity);
+            deleteButton = itemView.findViewById(R.id.ibDeleteOrderItem);
         }
 
-        public void bind(OrderItem item) {
-            tvItemName.setText(item.getName());
-            tvQuantity.setText("Qty: " + item.getQuantity());
+        public void bind(OrderItem item, int position, OnItemDeleteListener listener) {
+            itemName.setText(item.getName());
+            itemQuantity.setText("x" + item.getQuantity());
+            deleteButton.setOnClickListener(v -> listener.onDeleteClick(position));
         }
     }
 }

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="24dp"
-    android:background="@color/light_green">
+    android:background="@color/black">
 
     <ImageView
         android:layout_width="wrap_content"
@@ -80,7 +80,7 @@
             android:id="@+id/confirmPasswordInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/confirm_password"
+            android:hint="@string/Confirm_Password"
             android:inputType="textPassword"
             android:textColor="@color/green"
             android:textColorHint="@color/green"/>

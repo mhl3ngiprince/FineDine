@@ -21,15 +21,6 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
     public interface OnItemClickListener {
         void onItemClick(Inventory item);
     }
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvItemName, tvQuantity;
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-            tvItemName = itemView.findViewById(R.id.tvItemName);
-            tvQuantity = itemView.findViewById(R.id.tvQuantity);
-        }
-    }
 
     public InventoryAdapter(List<Inventory> inventoryItems, OnItemClickListener listener) {
         this.inventoryItems = inventoryItems;

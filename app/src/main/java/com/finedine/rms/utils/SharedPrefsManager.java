@@ -3,8 +3,10 @@ package com.finedine.rms.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.util.Log;
 
 public class SharedPrefsManager {
+    private static final String TAG = "SharedPrefsManager";
     private static final String PREFS_NAME = "FineDinePrefs";
     private static final String KEY_USER_ID = "user_id";
     private static final String KEY_USER_ROLE = "user_role";
@@ -19,12 +21,39 @@ public class SharedPrefsManager {
     }
 
     public void saveUserSession(int userId, String role, String name) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-            prefs.edit()
-                    .putInt(KEY_USER_ID, userId)
-                    .putString(KEY_USER_ROLE, role)
-                    .putString(KEY_USER_NAME, name)
-                    .apply();
+        Log.d(TAG, "Saving user session - userId: " + userId + ", role: " + role + ", name: " + name);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putInt(KEY_USER_ID, userId);
+                editor.putString(KEY_USER_NAME, name);
+
+                // Always set the role explicitly to ensure it's saved correctly
+                if (role != null && !role.isEmpty()) {
+                    Log.d(TAG, "Explicitly setting role: " + role);
+                    editor.putString(KEY_USER_ROLE, role);
+                } else {
+                    Log.w(TAG, "Role is null or empty, using default 'customer'");
+                    editor.putString(KEY_USER_ROLE, "customer");
+                }
+
+                editor.apply();
+                Log.d(TAG, "User session saved successfully");
+            } else {
+                Log.w(TAG, "Not saving session due to old Android version");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error saving user session", e);
+        }
+
+        // Double check that role was saved correctly
+        String savedRole = getUserRole();
+        Log.d(TAG, "User session saved. Role confirmed: " + savedRole);
+
+        // If role wasn't saved correctly, try a direct approach
+        if (role != null && !role.equals(savedRole)) {
+            Log.w(TAG, "Role mismatch, forcing direct role setting");
+            setUserRole(role);
         }
     }
 
@@ -33,7 +62,9 @@ public class SharedPrefsManager {
     }
 
     public String getUserRole() {
-        return prefs.getString(KEY_USER_ROLE, "customer");
+        String role = prefs.getString(KEY_USER_ROLE, "customer");
+        Log.d(TAG, "Getting user role from SharedPreferences: " + role);
+        return role;
     }
 
     public String getUserName() {
@@ -68,5 +99,15 @@ public class SharedPrefsManager {
 
     public long getLastSyncTime() {
         return prefs.getLong(KEY_LAST_SYNC, 0);
+    }
+
+    // Helper method to directly set the role (for debugging)
+    public void setUserRole(String role) {
+        Log.d(TAG, "DIRECTLY setting user role to: " + role);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+            prefs.edit()
+                    .putString(KEY_USER_ROLE, role)
+                    .apply();
+        }
     }
 }

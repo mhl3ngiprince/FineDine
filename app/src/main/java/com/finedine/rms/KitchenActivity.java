@@ -2,8 +2,10 @@ package com.finedine.rms;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -28,8 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-
-// ... [rest of the existing code remains the same]
+import com.finedine.rms.utils.RoleManager;
+import com.finedine.rms.utils.SharedPrefsManager;
 
 public class KitchenActivity extends AppCompatActivity {
     private RecyclerView rvOrders;
@@ -37,11 +39,50 @@ public class KitchenActivity extends AppCompatActivity {
     private final List<Order> orders = new ArrayList<>();
     private DatabaseReference ordersRef;
     private DatabaseReference orderItemsRef;
+    private SharedPrefsManager prefsManager;
+    private static final String TAG = "KitchenActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kitchen);
+
+        // Initialize SharedPrefsManager
+        prefsManager = new SharedPrefsManager(this);
+
+        // Verify user role
+        String userRole = prefsManager.getUserRole();
+        Log.d(TAG, "KitchenActivity - Current user role: " + userRole);
+
+        // Get intent extras if coming from login/registration
+        Intent intent = getIntent();
+        if (intent.hasExtra("user_role")) {
+            String intentRole = intent.getStringExtra("user_role");
+            Log.d(TAG, "Role from intent: " + intentRole);
+
+            // If intent provides a role and it's different from what's in prefs, update prefs
+            if (intentRole != null && !intentRole.isEmpty() && !intentRole.equals(userRole)) {
+                Log.w(TAG, "Role mismatch between SharedPrefs and Intent. Updating to: " + intentRole);
+                prefsManager.setUserRole(intentRole);
+                userRole = intentRole;
+            }
+        }
+
+        // Check if role is valid for this activity
+        if (!RoleManager.ROLE_CHEF.equals(userRole) && !RoleManager.ROLE_MANAGER.equals(userRole)) {
+            Log.e(TAG, "Unauthorized role for KitchenActivity: " + userRole);
+            Toast.makeText(this, "Unauthorized access. Chef or manager role required.", Toast.LENGTH_SHORT).show();
+
+            // Launch the OrderActivity as a fallback
+            try {
+                startActivity(new Intent(this, OrderActivity.class));
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to launch fallback activity", e);
+            }
+
+            finish();
+            return;
+        }
 
         // Initialize Firebase Database references
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -60,7 +101,7 @@ public class KitchenActivity extends AppCompatActivity {
     private void setupRecyclerView() {
         rvOrders.setLayoutManager(new LinearLayoutManager(this));
         orderAdapter = new OrderAdapter(orders, this::onOrderSelected);
-        rvOrders.setAdapter(orderAdapter); // Fixed variable name
+        rvOrders.setAdapter(orderAdapter);
     }
 
     private void loadActiveOrders() {
@@ -110,7 +151,10 @@ public class KitchenActivity extends AppCompatActivity {
                                 items.add(item);
                             }
                         }
-                        com.finedine.rms.OrderItemAdapter adapter = new com.finedine.rms.OrderItemAdapter(items);
+                        com.finedine.rms.OrderItemAdapter adapter = new com.finedine.rms.OrderItemAdapter(
+                                items,
+                                position -> { /* No deletion in kitchen view */ }
+                        );
                         rvItems.setAdapter(adapter);
                     }
 

@@ -19,20 +19,25 @@ public class Order {
     private String status;
     private long timestamp;
 
+    @ColumnInfo(name = "customerName")
+    private String customerName;
+
+    @ColumnInfo(name = "customerPhone")
+    private String customerPhone;
+
+    @ColumnInfo(name = "customerNotes")
+    private String customerNotes;
+
     long order_time;
     public int waiterId;
-
-
 
     public Order(int tableNumber, String status) {
         this.tableNumber = tableNumber;
         this.status = status;
         this.timestamp = System.currentTimeMillis();
-
     }
 
     public Order() {
-
     }
 
     // Getters and setters
@@ -44,4 +49,28 @@ public class Order {
     public void setStatus(String status) { this.status = status; }
     public long getTimestamp() { return timestamp; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCustomerPhone() {
+        return customerPhone;
+    }
+
+    public void setCustomerPhone(String customerPhone) {
+        this.customerPhone = customerPhone;
+    }
+
+    public String getCustomerNotes() {
+        return customerNotes;
+    }
+
+    public void setCustomerNotes(String customerNotes) {
+        this.customerNotes = customerNotes;
+    }
 }

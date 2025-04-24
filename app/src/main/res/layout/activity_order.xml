@@ -9,30 +9,121 @@
     android:padding="24dp">
 
     <!-- Table Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Table #"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary_green" />
+
+        <EditText
+            android:id="@+id/etTableNumber"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="number"
+            android:hint="Enter table number"
+            android:textSize="20sp"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/dark_gray" />
+    </LinearLayout>
+
+    <!-- Customer Info Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Customer Information"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary_green"
+            android:layout_marginBottom="8dp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etCustomerName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Full Name"
+                android:inputType="textPersonName" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etCustomerPhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Phone Number"
+                android:inputType="phone" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+
+    <!-- Menu Selection Header -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Table #12"
-        android:textSize="32sp"
+        android:text="Menu Items"
+        android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/primary_green"
-        android:layout_marginBottom="24dp"
-        android:shadowColor="@color/primary_green_20"
-        android:shadowRadius="4"
-        android:shadowDx="0"
-        android:shadowDy="2"/>
+        android:layout_marginBottom="8dp" />
 
-    <!-- Order Items List -->
+    <!-- Menu Items List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/menuRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="0.6"
         android:background="@drawable/rounded_container"
         android:clipToPadding="false"
         android:padding="12dp"
         android:scrollbars="vertical"
         tools:listitem="@layout/item_order_entry"/>
+
+    <!-- Current Order Section -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Your Current Order"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_green"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/currentOrderRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.4"
+        android:background="@drawable/rounded_container"
+        android:clipToPadding="false"
+        android:padding="12dp"
+        android:scrollbars="vertical"
+        tools:listitem="@layout/item_order_item" />
 
     <!-- Action Button -->
     <Button
@@ -44,7 +135,7 @@
         android:textColor="@color/white"
         app:cornerRadius="12dp"
         android:paddingVertical="14dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:elevation="2dp"/>
 
     <!-- Bottom Shadow Overlay -->

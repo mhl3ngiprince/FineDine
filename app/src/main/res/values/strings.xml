@@ -19,7 +19,7 @@
     <string name="full_name">Full Name</string>
     <string name="email">Email</string>
     <string name="already_have_an_account_login">already have an acount login</string>
-    <string name="confirm_password">confirm password</string>
+    <string name="Confirm_Password">Confirm Password</string>
     <string name="add_item">Add Item</string>
     <string name="warning_icon">warning</string>
     <string name="low_stock_warning">low stock warning</string>

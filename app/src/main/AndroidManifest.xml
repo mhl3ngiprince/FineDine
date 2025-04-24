@@ -65,6 +65,21 @@
             android:parentActivityName=".LoginActivity" />
 
         <activity
+            android:name=".CreateReservationActivity"
+            android:exported="true"
+            android:parentActivityName=".ReservationActivity" />
+
+        <activity
+            android:name=".AdminActivity"
+            android:exported="true"
+            android:parentActivityName=".LoginActivity" />
+
+        <activity
+            android:name=".StaffActivity"
+            android:exported="true"
+            android:parentActivityName=".LoginActivity" />
+
+        <activity
             android:name=".StaffManagementActivity"
             android:exported="true"
             android:parentActivityName=".LoginActivity" />

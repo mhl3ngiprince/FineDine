@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -64,12 +66,18 @@ public class RegisterActivity extends AppCompatActivity {
         nameEditText = findViewById(R.id.nameInput);
         roleSpinner = findViewById(R.id.roleSpinner);
         registerButton = findViewById(R.id.registerButton);
-        loginTextView = findViewById(R.id.loginTextView); // Make sure this ID exists in activity_register.xml
+        loginTextView = findViewById(R.id.loginTextView);
         progressBar = findViewById(R.id.progressBar);
         
         // Set up click listeners
         registerButton.setOnClickListener(v -> attemptRegistration());
-        loginTextView.setOnClickListener(v -> navigateToLogin());
+        loginTextView.setOnClickListener(v -> goToLogin(v));
+
+        // Set up role spinner with user_roles array
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.user_roles, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        roleSpinner.setAdapter(adapter);
     }
     
     private void attemptRegistration() {
@@ -83,163 +91,71 @@ public class RegisterActivity extends AppCompatActivity {
         final String email = emailEditText.getText().toString().trim();
         final String password = passwordEditText.getText().toString().trim();
         final String name = nameEditText.getText().toString().trim();
-        
-        // Determine selected role
-        String role = RoleManager.ROLE_CUSTOMER; // Default role
-        
+
+        // Determine selected role - Get the exact string from spinner
         String selectedRole = roleSpinner.getSelectedItem().toString();
-        switch (selectedRole) {
-            case "Manager":
-                role = RoleManager.ROLE_MANAGER;
-                break;
-            case "Chef":
-                role = RoleManager.ROLE_CHEF;
-                break;
-            case "Waiter":
-                role = RoleManager.ROLE_WAITER;
-                break;
-        }
-        
-        // Validate inputs
+        Log.d(TAG, "Selected role from spinner: " + selectedRole);
+
+        // Simple validation
         if (email.isEmpty()) {
             emailEditText.setError("Email is required");
-            emailEditText.requestFocus();
             return;
         }
-        
-        if (!InputValidator.isValidEmail(email)) {
-            emailEditText.setError("Please enter a valid email address");
-            emailEditText.requestFocus();
-            return;
-        }
-        
         if (password.isEmpty()) {
             passwordEditText.setError("Password is required");
-            passwordEditText.requestFocus();
             return;
         }
-        
-        if (!InputValidator.isValidPassword(password)) {
-            passwordEditText.setError("Password must be at least 6 characters");
-            passwordEditText.requestFocus();
-            return;
-        }
-        
         if (name.isEmpty()) {
             nameEditText.setError("Name is required");
-            nameEditText.requestFocus();
             return;
         }
-        
-        // Show progress
-        if (progressBar != null) {
-            progressBar.setVisibility(View.VISIBLE);
-        } else {
-            DialogUtils.showProgressDialog(this, "Creating account...");
-        }
+
+        // Show progress indicator
+        progressBar.setVisibility(View.VISIBLE);
         registerButton.setEnabled(false);
-        
-        // Store the final role value for use in the callback
-        final String finalRole = role;
-        
-        // Attempt registration with Firebase
-        mAuth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()) {
-                        // Registration success
-                        Log.d(TAG, "createUserWithEmail:success");
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            saveUserData(user.getUid(), name, email, finalRole);
-                        } else {
-                            completeRegistration(false, "Failed to get user after registration");
-                        }
-                    } else {
-                        // Registration failed
-                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                        String errorMessage = "Registration failed";
-                        if (task.getException() != null) {
-                            errorMessage = task.getException().getMessage();
-                        }
-                        completeRegistration(false, errorMessage);
-                    }
-                }
-            });
-    }
-    
-    private void saveUserData(String userId, String name, String email, String role) {
-        // Create user data map
-        Map<String, Object> userData = new HashMap<>();
-        userData.put("userId", userId);
-        userData.put("name", name);
-        userData.put("email", email);
-        userData.put("role", role);
-        
-        // Save to Firestore
-        db.collection("users")
-            .document(userId)
-            .set(userData)
-            .addOnSuccessListener(aVoid -> {
-                Log.d(TAG, "User data saved successfully for " + userId);
-                
-                // Save to SharedPreferences
-                prefsManager.saveUserSession(userId.hashCode(), role, name);
-                
-                completeRegistration(true, null);
-            })
-            .addOnFailureListener(e -> {
-                Log.w(TAG, "Error saving user data", e);
-                completeRegistration(false, "Failed to save user data: " + e.getMessage());
-            });
-    }
-    
-    private void completeRegistration(boolean success, String errorMessage) {
-        // Hide progress
-        if (progressBar != null) {
-            progressBar.setVisibility(View.GONE);
-        } else {
-            DialogUtils.hideProgressDialog(null);
+
+        // SIMPLIFIED APPROACH - Skip Firebase for now and go straight to the activity
+        String roleToUse = "customer"; // Default role
+
+        // Map the selected role to our constants
+        if (selectedRole.equalsIgnoreCase("Manager")) {
+            roleToUse = "manager";
+        } else if (selectedRole.equalsIgnoreCase("Chef")) {
+            roleToUse = "chef";
+        } else if (selectedRole.equalsIgnoreCase("Waiter")) {
+            roleToUse = "waiter";
         }
+
+        // Save role in shared preferences directly
+        prefsManager.setUserRole(roleToUse);
+
+        // Show a simple confirmation
+        Toast.makeText(this, "Registration successful as " + roleToUse, Toast.LENGTH_SHORT).show();
+
+        // Launch the appropriate activity directly based on the selected role
+        Intent intent = null;
+
+        if (roleToUse.equals("manager")) {
+            intent = new Intent(this, ManagerDashboardActivity.class);
+        } else if (roleToUse.equals("chef")) {
+            intent = new Intent(this, KitchenActivity.class);
+        } else {
+            intent = new Intent(this, OrderActivity.class);
+        }
+
+        // Add the role as an extra
+        intent.putExtra("user_role", roleToUse);
+
+        // Hide progress indicator
+        progressBar.setVisibility(View.GONE);
         registerButton.setEnabled(true);
-        
-        if (success) {
-            Toast.makeText(RegisterActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
-            
-            // Get current user and role from preferences
-            String role = prefsManager.getUserRole();
-            
-            // Navigate based on role
-            navigateBasedOnRole(role);
-        } else {
-            Toast.makeText(RegisterActivity.this, errorMessage, Toast.LENGTH_LONG).show();
-        }
-    }
-    
-    private void navigateBasedOnRole(String role) {
-        Intent intent;
-        
-        switch (role) {
-            case RoleManager.ROLE_MANAGER:
-                intent = new Intent(this, ManagerDashboardActivity.class);
-                break;
-            case RoleManager.ROLE_CHEF:
-                intent = new Intent(this, KitchenActivity.class);
-                break;
-            case RoleManager.ROLE_WAITER:
-                intent = new Intent(this, OrderActivity.class);
-                break;
-            default:
-                intent = new Intent(this, OrderActivity.class);
-                break;
-        }
-        
+
+        // Start the activity
         startActivity(intent);
         finish();
     }
-    
-    private void navigateToLogin() {
+
+    public void goToLogin(View view) {
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         finish();

@@ -85,6 +85,31 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- Order Form -->
+        <EditText
+            android:id="@+id/etTableNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Table Number"
+            android:inputType="number"
+            android:layout_marginTop="16dp"/>
+
+        <EditText
+            android:id="@+id/etCustomerName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Customer Name"
+            android:inputType="textPersonName"
+            android:layout_marginTop="8dp"/>
+
+        <EditText
+            android:id="@+id/etCustomerPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Customer Phone"
+            android:inputType="phone"
+            android:layout_marginTop="8dp"/>
+
         <!-- Bottom Shadow Overlay -->
         <View
             android:layout_width="match_parent"

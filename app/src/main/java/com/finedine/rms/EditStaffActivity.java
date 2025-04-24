@@ -1,27 +1,33 @@
 package com.finedine.rms;
 
-
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
-
 import com.google.android.material.textfield.TextInputEditText;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 public class EditStaffActivity extends AppCompatActivity {
 
-    private TextInputEditText etName, etEmail, etPassword;
-    private Spinner spinnerRole;
+    private TextInputEditText etStaffName, etStaffEmail, etStaffPhone, etHireDate, etAdditionalNotes;
+    private AutoCompleteTextView actvRole;
+    private Button btnSave, btnCancel;
     private User currentUser;
     private final List<String> roles = Arrays.asList("manager", "chef", "waiter");
+    private Calendar hireDate = Calendar.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,15 +36,43 @@ public class EditStaffActivity extends AppCompatActivity {
 
         initializeViews();
         loadStaffData();
-        setupRoleSpinner();
+        setupRoleDropdown();
+
+        btnCancel.setOnClickListener(v -> finish());
     }
 
     private void initializeViews() {
-        etName = findViewById(R.id.etName);
-        etEmail = findViewById(R.id.etEmail);
-        etPassword = findViewById(R.id.etPassword);
-        spinnerRole = findViewById(R.id.spinnerRole);
-        findViewById(R.id.btnSave).setOnClickListener(this::saveChanges);
+        etStaffName = findViewById(R.id.etStaffName);
+        etStaffEmail = findViewById(R.id.etStaffEmail);
+        etStaffPhone = findViewById(R.id.etStaffPhone);
+        actvRole = findViewById(R.id.actvRole);
+        etHireDate = findViewById(R.id.etHireDate);
+        etAdditionalNotes = findViewById(R.id.etAdditionalNotes);
+        btnSave = findViewById(R.id.btnSave);
+        btnCancel = findViewById(R.id.btnCancel);
+
+        btnSave.setOnClickListener(this::saveChanges);
+        etHireDate.setOnClickListener(this::showDatePicker);
+    }
+
+    public void showDatePicker(View view) {
+        int year = hireDate.get(Calendar.YEAR);
+        int month = hireDate.get(Calendar.MONTH);
+        int day = hireDate.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view1, selectedYear, selectedMonth, selectedDay) -> {
+                    hireDate.set(Calendar.YEAR, selectedYear);
+                    hireDate.set(Calendar.MONTH, selectedMonth);
+                    hireDate.set(Calendar.DAY_OF_MONTH, selectedDay);
+
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.US);
+                    etHireDate.setText(dateFormat.format(hireDate.getTime()));
+                },
+                year, month, day);
+
+        datePickerDialog.show();
     }
 
     private void loadStaffData() {
@@ -63,27 +97,49 @@ public class EditStaffActivity extends AppCompatActivity {
     }
 
     private void populateFields() {
-        etName.setText(currentUser.name);
-        etEmail.setText(currentUser.email);
-        spinnerRole.setSelection(roles.indexOf(currentUser.role));
+        etStaffName.setText(currentUser.name);
+        etStaffEmail.setText(currentUser.email);
+
+        // Set phone if available
+        if (currentUser.phone != null) {
+            etStaffPhone.setText(currentUser.phone);
+        }
+
+        // Set role in dropdown
+        int roleIndex = roles.indexOf(currentUser.role);
+        if (roleIndex >= 0) {
+            actvRole.setText(roles.get(roleIndex));
+        }
+
+        // Set hire date if available
+        if (currentUser.hireDate != null) {
+            etHireDate.setText(currentUser.hireDate);
+        }
+
+        // Set additional notes if available
+        if (currentUser.notes != null) {
+            etAdditionalNotes.setText(currentUser.notes);
+        }
     }
 
-    private void setupRoleSpinner() {
+    private void setupRoleDropdown() {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
-                android.R.layout.simple_spinner_item,
+                android.R.layout.simple_dropdown_item_1line,
                 roles
         );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerRole.setAdapter(adapter);
+        actvRole.setAdapter(adapter);
     }
 
     private void saveChanges(View view) {
-        String name = Objects.requireNonNull(etName.getText()).toString().trim();
-        String email = Objects.requireNonNull(etEmail.getText()).toString().trim();
-        String password = Objects.requireNonNull(etPassword.getText()).toString().trim();
-        String role = roles.get(spinnerRole.getSelectedItemPosition());
+        String name = Objects.requireNonNull(etStaffName.getText()).toString().trim();
+        String email = Objects.requireNonNull(etStaffEmail.getText()).toString().trim();
+        String phone = Objects.requireNonNull(etStaffPhone.getText()).toString().trim();
+        String role = actvRole.getText().toString().trim();
+        String additionalNotes = Objects.requireNonNull(etAdditionalNotes.getText()).toString().trim();
+        String hireDateStr = Objects.requireNonNull(etHireDate.getText()).toString().trim();
 
+        // Validate required fields
         if (name.isEmpty() || email.isEmpty()) {
             Toast.makeText(this, "Name and email are required", Toast.LENGTH_SHORT).show();
             return;
@@ -94,14 +150,18 @@ public class EditStaffActivity extends AppCompatActivity {
             return;
         }
 
+        if (!roles.contains(role.toLowerCase())) {
+            Toast.makeText(this, "Please select a valid role", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Update user data
         currentUser.name = name;
         currentUser.email = email;
-        currentUser.role = role;
-
-        if (!password.isEmpty()) {
-            // In production, use proper password hashing
-            currentUser.password_hash = String.valueOf(password.hashCode());
-        }
+        currentUser.role = role.toLowerCase();
+        currentUser.phone = phone;
+        currentUser.hireDate = hireDateStr;
+        currentUser.notes = additionalNotes;
 
         new Thread(() -> {
             AppDatabase.getDatabase(this).userDao().update(currentUser);

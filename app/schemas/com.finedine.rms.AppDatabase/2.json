@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "a86338ee7ef57187bfe44d49a8d066ba",
+    "identityHash": "77a35363a7bc2452dca5cdbeaa801aec",
     "entities": [
       {
         "tableName": "users",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`user_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `email` TEXT, `password_hash` TEXT, `role` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`user_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `email` TEXT, `password_hash` TEXT, `role` TEXT, `phone` TEXT, `hireDate` TEXT, `notes` TEXT)",
         "fields": [
           {
             "fieldPath": "user_id",
@@ -37,6 +37,24 @@
             "columnName": "role",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "phone",
+            "columnName": "phone",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hireDate",
+            "columnName": "hireDate",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -50,7 +68,7 @@
       },
       {
         "tableName": "reservations",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reservation_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `user_id` INTEGER NOT NULL, `reservation_date` TEXT, `reservation_time` TEXT, `number_of_guests` INTEGER NOT NULL, `status` TEXT, `customerName` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reservation_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `user_id` INTEGER NOT NULL, `reservation_date` TEXT, `reservation_time` TEXT, `number_of_guests` INTEGER NOT NULL, `status` TEXT, `customerName` TEXT, `phone` TEXT, `email` TEXT, `specialRequests` TEXT)",
         "fields": [
           {
             "fieldPath": "reservation_id",
@@ -91,6 +109,24 @@
           {
             "fieldPath": "customerName",
             "columnName": "customerName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "phone",
+            "columnName": "phone",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "specialRequests",
+            "columnName": "specialRequests",
             "affinity": "TEXT",
             "notNull": false
           }
@@ -150,7 +186,7 @@
       },
       {
         "tableName": "orders",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`orderId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tableNumber` INTEGER NOT NULL, `status` TEXT, `timestamp` INTEGER NOT NULL, `order_time` INTEGER NOT NULL, `waiterId` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`orderId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tableNumber` INTEGER NOT NULL, `status` TEXT, `timestamp` INTEGER NOT NULL, `customerName` TEXT, `customerPhone` TEXT, `customerNotes` TEXT, `order_time` INTEGER NOT NULL, `waiterId` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "orderId",
@@ -175,6 +211,24 @@
             "columnName": "timestamp",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "customerName",
+            "columnName": "customerName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "customerPhone",
+            "columnName": "customerPhone",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "customerNotes",
+            "columnName": "customerNotes",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "order_time",
@@ -327,7 +381,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a86338ee7ef57187bfe44d49a8d066ba')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '77a35363a7bc2452dca5cdbeaa801aec')"
     ]
   }
 }
