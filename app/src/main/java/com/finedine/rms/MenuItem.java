@@ -46,7 +46,7 @@ public class MenuItem {
                 new MenuItem(
                         "Lobster Thermidor",
                         "Atlantic lobster with cognac cream sauce, gruyère gratin, and asparagus tips",
-                        75.00,
+                        275.00,
                         true
                 ),
 

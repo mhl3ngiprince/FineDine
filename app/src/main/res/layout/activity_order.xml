@@ -24,16 +24,22 @@
             android:textStyle="bold"
             android:textColor="@color/primary_green" />
 
-        <EditText
-            android:id="@+id/etTableNumber"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:inputType="number"
-            android:hint="Enter table number"
-            android:textSize="20sp"
             android:layout_marginStart="8dp"
-            android:textColor="@color/dark_gray" />
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTableNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:hint="Enter table number"
+                android:textSize="20sp"
+                android:textColor="@color/dark_gray" />
+        </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 
     <!-- Customer Info Section -->

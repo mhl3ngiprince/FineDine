@@ -12,11 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class InventoryActivity extends AppCompatActivity {
     private RecyclerView inventoryRecyclerView;
@@ -32,6 +31,10 @@ public class InventoryActivity extends AppCompatActivity {
         inventoryRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         inventoryAdapter = new InventoryAdapter(inventoryItems, this::onItemSelected);
         inventoryRecyclerView.setAdapter(inventoryAdapter);
+
+        // Initialize FloatingActionButton
+        FloatingActionButton fabAddItem = findViewById(R.id.fabAddItem);
+        fabAddItem.setOnClickListener(v -> showAddItemDialog());
 
         loadInventory();
     }
@@ -117,5 +120,51 @@ public class InventoryActivity extends AppCompatActivity {
         builder.show();
     }
 
+    private void showAddItemDialog() {
+        // Create dialog for adding a new inventory item
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add New Inventory Item");
 
+        // Inflate custom layout
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_add_inventory, null);
+        EditText nameInput = view.findViewById(R.id.addNameInput);
+        EditText quantityInput = view.findViewById(R.id.addQuantityInput);
+        EditText thresholdInput = view.findViewById(R.id.addThresholdInput);
+
+        // Set default values
+        quantityInput.setText("0.0");
+        thresholdInput.setText("10.0");
+
+        builder.setView(view);
+        builder.setPositiveButton("Add", (dialog, which) -> {
+            // Validate inputs
+            String itemName = nameInput.getText().toString().trim();
+            if (itemName.isEmpty()) {
+                Toast.makeText(this, "Item name is required", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            try {
+                // Create new inventory item
+                Inventory newItem = new Inventory();
+                newItem.item_name = itemName;
+                newItem.quantity_in_stock = Double.parseDouble(quantityInput.getText().toString());
+                newItem.reorder_threshold = Double.parseDouble(thresholdInput.getText().toString());
+                newItem.last_updated = System.currentTimeMillis();
+
+                // Save to database
+                new Thread(() -> {
+                    AppDatabase.getDatabase(this).inventoryDao().insert(newItem);
+                    runOnUiThread(() -> {
+                        loadInventory();
+                        Toast.makeText(this, "Item added successfully", Toast.LENGTH_SHORT).show();
+                    });
+                }).start();
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "Please enter valid numbers for quantity and threshold", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
 }

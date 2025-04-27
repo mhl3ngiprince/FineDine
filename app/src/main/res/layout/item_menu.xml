@@ -70,8 +70,9 @@
                     android:id="@+id/ivAvailabilityIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_available"
                     android:contentDescription="@string/availability"
+
+                    android:src="@drawable/ic_available"
                     app:tint="@color/primary_green" />
 
                 <TextView

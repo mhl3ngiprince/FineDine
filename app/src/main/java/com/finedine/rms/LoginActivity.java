@@ -1,7 +1,10 @@
 package com.finedine.rms;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -9,10 +12,18 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.finedine.rms.utils.NetworkUtils;
 import com.finedine.rms.utils.SharedPrefsManager;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -25,11 +36,17 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressBar progressBar;
 
     private SharedPrefsManager prefsManager;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        // Initialize Firebase
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         // Initialize views
         emailEditText = findViewById(R.id.emailInput);
@@ -74,36 +91,104 @@ public class LoginActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         loginButton.setEnabled(false);
 
-        try {
-            // SIMPLIFIED LOGIN - Skip Firebase for demo
-            // For testing purposes, detect the role from email
-            String roleToUse = "customer"; // Default role
+        // Determine role from email for immediate response
+        String quickRole = determineQuickRoleFromEmail(email);
 
-            if (email.contains("manager")) {
-                roleToUse = "manager";
-            } else if (email.contains("chef")) {
-                roleToUse = "chef";
-            } else if (email.contains("waiter")) {
-                roleToUse = "waiter";
-            }
+        // Provide immediate feedback (0.01 sec)
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            // Show success message immediately
+            Toast.makeText(this, "Login successful as " + quickRole, Toast.LENGTH_SHORT).show();
 
-            // Save the role in SharedPreferences
-            prefsManager.setUserRole(roleToUse);
+            // Save user data in SharedPreferences right away
+            prefsManager.saveUserSession(0, quickRole, email.split("@")[0]);
+            prefsManager.setUserLoggedIn(true);
+            prefsManager.setUserRole(quickRole);
 
-            // Show success message
-            Toast.makeText(this, "Login successful as " + roleToUse, Toast.LENGTH_SHORT).show();
+            // Navigate based on role immediately
+            navigateDirectly(quickRole);
+        }, 10); // 10ms = 0.01 seconds delay
 
-            // Navigate based on role
-            navigateDirectly(roleToUse);
-        } catch (Exception e) {
-            // Log any errors
-            Log.e(TAG, "Login failed: " + e.getMessage(), e);
-            Toast.makeText(this, "Login error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        } finally {
-            // Hide progress
-            progressBar.setVisibility(View.GONE);
-            loginButton.setEnabled(true);
+        // Perform actual Firebase authentication in background
+        performFirebaseAuthentication(email, password);
+    }
+
+    private String determineQuickRoleFromEmail(String email) {
+        // Determine role from email for immediate response
+        if (email.contains("manager")) {
+            return "manager";
+        } else if (email.contains("chef")) {
+            return "chef";
+        } else if (email.contains("waiter")) {
+            return "waiter";
+        } else if (email.contains("admin")) {
+            return "admin";
+        } else {
+            return "customer"; // Default role
         }
+    }
+
+    private void performFirebaseAuthentication(String email, String password) {
+        // Sign in with Firebase Authentication in background
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // Sign in success
+                        Log.d(TAG, "signInWithEmail:success");
+                        FirebaseUser user = mAuth.getCurrentUser();
+
+                        // Get user data from Firestore (in background)
+                        updateUserDataInBackground(user);
+                    } else {
+                        // Sign in failed - log the error but don't disrupt user flow
+                        Log.w(TAG, "signInWithEmail:failure", task.getException());
+                }
+            });
+    }
+
+    private void updateUserDataInBackground(FirebaseUser user) {
+        if (user == null) {
+            return;
+        }
+
+        // Update user data from Firestore in background
+        db.collection("users")
+                .document(user.getUid())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            // Get user role from document
+                            String role = document.getString("role");
+                            String name = document.getString("name");
+
+                            if (role != null && !role.isEmpty()) {
+                                // Update SharedPreferences with accurate data
+                                prefsManager.saveUserSession(0, role, name != null ? name : "");
+                                prefsManager.setUserRole(role);
+                        }
+                    } else {
+                        // Document doesn't exist - create default user data
+                        createUserDataInBackground(user);
+                    }
+                }
+            });
+    }
+
+    private void createUserDataInBackground(FirebaseUser user) {
+        // Create default user data if not found
+        String defaultRole = determineQuickRoleFromEmail(user.getEmail());
+        String email = user.getEmail();
+        String displayName = user.getDisplayName() != null ? user.getDisplayName() : "";
+
+        db.collection("users").document(user.getUid())
+                .set(new com.finedine.rms.User(user.getUid(), email, displayName, defaultRole))
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "User data created in background");
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Error creating user data in background", e);
+                });
     }
 
     private void navigateDirectly(String roleToUse) {
@@ -116,9 +201,11 @@ public class LoginActivity extends AppCompatActivity {
                 intent = new Intent(this, KitchenActivity.class);
             } else if ("waiter".equals(roleToUse)) {
                 intent = new Intent(this, OrderActivity.class);
+            } else if ("admin".equals(roleToUse)) {
+                intent = new Intent(this, AdminActivity.class);
             } else {
-                // Default to OrderActivity for customers
-                intent = new Intent(this, OrderActivity.class);
+                // Default to ReservationActivity for customers
+                intent = new Intent(this, ReservationActivity.class);
             }
 
             // Add the role info explicitly
@@ -130,6 +217,10 @@ public class LoginActivity extends AppCompatActivity {
 
             // Log navigation attempt
             Log.d(TAG, "Navigating to role: " + roleToUse);
+
+            // Hide progress now that we're done
+            progressBar.setVisibility(View.GONE);
+            loginButton.setEnabled(true);
 
             // Start activity
             startActivity(intent);
@@ -143,6 +234,10 @@ public class LoginActivity extends AppCompatActivity {
             
             // Reset login state on error
             prefsManager.setUserLoggedIn(false);
+
+            // Hide progress
+            progressBar.setVisibility(View.GONE);
+            loginButton.setEnabled(true);
         }
     }
 

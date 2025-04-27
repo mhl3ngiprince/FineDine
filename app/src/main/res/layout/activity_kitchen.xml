@@ -8,20 +8,23 @@
     android:background="@color/light_green">
 
     <!-- Title Section -->
+
+    <!-- Orders List Container -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="kitchen_orders"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="@color/primary_green"
         android:layout_marginBottom="24dp"
         android:shadowColor="@color/primary_green_20"
-        android:shadowRadius="4"
         android:shadowDx="0"
-        android:shadowDy="2"/>
+        android:shadowDy="2"
+        android:shadowRadius="4"
+        android:text="kitchen_orders"
+        android:textColor="@color/primary_green"
+        android:textSize="28sp"
+        android:textStyle="bold" />
 
-    <!-- Orders List Container -->
+    <!-- Bottom Shadow Overlay -->
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvOrders"
         android:layout_width="match_parent"
@@ -32,7 +35,6 @@
         android:scrollbars="vertical"
         tools:listitem="@layout/item_order" />
 
-    <!-- Bottom Shadow Overlay -->
     <View
         android:layout_width="match_parent"
         android:layout_height="48dp"

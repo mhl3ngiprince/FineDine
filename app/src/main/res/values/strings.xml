@@ -56,5 +56,6 @@
         <item>Chef</item>
         <item>Waiter</item>
         <item>Manager</item>
+        <item>Admin</item>
     </string-array>
 </resources>

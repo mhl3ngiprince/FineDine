@@ -13,6 +13,7 @@ public class SharedPrefsManager {
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_FCM_TOKEN = "fcm_token";
     private static final String KEY_LAST_SYNC = "last_sync";
+    private static final String KEY_IS_LOGGED_IN = "is_logged_in";
 
     private final SharedPreferences prefs;
 
@@ -77,6 +78,7 @@ public class SharedPrefsManager {
                     .remove(KEY_USER_ID)
                     .remove(KEY_USER_ROLE)
                     .remove(KEY_USER_NAME)
+                    .remove(KEY_IS_LOGGED_IN)
                     .apply();
         }
     }
@@ -109,5 +111,18 @@ public class SharedPrefsManager {
                     .putString(KEY_USER_ROLE, role)
                     .apply();
         }
+    }
+
+    public void setUserLoggedIn(boolean isLoggedIn) {
+        Log.d(TAG, "Setting user logged in status to: " + isLoggedIn);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+            prefs.edit()
+                    .putBoolean(KEY_IS_LOGGED_IN, isLoggedIn)
+                    .apply();
+        }
+    }
+
+    public boolean isUserLoggedIn() {
+        return prefs.getBoolean(KEY_IS_LOGGED_IN, false);
     }
 }

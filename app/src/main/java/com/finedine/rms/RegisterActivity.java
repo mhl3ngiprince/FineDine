@@ -3,6 +3,8 @@ package com.finedine.rms;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -114,45 +116,116 @@ public class RegisterActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         registerButton.setEnabled(false);
 
-        // SIMPLIFIED APPROACH - Skip Firebase for now and go straight to the activity
-        String roleToUse = "customer"; // Default role
-
         // Map the selected role to our constants
+        final String roleToUse = mapSelectedRole(selectedRole);
+
+        // Create immediate success feedback and navigate instantly (0.01 sec)
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            // Show success message immediately
+            Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
+
+            // Navigate to the appropriate activity immediately
+            navigateBasedOnRole(roleToUse);
+
+            // Save basic info in SharedPreferences right away
+            prefsManager.saveUserSession(0, roleToUse, name);
+            prefsManager.setUserLoggedIn(true);
+            prefsManager.setUserRole(roleToUse);
+        }, 10); // 10ms = 0.01 seconds delay
+
+        // Perform actual Firebase operations in background
+        performFirebaseRegistration(email, password, name, roleToUse);
+    }
+
+    private void performFirebaseRegistration(String email, String password, String name, String roleToUse) {
+        // Create user in Firebase Auth (background operation)
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // Registration successful, get the user
+                        Log.d(TAG, "createUserWithEmail:success");
+                        FirebaseUser user = mAuth.getCurrentUser();
+
+                        // Save user data to Firestore
+                        saveUserDataToFirestore(user, name, roleToUse);
+                    } else {
+                        // If registration fails, log it (user is already navigated away)
+                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                }
+            });
+    }
+
+    private String mapSelectedRole(String selectedRole) {
         if (selectedRole.equalsIgnoreCase("Manager")) {
-            roleToUse = "manager";
+            return "manager";
         } else if (selectedRole.equalsIgnoreCase("Chef")) {
-            roleToUse = "chef";
+            return "chef";
         } else if (selectedRole.equalsIgnoreCase("Waiter")) {
-            roleToUse = "waiter";
-        }
-
-        // Save role in shared preferences directly
-        prefsManager.setUserRole(roleToUse);
-
-        // Show a simple confirmation
-        Toast.makeText(this, "Registration successful as " + roleToUse, Toast.LENGTH_SHORT).show();
-
-        // Launch the appropriate activity directly based on the selected role
-       /* Intent intent = null;
-
-        if (roleToUse.equals("manager")) {
-            intent = new Intent(this, ManagerDashboardActivity.class);
-        } else if (roleToUse.equals("chef")) {
-            intent = new Intent(this, KitchenActivity.class);
+            return "waiter";
+        } else if (selectedRole.equalsIgnoreCase("Admin")) {
+            return "admin";
         } else {
-            intent = new Intent(this, OrderActivity.class);
+            return "customer"; // Default role
+        }
+    }
+
+    private void saveUserDataToFirestore(FirebaseUser user, String name, String role) {
+        if (user == null) {
+            Log.w(TAG, "Failed to create user in Firebase");
+            return;
         }
 
-        // Add the role as an extra
-        intent.putExtra("user_role", roleToUse);
+        // Create a User object
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("uid", user.getUid());
+        userData.put("name", name);
+        userData.put("email", user.getEmail());
+        userData.put("role", role);
+        userData.put("createdAt", System.currentTimeMillis());
 
+        // Save to Firestore (background operation)
+        db.collection("users").document(user.getUid())
+                .set(userData)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "User profile created successfully");
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Error creating user document", e);
+                });
+    }
+
+    private void navigateBasedOnRole(String role) {
         // Hide progress indicator
         progressBar.setVisibility(View.GONE);
         registerButton.setEnabled(true);
 
+        // Launch the appropriate activity
+        Intent intent;
+
+        switch (role) {
+            case "manager":
+                intent = new Intent(this, ManagerDashboardActivity.class);
+                break;
+            case "chef":
+                intent = new Intent(this, KitchenActivity.class);
+                break;
+            case "waiter":
+                intent = new Intent(this, OrderActivity.class);
+                break;
+            case "admin":
+                intent = new Intent(this, AdminActivity.class);
+                break;
+            default:
+                intent = new Intent(this, ReservationActivity.class);
+                break;
+        }
+
+        // Add the role as an extra
+        intent.putExtra("user_role", role);
+
         // Start the activity
         startActivity(intent);
-        finish();*/
+        finish();
     }
 
     public void goToLogin(View view) {
