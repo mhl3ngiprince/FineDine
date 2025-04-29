@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "7c827a0ce79e521add9dd04040f19285",
+    "identityHash": "d5de831260b0d934a5e0ec2da21dc0cb",
     "entities": [
       {
         "tableName": "users",
@@ -142,7 +142,7 @@
       },
       {
         "tableName": "menu_items",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`item_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `description` TEXT, `price` REAL NOT NULL, `availability` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`item_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `description` TEXT, `price` REAL NOT NULL, `availability` INTEGER NOT NULL, `imageUrl` TEXT, `category` TEXT, `prepTimeMinutes` INTEGER NOT NULL, `calories` INTEGER NOT NULL, `spiceLevel` TEXT)",
         "fields": [
           {
             "fieldPath": "item_id",
@@ -173,6 +173,36 @@
             "columnName": "availability",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "imageUrl",
+            "columnName": "imageUrl",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "prepTimeMinutes",
+            "columnName": "prepTimeMinutes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "calories",
+            "columnName": "calories",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spiceLevel",
+            "columnName": "spiceLevel",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -387,7 +417,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7c827a0ce79e521add9dd04040f19285')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd5de831260b0d934a5e0ec2da21dc0cb')"
     ]
   }
 }
