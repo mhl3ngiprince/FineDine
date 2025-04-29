@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Transparent base to allow content to show through -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#00000000" />
+        </shape>
+    </item>
+
+    <!-- Top ornate border -->
+    <item
+        android:left="16dp"
+        android:right="16dp"
+        android:top="1dp"
+        android:bottom="0dp">
+        <shape android:shape="rectangle">
+            <size android:height="2dp" />
+            <gradient
+                android:startColor="#00D4AF37"
+                android:centerColor="#40D4AF37"
+                android:endColor="#00D4AF37"
+                android:type="linear"
+                android:angle="0" />
+        </shape>
+    </item>
+
+    <!-- Left ornate border -->
+    <item
+        android:left="1dp"
+        android:right="0dp"
+        android:top="16dp"
+        android:bottom="16dp">
+        <shape android:shape="rectangle">
+            <size android:width="2dp" />
+            <gradient
+                android:startColor="#00D4AF37"
+                android:centerColor="#40D4AF37"
+                android:endColor="#00D4AF37"
+                android:type="linear"
+                android:angle="90" />
+        </shape>
+    </item>
+
+    <!-- Bottom ornate border -->
+    <item
+        android:left="16dp"
+        android:right="16dp"
+        android:top="0dp"
+        android:bottom="1dp">
+        <shape android:shape="rectangle">
+            <size android:height="2dp" />
+            <gradient
+                android:startColor="#00D4AF37"
+                android:centerColor="#40D4AF37"
+                android:endColor="#00D4AF37"
+                android:type="linear"
+                android:angle="0" />
+        </shape>
+    </item>
+
+    <!-- Right ornate border -->
+    <item
+        android:left="0dp"
+        android:right="1dp"
+        android:top="16dp"
+        android:bottom="16dp">
+        <shape android:shape="rectangle">
+            <size android:width="2dp" />
+            <gradient
+                android:startColor="#00D4AF37"
+                android:centerColor="#40D4AF37"
+                android:endColor="#00D4AF37"
+                android:type="linear"
+                android:angle="90" />
+        </shape>
+    </item>
+
+    <!-- Corner accents - top left -->
+    <item
+        android:left="1dp"
+        android:top="1dp"
+        android:right="0dp"
+        android:bottom="0dp">
+        <rotate android:fromDegrees="0">
+            <shape android:shape="rectangle">
+                <size
+                    android:width="16dp"
+                    android:height="16dp" />
+                <corners android:topLeftRadius="8dp" />
+                <stroke
+                    android:color="@color/luxe_gold"
+                    android:width="1dp" />
+            </shape>
+        </rotate>
+    </item>
+
+    <!-- Corner accents - top right -->
+    <item
+        android:right="1dp"
+        android:top="1dp"
+        android:left="0dp"
+        android:bottom="0dp">
+        <rotate android:fromDegrees="0">
+            <shape android:shape="rectangle">
+                <size
+                    android:width="16dp"
+                    android:height="16dp" />
+                <corners android:topRightRadius="8dp" />
+                <stroke
+                    android:color="@color/luxe_gold"
+                    android:width="1dp" />
+            </shape>
+        </rotate>
+    </item>
+
+    <!-- Corner accents - bottom left -->
+    <item
+        android:left="1dp"
+        android:bottom="1dp"
+        android:right="0dp"
+        android:top="0dp">
+        <rotate android:fromDegrees="0">
+            <shape android:shape="rectangle">
+                <size
+                    android:width="16dp"
+                    android:height="16dp" />
+                <corners android:bottomLeftRadius="8dp" />
+                <stroke
+                    android:color="@color/luxe_gold"
+                    android:width="1dp" />
+            </shape>
+        </rotate>
+    </item>
+
+    <!-- Corner accents - bottom right -->
+    <item
+        android:right="1dp"
+        android:bottom="1dp"
+        android:left="0dp"
+        android:top="0dp">
+        <rotate android:fromDegrees="0">
+            <shape android:shape="rectangle">
+                <size
+                    android:width="16dp"
+                    android:height="16dp" />
+                <corners android:bottomRightRadius="8dp" />
+                <stroke
+                    android:color="@color/luxe_gold"
+                    android:width="1dp" />
+            </shape>
+        </rotate>
+    </item>
+</layer-list>

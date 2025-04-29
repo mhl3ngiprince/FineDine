@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Base background color -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/luxe_charcoal" />
+        </shape>
+    </item>
+
+    <!-- Subtle gradient undertone -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:startColor="#00000000"
+                android:centerColor="#10331A10"
+                android:endColor="#20331A10"
+                android:type="linear" />
+        </shape>
+    </item>
+
+    <!-- Subtle pattern texture -->
+    <item>
+        <bitmap
+            android:src="@drawable/pattern_luxury"
+            android:tileMode="repeat"
+            android:alpha="0.12" />
+    </item>
+
+    <!-- Enhanced golden gradient overlay -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:startColor="#00000000"
+                android:centerColor="#15D4AF37"
+                android:endColor="#25D4AF37"
+                android:type="linear" />
+        </shape>
+    </item>
+
+    <!-- Top decorative gradient -->
+    <item
+        android:top="-400dp"
+        android:bottom="550dp">
+        <shape android:shape="oval">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="400dp"
+                android:startColor="#20D4AF37"
+                android:endColor="#00000000" />
+        </shape>
+    </item>
+
+    <!-- Vignette effect around edges -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="800dp"
+                android:startColor="#00000000"
+                android:endColor="#90000000"
+                android:centerX="0.5"
+                android:centerY="0.5" />
+        </shape>
+    </item>
+</layer-list>

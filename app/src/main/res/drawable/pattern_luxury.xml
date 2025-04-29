@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Diamond Shapes with enhanced opacity -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M60,10 L70,20 L60,30 L50,20 Z"
+        android:fillAlpha="0.07" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M60,90 L70,100 L60,110 L50,100 Z"
+        android:fillAlpha="0.07" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M20,50 L30,60 L20,70 L10,60 Z"
+        android:fillAlpha="0.07" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M100,50 L110,60 L100,70 L90,60 Z"
+        android:fillAlpha="0.07" />
+
+    <!-- Small decorative diamonds at corners -->
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M10,10 L15,15 L10,20 L5,15 Z"
+        android:fillAlpha="0.06" />
+
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M110,10 L115,15 L110,20 L105,15 Z"
+        android:fillAlpha="0.06" />
+
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M10,110 L15,115 L10,120 L5,115 Z"
+        android:fillAlpha="0.06" />
+
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M110,110 L115,115 L110,120 L105,115 Z"
+        android:fillAlpha="0.06" />
+
+    <!-- Diagonal Line Patterns with gold color -->
+    <path
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="0.5"
+        android:strokeAlpha="0.12"
+        android:pathData="M0,0 L120,120" />
+
+    <path
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="0.5"
+        android:strokeAlpha="0.12"
+        android:pathData="M0,40 L80,120" />
+
+    <path
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="0.5"
+        android:strokeAlpha="0.12"
+        android:pathData="M40,0 L120,80" />
+
+    <path
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="0.5"
+        android:strokeAlpha="0.12"
+        android:pathData="M120,0 L0,120" />
+
+    <path
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="0.5"
+        android:strokeAlpha="0.12"
+        android:pathData="M80,0 L0,80" />
+
+    <path
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="0.5"
+        android:strokeAlpha="0.12"
+        android:pathData="M120,40 L40,120" />
+
+    <!-- Horizontal and vertical decorative lines -->
+    <path
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="0.3"
+        android:strokeAlpha="0.08"
+        android:pathData="M0,60 L120,60" />
+
+    <path
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="0.3"
+        android:strokeAlpha="0.08"
+        android:pathData="M60,0 L60,120" />
+
+    <!-- Enhanced Elegant Fleur-de-lis at center -->
+    <path
+        android:fillColor="#D4AF37"
+        android:fillAlpha="0.09"
+        android:pathData="M60,50 C60,50 65,55 65,60 C65,65 60,70 60,70 C60,70 55,65 55,60 C55,55 60,50 60,50 Z" />
+
+    <path
+        android:fillColor="#D4AF37"
+        android:fillAlpha="0.09"
+        android:pathData="M60,50 C60,50 70,45 70,40 C70,35 65,30 60,35 C55,30 50,35 50,40 C50,45 60,50 60,50 Z" />
+
+    <path
+        android:fillColor="#D4AF37"
+        android:fillAlpha="0.09"
+        android:pathData="M60,70 C60,70 70,75 70,80 C70,85 65,90 60,85 C55,90 50,85 50,80 C50,75 60,70 60,70 Z" />
+
+    <path
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="1"
+        android:strokeAlpha="0.09"
+        android:pathData="M60,70 L60,85" />
+
+    <!-- Decorative circles -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="0.5"
+        android:strokeAlpha="0.04"
+        android:pathData="M60,60 m-30,0 a30,30 0 1,0 60,0 a30,30 0 1,0 -60,0" />
+
+    <path
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="0.5"
+        android:strokeAlpha="0.05"
+        android:pathData="M60,60 m-20,0 a20,20 0 1,0 40,0 a20,20 0 1,0 -40,0" />
+</vector>
