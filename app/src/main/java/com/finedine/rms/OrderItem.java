@@ -10,12 +10,15 @@ import androidx.room.PrimaryKey;
         foreignKeys = {
                 @ForeignKey(entity = Order.class,
                         parentColumns = "orderId",
-                        childColumns = "orderId"),
+                        childColumns = "orderId",
+                        onDelete = ForeignKey.CASCADE,
+                        deferred = true),
                 @ForeignKey(entity = MenuItem.class,
-                        parentColumns = "item_id", // Match parent column name
-                        childColumns = "item_id")
+                        parentColumns = "item_id",
+                        childColumns = "item_id",
+                        onDelete = ForeignKey.NO_ACTION,
+                        deferred = true)
         })
-
 public class OrderItem {
 
     @PrimaryKey(autoGenerate = true)
@@ -24,7 +27,7 @@ public class OrderItem {
     private String name;
     private int quantity;
     private String orderId;
-
+    private String notes;
 
     public OrderItem() {
         // Default constructor required for Room
@@ -34,6 +37,7 @@ public class OrderItem {
         this.name = name;
         this.quantity = quantity;
         this.orderId = orderId;
+        this.notes = "";
     }
 
     // Getters and setters
@@ -45,4 +49,12 @@ public class OrderItem {
     public void setQuantity(int quantity) { this.quantity = quantity; }
     public String getOrderId() { return orderId; }
     public void setOrderId(String orderId) { this.orderId = orderId; }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes != null ? notes : "";
+    }
 }

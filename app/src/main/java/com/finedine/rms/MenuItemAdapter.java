@@ -5,15 +5,16 @@ import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.finedine.rms.R;
-import com.finedine.rms.MenuItem;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.RequestOptions;
+
 import java.util.List;
-
-
 
 public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHolder> {
 
@@ -28,13 +29,20 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tvName, tvDescription, tvPrice, tvAvailability;
+        public ImageView ivMenuItemImage;
+        public TextView tvCategory, tvPrepTime, tvCalories, tvSpiceLevel;
 
         public ViewHolder(View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tvMenuItemName);
             tvDescription = itemView.findViewById(R.id.tvMenuItemDescription);
             tvPrice = itemView.findViewById(R.id.tvMenuItemPrice);
-            tvAvailability = itemView.findViewById(R.id.tvMenuItemAvailability);
+            tvAvailability = itemView.findViewById(R.id.tvAvailabilityBadge);
+            ivMenuItemImage = itemView.findViewById(R.id.ivMenuItemImage);
+            tvCategory = itemView.findViewById(R.id.tvMenuItemCategory);
+            tvPrepTime = itemView.findViewById(R.id.tvPrepTime);
+            tvCalories = itemView.findViewById(R.id.tvCalories);
+            tvSpiceLevel = itemView.findViewById(R.id.tvSpiceLevel);
         }
     }
 
@@ -65,6 +73,19 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
                     holder.itemView.getContext().getColor(R.color.green) :
                     holder.itemView.getContext().getColor(R.color.red));
         }
+
+        holder.tvCategory.setText(item.category);
+        holder.tvPrepTime.setText(String.format("Prep Time: %s minutes", item.prepTimeMinutes));
+        holder.tvCalories.setText(String.format("Calories: %d", item.calories));
+        holder.tvSpiceLevel.setText(String.format("Spice Level: %s", item.spiceLevel));
+
+        Glide.with(holder.itemView.getContext())
+                .load(item.imageUrl)
+                .apply(new RequestOptions().centerCrop())
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .placeholder(R.drawable.placeholder_food)
+                .error(R.drawable.placeholder_food)
+                .into(holder.ivMenuItemImage);
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {

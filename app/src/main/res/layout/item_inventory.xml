@@ -5,10 +5,10 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="@color/white"
+    app:cardBackgroundColor="@color/luxe_dark"
     app:cardCornerRadius="16dp"
     app:cardElevation="6dp"
-    app:strokeColor="@color/primary_green_10"
+    app:strokeColor="@color/luxe_gold"
     app:strokeWidth="1dp">
 
     <LinearLayout
@@ -16,6 +16,13 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="24dp">
+
+        <!-- Gold trim at top -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="2dp"
+            android:background="@color/luxe_gold"
+            android:layout_marginBottom="16dp" />
 
         <!-- Header Section -->
         <LinearLayout
@@ -31,7 +38,7 @@
                 android:layout_weight="1"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@color/dark_gray"/>
+                android:textColor="@color/luxe_gold" />
 
             <ImageView
                 android:id="@+id/warningIcon"
@@ -41,7 +48,7 @@
                 android:src="@drawable/ic_warning"
                 android:visibility="gone"
                 android:contentDescription="@string/warning_icon"
-                app:tint="@color/red_600" />
+                app:tint="@color/luxe_gold" />
         </LinearLayout>
 
         <!-- Divider -->
@@ -49,7 +56,8 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginVertical="16dp"
-            android:background="@color/primary_green_20"/>
+            android:background="@color/luxe_gold"
+            android:alpha="0.3" />
 
         <!-- Quantity Information -->
         <TextView
@@ -57,8 +65,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:textColor="@color/medium_gray"
+            android:textColor="@color/text_white"
             android:drawableStart="@drawable/ic_inventory"
+            android:drawableTint="@color/luxe_gold"
             android:drawablePadding="8dp"
             android:layout_marginBottom="8dp"/>
 
@@ -68,9 +77,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:textColor="@color/medium_gray"
+            android:textColor="@color/text_white"
             android:drawableStart="@drawable/ic_threshold"
+            android:drawableTint="@color/luxe_gold"
             android:drawablePadding="8dp"/>
+
+        <!-- Gold corner accent -->
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/corner_gold"
+            android:alpha="0.7" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

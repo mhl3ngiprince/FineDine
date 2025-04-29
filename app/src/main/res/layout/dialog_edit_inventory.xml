@@ -4,17 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/light_green"
+    android:background="@drawable/bg_luxury_pattern"
     android:padding="24dp"
     android:fillViewport="true">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/luxe_dark"
         app:cardCornerRadius="16dp"
         app:cardElevation="6dp"
-        app:strokeColor="@color/primary_green_10"
+        app:strokeColor="@color/luxe_gold"
         app:strokeWidth="1dp">
 
         <LinearLayout
@@ -23,6 +23,25 @@
             android:orientation="vertical"
             android:padding="24dp">
 
+            <!-- Title -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="EDIT INVENTORY ITEM"
+                android:textColor="@color/luxe_gold"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:fontFamily="serif"
+                android:letterSpacing="0.05"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Gold divider -->
+            <View
+                android:layout_width="40dp"
+                android:layout_height="2dp"
+                android:background="@color/luxe_gold"
+                android:layout_marginBottom="16dp" />
+
             <!-- Item Name Field -->
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -30,17 +49,18 @@
                 android:layout_height="wrap_content"
                 android:hint="Item Name"
                 android:layout_marginBottom="16dp"
-                app:boxStrokeColor="@color/primary_green"
-                app:hintTextColor="@color/primary_green"
+                app:boxStrokeColor="@color/luxe_gold"
+                app:hintTextColor="@color/luxe_gold"
+                app:boxBackgroundColor="@color/transparent_black"
                 app:helperText="e.g. Organic Basil Leaves"
-                app:helperTextTextColor="@color/medium_gray">
+                app:helperTextTextColor="@color/text_gray">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/nameInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/dark_gray"
-                    android:textColorHint="@color/medium_gray"/>
+                    android:textColor="@color/text_white"
+                    android:textColorHint="@color/text_gray" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Quantity Field -->
@@ -50,18 +70,19 @@
                 android:layout_height="wrap_content"
                 android:hint="Current Quantity"
                 android:layout_marginBottom="16dp"
-                app:boxStrokeColor="@color/primary_green"
-                app:hintTextColor="@color/primary_green"
+                app:boxStrokeColor="@color/luxe_gold"
+                app:hintTextColor="@color/luxe_gold"
+                app:boxBackgroundColor="@color/transparent_black"
                 app:helperText="In stock quantity"
-                app:helperTextTextColor="@color/medium_gray">
+                app:helperTextTextColor="@color/text_gray">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/quantityInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal"
-                    android:textColor="@color/dark_gray"
-                    android:textColorHint="@color/medium_gray"/>
+                    android:textColor="@color/text_white"
+                    android:textColorHint="@color/text_gray" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Threshold Field -->
@@ -70,19 +91,29 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Reorder Threshold"
-                app:boxStrokeColor="@color/primary_green"
-                app:hintTextColor="@color/primary_green"
+                app:boxStrokeColor="@color/luxe_gold"
+                app:hintTextColor="@color/luxe_gold"
+                app:boxBackgroundColor="@color/transparent_black"
                 app:helperText="Minimum quantity before reorder"
-                app:helperTextTextColor="@color/medium_gray">
+                app:helperTextTextColor="@color/text_gray">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/thresholdInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal"
-                    android:textColor="@color/dark_gray"
-                    android:textColorHint="@color/medium_gray"/>
+                    android:textColor="@color/text_white"
+                    android:textColorHint="@color/text_gray" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Gold corner accent -->
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="end"
+                android:layout_marginTop="16dp"
+                android:src="@drawable/corner_gold"
+                android:alpha="0.7" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

@@ -4,8 +4,27 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/light_green"
+    android:background="@drawable/bg_luxury_pattern"
     android:padding="24dp">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SPECIFY QUANTITY"
+        android:textColor="@color/luxe_gold"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:fontFamily="serif"
+        android:letterSpacing="0.05"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Gold divider -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="2dp"
+        android:background="@color/luxe_gold"
+        android:layout_marginBottom="16dp" />
 
     <!-- Quantity Section -->
     <com.google.android.material.textfield.TextInputLayout
@@ -13,25 +32,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
-        app:boxStrokeColor="@color/primary_green"
-        app:hintTextColor="@color/primary_green">
+        app:boxStrokeColor="@color/luxe_gold"
+        app:hintTextColor="@color/luxe_gold"
+        app:boxBackgroundColor="@color/transparent_black">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/quantityInput"
             android:layout_width="match_parent"
-            android:layout_height="69dp"
+            android:layout_height="wrap_content"
             android:hint="Quantity"
             android:inputType="number"
             android:text="1"
-            android:textColor="@color/dark_gray"
-            android:textColorHint="@color/medium_gray" />
+            android:textColor="@color/text_white"
+            android:textColorHint="@color/text_gray" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Divider -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/primary_green_10"
+        android:background="@color/luxe_gold"
+        android:alpha="0.3"
         android:layout_marginBottom="24dp"/>
 
     <!-- Special Instructions Section -->
@@ -39,10 +60,11 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:boxStrokeColor="@color/primary_green"
-        app:hintTextColor="@color/primary_green"
+        app:boxStrokeColor="@color/luxe_gold"
+        app:hintTextColor="@color/luxe_gold"
+        app:boxBackgroundColor="@color/transparent_black"
         app:helperText="e.g. No onions, extra spicy"
-        app:helperTextTextColor="@color/medium_gray">
+        app:helperTextTextColor="@color/text_gray">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/notesInput"
@@ -52,9 +74,18 @@
             android:hint="Special Instructions"
             android:inputType="textMultiLine|textCapSentences"
             android:maxLines="4"
-            android:textColor="@color/dark_gray"
-            android:textColorHint="@color/medium_gray"/>
+            android:textColor="@color/text_white"
+            android:textColorHint="@color/text_gray" />
     </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Gold corner accent -->
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="end"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/corner_gold"
+        android:alpha="0.7" />
 
     <!-- Bottom Shadow Overlay -->
     <View

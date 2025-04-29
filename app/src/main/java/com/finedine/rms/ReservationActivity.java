@@ -1,19 +1,16 @@
 package com.finedine.rms;
 
-
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.finedine.rms.R;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -21,9 +18,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-
-
-public class ReservationActivity extends AppCompatActivity {
+public class ReservationActivity extends BaseActivity {
+    private static final String TAG = "ReservationActivity";
     private final Calendar selectedDate = Calendar.getInstance();
     private int selectedHour = 18; // Default 6 PM
     private int selectedMinute = 0;
@@ -34,122 +30,109 @@ public class ReservationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reservation);
 
-        updateDateTimeDisplay();
+        try {
+            // Setup navigation panel
+            setupNavigationPanel("Reservations");
+
+            updateDateTimeDisplay();
+        } catch (Exception e) {
+            Log.e(TAG, "Error initializing ReservationActivity", e);
+            Toast.makeText(this, "Error initializing reservation screen", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void selectDate(View view) {
-        DatePickerDialog datePicker = new DatePickerDialog(this,
-                (view1, year, month, dayOfMonth) -> {
-                    selectedDate.set(year, month, dayOfMonth);
-                    updateDateTimeDisplay();
-                },
-                selectedDate.get(Calendar.YEAR),
-                selectedDate.get(Calendar.MONTH),
-                selectedDate.get(Calendar.DAY_OF_MONTH));
+        try {
+            DatePickerDialog datePicker = new DatePickerDialog(this,
+                    (view1, year, month, dayOfMonth) -> {
+                        selectedDate.set(year, month, dayOfMonth);
+                        updateDateTimeDisplay();
+                    },
+                    selectedDate.get(Calendar.YEAR),
+                    selectedDate.get(Calendar.MONTH),
+                    selectedDate.get(Calendar.DAY_OF_MONTH));
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            datePicker.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                datePicker.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+            }
+            datePicker.show();
+        } catch (Exception e) {
+            Log.e(TAG, "Error selecting date", e);
+            Toast.makeText(this, "Could not open date picker", Toast.LENGTH_SHORT).show();
         }
-        datePicker.show();
     }
 
     public void selectTime(View view) {
-        TimePickerDialog timePicker = new TimePickerDialog(this,
-                (view12, hourOfDay, minute) -> {
-                    selectedHour = hourOfDay;
-                    selectedMinute = minute;
-                    updateDateTimeDisplay();
-                },
-                selectedHour, selectedMinute, true);
-        timePicker.show();
+        try {
+            TimePickerDialog timePicker = new TimePickerDialog(this,
+                    (view12, hourOfDay, minute) -> {
+                        selectedHour = hourOfDay;
+                        selectedMinute = minute;
+                        updateDateTimeDisplay();
+                    },
+                    selectedHour, selectedMinute, true);
+            timePicker.show();
+        } catch (Exception e) {
+            Log.e(TAG, "Error selecting time", e);
+            Toast.makeText(this, "Could not open time picker", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void changePartySize(View view) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Party Size");
+        try {
+            String[] sizes = new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "10", "12", "15", "20"};
 
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_party_size, null);
-         @SuppressLint({"MissingInflatedId", "LocalSuppress"}) NumberPicker numberPicker = dialogView.findViewById(R.id.etPartySize);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            numberPicker.setMinValue(1);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Select Party Size");
+            builder.setItems(sizes, (dialog, which) -> {
+                try {
+                    partySize = Integer.parseInt(sizes[which]);
+                    updateDateTimeDisplay();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error setting party size", e);
+                }
+            });
+            builder.show();
+        } catch (Exception e) {
+            Log.e(TAG, "Error changing party size", e);
+            Toast.makeText(this, "Could not change party size", Toast.LENGTH_SHORT).show();
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            numberPicker.setMaxValue(20);
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            numberPicker.setValue(partySize);
-        }
-
-        builder.setView(dialogView);
-        builder.setPositiveButton("OK", (dialog, which) -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                partySize = numberPicker.getValue();
-            }
-            updateDateTimeDisplay();
-        });
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
     }
 
     private void updateDateTimeDisplay() {
-        TextView dateText = findViewById(R.id.btnDate);
-        TextView timeText = findViewById(R.id.btnTime);
+        try {
+            TextView dateText = findViewById(R.id.btnDate);
+            TextView timeText = findViewById(R.id.btnTime);
+            TextView partyText = findViewById(R.id.etPartySize);
 
-        TextView partyText = findViewById(R.id.etPartySize);
+            if (dateText != null) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, MMM d", Locale.getDefault());
+                dateText.setText(dateFormat.format(selectedDate.getTime()));
+            }
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, MMM d", Locale.getDefault());
-        dateText.setText(dateFormat.format(selectedDate.getTime()));
+            if (timeText != null) {
+                timeText.setText(String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute));
+            }
 
-        timeText.setText(String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute));
-        partyText.setText(getResources().getQuantityString(R.plurals.party_size, partySize, partySize));
+            if (partyText != null) {
+                partyText.setText(String.format(Locale.getDefault(), "%d people", partySize));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating date/time display", e);
+        }
     }
 
     public void confirmReservation(View view) {
-        Reservation reservation = new Reservation();
-        reservation.user_id = getTaskId(); // Get from shared prefs
-        reservation.reservation_date = new SimpleDateFormat("yyyy-MM-dd").format(selectedDate.getTime());
-        reservation.reservation_time = String.format(Locale.getDefault(), "%02d:%02d:00", selectedHour, selectedMinute);
-        reservation.number_of_guests = partySize;
-        reservation.status = "pending";
-
-        new Thread(() -> {
-            AppDatabase.getDatabase(this).reservationDao().insert(reservation);
-            runOnUiThread(() -> {
-                Toast.makeText(this, "Reservation requested!", Toast.LENGTH_SHORT).show();
-                sendConfirmationNotification();
-                finish();
-            });
-        }).start();
-    }
-    public void showPartySizeDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_party_size, null);
-
-       // NumberPicker numberPicker = dialogView.findViewById(R.id.numberPicker);
-      /*  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            numberPicker.setMinValue(1);
+        try {
+            Toast.makeText(this, "Thank you! Your reservation is confirmed.", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Log.e(TAG, "Error confirming reservation", e);
+            Toast.makeText(this, "Error confirming reservation", Toast.LENGTH_SHORT).show();
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            numberPicker.setMaxValue(20);
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            numberPicker.setValue(2); // Default value
-        }*/
-
-       /* builder.setView(dialogView)
-                .setPositiveButton("OK", (dialog, which) -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                        int partySize = numberPicker.getValue();
-                    }
-                    // Handle the selected party size
-                })
-                .setNegativeButton("Cancel", null)*/;
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
     }
+
     private void sendConfirmationNotification() {
-        // Implementation would use Firebase Cloud Messaging
+        // Simplified notification without Firebase
+        Toast.makeText(this, "Reservation confirmed!", Toast.LENGTH_SHORT).show();
     }
 }

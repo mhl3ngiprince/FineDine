@@ -1,44 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@color/light_green">
+    android:background="@drawable/bg_luxury_pattern">
 
-    <!-- Title Section -->
-
-    <!-- Orders List Container -->
-    <TextView
+    <!-- Include Navigation Panel -->
+    <include
+        android:id="@+id/navigation_panel"
+        layout="@layout/navigation_panel"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:shadowColor="@color/primary_green_20"
-        android:shadowDx="0"
-        android:shadowDy="2"
-        android:shadowRadius="4"
-        android:text="kitchen_orders"
-        android:textColor="@color/primary_green"
-        android:textSize="28sp"
-        android:textStyle="bold" />
+        android:layout_height="wrap_content" />
 
-    <!-- Bottom Shadow Overlay -->
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvOrders"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="586dp"
-        android:background="@drawable/rounded_container"
-        android:clipToPadding="false"
-        android:padding="8dp"
-        android:scrollbars="vertical"
-        tools:listitem="@layout/item_order" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="24dp">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_gravity="bottom"
-        android:background="@drawable/shadow_gradient" />
+        <!-- Title Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="KITCHEN ORDERS"
+            android:textColor="@color/luxe_gold"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:fontFamily="serif" />
 
+        <!-- Gold divider -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="2dp"
+            android:background="@color/luxe_gold"
+            android:layout_marginBottom="24dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvOrders"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/transparent_black"
+            android:clipToPadding="false"
+            android:padding="8dp"
+            android:scrollbars="vertical"
+            tools:listitem="@layout/item_order" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/shadow_gradient" />
+    </LinearLayout>
 </LinearLayout>

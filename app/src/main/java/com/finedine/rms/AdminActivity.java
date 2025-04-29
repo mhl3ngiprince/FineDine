@@ -42,7 +42,7 @@ public class AdminActivity extends AppCompatActivity implements NavigationView.O
         // Set up toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Admin Dashboard");
+        getSupportActionBar().setTitle("FINE DINE ADMINISTRATION");
 
         // Set up navigation drawer
         drawerLayout = findViewById(R.id.drawer_layout);

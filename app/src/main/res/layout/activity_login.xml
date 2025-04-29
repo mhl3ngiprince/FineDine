@@ -7,41 +7,75 @@
     android:orientation="vertical"
     android:padding="24dp"
     android:gravity="center"
-    android:background="@color/primary_green"
+    android:background="@drawable/bg_luxury_pattern"
     tools:context="com.finedine.rms.LoginActivity">
 
-    <ImageView
-        android:layout_width="306dp"
-        android:layout_height="266dp"
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
-        android:background="@drawable/circle_green"
-        android:contentDescription="@string/todo"
-        android:elevation="4dp"
-        android:padding="16dp"
-        android:src="@drawable/logoj" />
+        app:cardCornerRadius="100dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="@color/luxe_burgundy">
+
+        <ImageView
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:contentDescription="@string/todo"
+            android:padding="16dp"
+            android:src="@drawable/logoj" />
+
+        <!-- Gold corner accent -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="end|bottom"
+            android:background="@drawable/corner_gold" />
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="FINE DINE"
+        android:textColor="@color/luxe_gold"
+        android:textSize="28sp"
+        android:letterSpacing="0.1"
+        android:gravity="center"
+        android:fontFamily="serif"
+        android:layout_marginBottom="24dp"
+        android:textStyle="bold" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        app:boxStrokeColor="@color/primary_green"
-        app:hintTextColor="@color/primary_green">
-        <com.google.android.material.textfield.TextInputEditText
+        android:layout_marginBottom="16dp"
+        app:boxStrokeColor="@color/luxe_gold"
+        app:hintTextColor="@color/luxe_gold"
+        app:boxBackgroundColor="@color/transparent_black"
+        android:textColorHint="@color/text_gray"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+    <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/emailInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/Email"
             android:inputType="textEmailAddress"
-            android:textColor="@color/primary_green_dark"
-            android:textColorHint="@color/black"/>
+            android:textColor="@color/text_white"
+            android:textColorHint="@color/text_gray" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
-        app:boxStrokeColor="@color/primary_green"
-        app:hintTextColor="@color/primary_green">
+        app:boxStrokeColor="@color/luxe_gold"
+        app:hintTextColor="@color/luxe_gold"
+        app:boxBackgroundColor="@color/transparent_black"
+        android:textColorHint="@color/text_gray"
+        app:passwordToggleEnabled="true"
+        app:passwordToggleTint="@color/luxe_gold"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/passwordInput"
@@ -49,8 +83,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/password"
             android:inputType="textPassword"
-            android:textColor="@color/primary_green_dark"
-            android:textColorHint="@color/black"/>
+            android:textColor="@color/text_white"
+            android:textColorHint="@color/text_gray" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
@@ -58,31 +92,46 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/login"
-
-        android:backgroundTint="@color/white"
-        android:textColor="@color/primary_green"
+        android:backgroundTint="@color/luxe_burgundy"
+        android:textColor="@color/luxe_gold"
         app:cornerRadius="8dp"
         android:textStyle="bold"
-        android:paddingVertical="12dp"/>
+        android:paddingVertical="12dp"
+        app:strokeColor="@color/luxe_gold"
+        app:strokeWidth="1dp" />
+
+    <TextView
+        android:id="@+id/forgotPasswordText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Forgot Password?"
+        android:textColor="@color/luxe_gold"
+        android:textSize="14sp"
+        android:padding="8dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground" />
 
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:indeterminateTint="@color/luxe_gold" />
 
     <Button
         android:id="@+id/registerText"
         style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
+        android:layout_width="155dp"
+        android:layout_height="58dp"
         android:layout_marginTop="16dp"
-        android:drawablePadding="4dp"
-
-        android:text="Create account"
-        android:textColor="@color/white"
-        android:textStyle="bold"/>
+        android:letterSpacing="0.05"
+        android:text="CREATE ACCOUNT"
+        android:textColor="@color/luxe_gold"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/text_phone"

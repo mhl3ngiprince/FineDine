@@ -1,248 +1,367 @@
 package com.finedine.rms;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.finedine.rms.utils.NetworkUtils;
-import com.finedine.rms.utils.SharedPrefsManager;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.finedine.rms.utils.NetworkUtils;
+import com.finedine.rms.utils.SharedPrefsManager;
+import com.finedine.rms.utils.FirebaseSafetyWrapper;
 
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
-    
+
     private EditText emailEditText;
     private EditText passwordEditText;
     private Button loginButton;
     private Button createAccountButton;
     private ProgressBar progressBar;
+    private TextView forgotPasswordText;
 
-    private SharedPrefsManager prefsManager;
+    // Initialize these only when needed
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private SharedPrefsManager prefsManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "LoginActivity onCreate - starting");
+
+        // Set content view first
         setContentView(R.layout.activity_login);
+        Log.d(TAG, "LoginActivity - setContentView complete");
 
-        // Initialize Firebase
-        mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
-
-        // Initialize views
-        emailEditText = findViewById(R.id.emailInput);
-        passwordEditText = findViewById(R.id.passwordInput);
-        loginButton = findViewById(R.id.loginButton);
-        createAccountButton = findViewById(R.id.registerText);
-        progressBar = findViewById(R.id.progressBar);
-
-        // Initialize SharedPrefsManager
-        prefsManager = new SharedPrefsManager(this);
-
-        // Set up click listeners
-        loginButton.setOnClickListener(v -> attemptLogin());
-        createAccountButton.setOnClickListener(v -> navigateToRegister());
-    }
-
-    private void attemptLogin() {
-        // Check internet connection first
-        if (!NetworkUtils.isNetworkAvailable(this)) {
-            Toast.makeText(this, "No internet connection. Please try again when online.", Toast.LENGTH_LONG).show();
-            return;
-        }
-        
-        // Get input values
-        final String email = emailEditText.getText().toString().trim();
-        final String password = passwordEditText.getText().toString().trim();
-        
-        // Validate inputs
-        if (email.isEmpty()) {
-            emailEditText.setError("Email is required");
-            emailEditText.requestFocus();
-            return;
-        }
-        
-        if (password.isEmpty()) {
-            passwordEditText.setError("Password is required");
-            passwordEditText.requestFocus();
-            return;
-        }
-        
-        // Show progress
-        progressBar.setVisibility(View.VISIBLE);
-        loginButton.setEnabled(false);
-
-        // Determine role from email for immediate response
-        String quickRole = determineQuickRoleFromEmail(email);
-
-        // Provide immediate feedback (0.01 sec)
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            // Show success message immediately
-            Toast.makeText(this, "Login successful as " + quickRole, Toast.LENGTH_SHORT).show();
-
-            // Save user data in SharedPreferences right away
-            prefsManager.saveUserSession(0, quickRole, email.split("@")[0]);
-            prefsManager.setUserLoggedIn(true);
-            prefsManager.setUserRole(quickRole);
-
-            // Navigate based on role immediately
-            navigateDirectly(quickRole);
-        }, 10); // 10ms = 0.01 seconds delay
-
-        // Perform actual Firebase authentication in background
-        performFirebaseAuthentication(email, password);
-    }
-
-    private String determineQuickRoleFromEmail(String email) {
-        // Determine role from email for immediate response
-        if (email.contains("manager")) {
-            return "manager";
-        } else if (email.contains("chef")) {
-            return "chef";
-        } else if (email.contains("waiter")) {
-            return "waiter";
-        } else if (email.contains("admin")) {
-            return "admin";
-        } else {
-            return "customer"; // Default role
-        }
-    }
-
-    private void performFirebaseAuthentication(String email, String password) {
-        // Sign in with Firebase Authentication in background
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        // Sign in success
-                        Log.d(TAG, "signInWithEmail:success");
-                        FirebaseUser user = mAuth.getCurrentUser();
-
-                        // Get user data from Firestore (in background)
-                        updateUserDataInBackground(user);
-                    } else {
-                        // Sign in failed - log the error but don't disrupt user flow
-                        Log.w(TAG, "signInWithEmail:failure", task.getException());
-                }
-            });
-    }
-
-    private void updateUserDataInBackground(FirebaseUser user) {
-        if (user == null) {
-            return;
-        }
-
-        // Update user data from Firestore in background
-        db.collection("users")
-                .document(user.getUid())
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            // Get user role from document
-                            String role = document.getString("role");
-                            String name = document.getString("name");
-
-                            if (role != null && !role.isEmpty()) {
-                                // Update SharedPreferences with accurate data
-                                prefsManager.saveUserSession(0, role, name != null ? name : "");
-                                prefsManager.setUserRole(role);
-                        }
-                    } else {
-                        // Document doesn't exist - create default user data
-                        createUserDataInBackground(user);
-                    }
-                }
-            });
-    }
-
-    private void createUserDataInBackground(FirebaseUser user) {
-        // Create default user data if not found
-        String defaultRole = determineQuickRoleFromEmail(user.getEmail());
-        String email = user.getEmail();
-        String displayName = user.getDisplayName() != null ? user.getDisplayName() : "";
-
-        db.collection("users").document(user.getUid())
-                .set(new com.finedine.rms.User(user.getUid(), email, displayName, defaultRole))
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "User data created in background");
-                })
-                .addOnFailureListener(e -> {
-                    Log.w(TAG, "Error creating user data in background", e);
-                });
-    }
-
-    private void navigateDirectly(String roleToUse) {
         try {
-            Intent intent;
+            // Initialize SharedPrefsManager
+            prefsManager = new SharedPrefsManager(this);
 
-            if ("manager".equals(roleToUse)) {
-                intent = new Intent(this, ManagerDashboardActivity.class);
-            } else if ("chef".equals(roleToUse)) {
-                intent = new Intent(this, KitchenActivity.class);
-            } else if ("waiter".equals(roleToUse)) {
-                intent = new Intent(this, OrderActivity.class);
-            } else if ("admin".equals(roleToUse)) {
-                intent = new Intent(this, AdminActivity.class);
-            } else {
-                // Default to ReservationActivity for customers
-                intent = new Intent(this, ReservationActivity.class);
+            // Check if user is already logged in
+            if (prefsManager.isUserLoggedIn()) {
+                String role = prefsManager.getUserRole();
+                Log.d(TAG, "User already logged in with role: " + role);
+                navigateBasedOnRole(role);
+                return;
             }
 
-            // Add the role info explicitly
-            intent.putExtra("user_role", roleToUse);
+            // Initialize UI components first
+            emailEditText = findViewById(R.id.emailInput);
+            passwordEditText = findViewById(R.id.passwordInput);
+            loginButton = findViewById(R.id.loginButton);
+            createAccountButton = findViewById(R.id.registerText);
+            progressBar = findViewById(R.id.progressBar);
+            forgotPasswordText = findViewById(R.id.forgotPasswordText);
 
-            // Save login state
-            prefsManager.setUserLoggedIn(true);
-            prefsManager.setUserRole(roleToUse);
+            // Hide progress bar initially
+            if (progressBar != null) {
+                progressBar.setVisibility(View.GONE);
+            }
 
-            // Log navigation attempt
-            Log.d(TAG, "Navigating to role: " + roleToUse);
+            // Set up click listeners
+            if (loginButton != null) {
+                loginButton.setOnClickListener(v -> attemptLogin());
+            } else {
+                Log.e(TAG, "Login button is null!");
+                Toast.makeText(this, "UI initialization error", Toast.LENGTH_SHORT).show();
+            }
 
-            // Hide progress now that we're done
-            progressBar.setVisibility(View.GONE);
-            loginButton.setEnabled(true);
+            if (createAccountButton != null) {
+                createAccountButton.setOnClickListener(v -> navigateToRegister());
+            } else {
+                Log.e(TAG, "Create account button is null!");
+            }
 
-            // Start activity
-            startActivity(intent);
-            finish();
+            if (forgotPasswordText != null) {
+                forgotPasswordText.setOnClickListener(v -> attemptForgotPassword());
+            } else {
+                Log.e(TAG, "Forgot password text is null!");
+            }
+
+            // Check if user is already logged in
+            if (prefsManager.isUserLoggedIn()) {
+                String role = prefsManager.getUserRole();
+                Log.d(TAG, "User already logged in with role: " + role);
+                navigateBasedOnRole(role);
+                return;
+            }
+
+            Log.d(TAG, "LoginActivity onCreate - completed successfully");
+
+            // Pre-initialize Firebase safely
+            mAuth = FirebaseSafetyWrapper.getAuthInstance(this);
+            db = FirebaseSafetyWrapper.getFirestoreInstance(this);
+
         } catch (Exception e) {
-            // Log the error and show a helpful message
-            Log.e(TAG, "Navigation failed: " + e.getMessage(), e);
-            Toast.makeText(this, 
-                    "Error starting app: " + e.getMessage(), 
-                    Toast.LENGTH_LONG).show();
-            
-            // Reset login state on error
-            prefsManager.setUserLoggedIn(false);
-
-            // Hide progress
-            progressBar.setVisibility(View.GONE);
-            loginButton.setEnabled(true);
+            Log.e(TAG, "Error in LoginActivity onCreate", e);
+            Toast.makeText(this, "Error initializing login screen", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void navigateToRegister() {
-        Intent intent = new Intent(this, RegisterActivity.class);
-        startActivity(intent);
+        try {
+            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "Error navigating to register", e);
+            Toast.makeText(this, "Could not open registration screen", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean initializeFirebaseSafely() {
+        return FirebaseSafetyWrapper.initializeFirebase(this);
+    }
+
+    private void attemptLogin() {
+        try {
+            Log.d(TAG, "Attempting login");
+
+            // Show progress
+            if (progressBar != null) {
+                progressBar.setVisibility(View.VISIBLE);
+            }
+
+            // Disable login button to prevent double-clicks
+            if (loginButton != null) {
+                loginButton.setEnabled(false);
+            }
+
+            // Validate form
+            String email = emailEditText != null ? emailEditText.getText().toString().trim() : "";
+            String password = passwordEditText != null ? passwordEditText.getText().toString().trim() : "";
+
+            if (email.isEmpty()) {
+                if (emailEditText != null) {
+                    emailEditText.setError("Email is required");
+                    emailEditText.requestFocus();
+                }
+                resetUiAfterLoginAttempt();
+                return;
+            }
+
+            if (password.isEmpty()) {
+                if (passwordEditText != null) {
+                    passwordEditText.setError("Password is required");
+                    passwordEditText.requestFocus();
+                }
+                resetUiAfterLoginAttempt();
+                return;
+            }
+
+            // For demo purposes, allow default login
+            if (email.equals("admin@finedine.com") && password.equals("admin123")) {
+                handleDemoLogin("admin");
+                return;
+            } else if (email.equals("manager@finedine.com") && password.equals("manager123")) {
+                handleDemoLogin("manager");
+                return;
+            } else if (email.equals("chef@finedine.com") && password.equals("chef123")) {
+                handleDemoLogin("chef");
+                return;
+            } else if (email.equals("waiter@finedine.com") && password.equals("waiter123")) {
+                handleDemoLogin("waiter");
+                return;
+            } else if (email.equals("customer@finedine.com") && password.equals("customer123")) {
+                handleDemoLogin("customer");
+                return;
+            }
+
+            // Initialize Firebase if needed
+            mAuth = FirebaseSafetyWrapper.getAuthInstance(this);
+            if (mAuth == null) {
+                Toast.makeText(this, "Authentication service unavailable", Toast.LENGTH_SHORT).show();
+                resetUiAfterLoginAttempt();
+                return;
+            }
+
+            // Attempt login with Firebase
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, task -> {
+                        try {
+                            if (task.isSuccessful() && mAuth.getCurrentUser() != null) {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                fetchUserDataAndNavigate(user);
+                            } else {
+                                String errorMsg = "Authentication failed";
+                                if (task.getException() != null) {
+                                    errorMsg = task.getException().getMessage();
+                                }
+                                Log.w(TAG, "signInWithEmail:failure: " + errorMsg);
+                                Toast.makeText(LoginActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
+                                resetUiAfterLoginAttempt();
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error in login completion handler", e);
+                            Toast.makeText(LoginActivity.this, "Login error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            resetUiAfterLoginAttempt();
+                        }
+                    })
+                    .addOnFailureListener(this, e -> {
+                        Log.e(TAG, "Login failure", e);
+                        Toast.makeText(this, "Login failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        resetUiAfterLoginAttempt();
+                    });
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error attempting login", e);
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            resetUiAfterLoginAttempt();
+        }
+    }
+
+    private void attemptForgotPassword() {
+        try {
+            // Show dialog or activity for forgot password
+            Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "Error attempting forgot password", e);
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void handleDemoLogin(String role) {
+        // Save user session with demo data
+        if (prefsManager != null) {
+            prefsManager.saveUserSession(12345, role, role.substring(0, 1).toUpperCase() + role.substring(1));
+            prefsManager.setUserLoggedIn(true);
+            prefsManager.setUserRole(role);
+        }
+
+        // Navigate based on role
+        navigateBasedOnRole(role);
+    }
+
+    private void resetUiAfterLoginAttempt() {
+        try {
+            if (progressBar != null) {
+                progressBar.setVisibility(View.GONE);
+            }
+
+            if (loginButton != null) {
+                loginButton.setEnabled(true);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error resetting UI", e);
+        }
+    }
+
+    private void fetchUserDataAndNavigate(FirebaseUser user) {
+        try {
+            if (user == null) {
+                Log.e(TAG, "User is null");
+                Toast.makeText(this, "Login error: Missing user data", Toast.LENGTH_SHORT).show();
+                resetUiAfterLoginAttempt();
+                return;
+            }
+
+            db = FirebaseSafetyWrapper.getFirestoreInstance(this);
+            if (db == null) {
+                // Fallback to a default role if Firestore isn't available
+                saveUserSessionAndNavigate(user.getUid(), "customer", user.getDisplayName());
+                return;
+            }
+
+            db.collection("users").document(user.getUid())
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        try {
+                            if (task.isSuccessful() && task.getResult() != null) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    // Get user data
+                                    String role = document.getString("role");
+                                    String name = document.getString("name");
+
+                                    if (role == null || role.isEmpty()) {
+                                        role = "customer"; // Default role
+                                    }
+
+                                    if (name == null || name.isEmpty()) {
+                                        name = "User";
+                                    }
+
+                                    saveUserSessionAndNavigate(user.getUid(), role, name);
+                                } else {
+                                    Log.w(TAG, "User document does not exist");
+                                    // Default to customer role if no document exists
+                                    saveUserSessionAndNavigate(user.getUid(), "customer", user.getDisplayName());
+                                }
+                            } else {
+                                Log.w(TAG, "Failed to get user data");
+                                // Default to customer role if fetch fails
+                                saveUserSessionAndNavigate(user.getUid(), "customer", user.getDisplayName());
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error in fetchUserDataAndNavigate", e);
+                            Toast.makeText(LoginActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            resetUiAfterLoginAttempt();
+                        }
+                    });
+        } catch (Exception e) {
+            Log.e(TAG, "Error fetching user data", e);
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            resetUiAfterLoginAttempt();
+        }
+    }
+
+    private void saveUserSessionAndNavigate(String userId, String role, String name) {
+        // Save user session
+        if (prefsManager != null) {
+            prefsManager.saveUserSession(userId.hashCode(), role, name != null ? name : "User");
+            prefsManager.setUserLoggedIn(true);
+            prefsManager.setUserRole(role);
+        }
+
+        // Navigate based on role
+        navigateBasedOnRole(role);
+    }
+
+    private void navigateBasedOnRole(String role) {
+        try {
+            Log.d(TAG, "Navigating based on role: " + role);
+
+            Intent intent;
+
+            switch (role.toLowerCase()) {
+                case "manager":
+                    intent = new Intent(this, ManagerDashboardActivity.class);
+                    break;
+                case "chef":
+                    intent = new Intent(this, KitchenActivity.class);
+                    break;
+                case "waiter":
+                    intent = new Intent(this, OrderActivity.class);
+                    break;
+                case "admin":
+                    intent = new Intent(this, AdminActivity.class);
+                    break;
+                default:
+                    intent = new Intent(this, ReservationActivity.class);
+                    break;
+            }
+
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error navigating based on role", e);
+            Toast.makeText(this, "Navigation error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            resetUiAfterLoginAttempt();
+        }
     }
 }

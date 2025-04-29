@@ -9,7 +9,8 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_luxury_pattern">
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
@@ -19,10 +20,11 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="@color/primary_green"
+                android:background="@color/luxe_burgundy_dark"
                 android:elevation="4dp"
                 android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:titleTextColor="@color/luxe_gold" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -32,12 +34,39 @@
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:padding="8dp" />
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Section Title -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="STAFF MEMBERS"
+                    android:textColor="@color/luxe_gold"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.1"
+                    android:fontFamily="serif"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Gold divider -->
+                <View
+                    android:layout_width="40dp"
+                    android:layout_height="2dp"
+                    android:background="@color/luxe_gold"
+                    android:layout_marginBottom="16dp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:padding="8dp" />
+
+            </LinearLayout>
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
@@ -49,8 +78,10 @@
             android:layout_margin="16dp"
             android:contentDescription="add_staff"
             android:src="@drawable/ic_add"
-            app:backgroundTint="@color/primary_green"
-            app:tint="@android:color/white" />
+            app:backgroundTint="@color/luxe_gold"
+            android:tint="@color/luxe_charcoal"
+            app:borderWidth="0dp"
+            app:elevation="6dp" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
@@ -59,6 +90,9 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:background="@color/luxe_dark"
+        app:itemTextColor="@color/text_white"
+        app:itemIconTint="@color/luxe_gold"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/staff_drawer_menu" />
 

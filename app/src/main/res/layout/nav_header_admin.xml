@@ -2,11 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="176dp"
-    android:background="@color/primary_green"
+    android:background="@color/luxe_burgundy"
     android:gravity="bottom"
     android:orientation="vertical"
     android:padding="16dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+    <!-- Gold trim at top -->
+    <View
+        android:layout_width="80dp"
+        android:layout_height="2dp"
+        android:background="@color/luxe_gold"
+        android:layout_marginBottom="16dp" />
 
     <ImageView
         android:id="@+id/imageView"
@@ -21,13 +28,25 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="Admin User"
+        android:textColor="@color/luxe_gold"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:fontFamily="serif" />
 
     <TextView
         android:id="@+id/nav_header_email"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="admin@finedine.com" />
+        android:text="admin@finedine.com"
+        android:textColor="@color/text_light"
+        android:alpha="0.8" />
+
+    <!-- Gold corner accent -->
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="end"
+        android:src="@drawable/corner_gold"
+        android:layout_marginTop="8dp" />
 
 </LinearLayout>

@@ -4,119 +4,304 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_marginVertical="12dp"
+    android:layout_marginHorizontal="8dp"
     android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="@color/white"
-    app:cardCornerRadius="16dp"
+    app:cardCornerRadius="10dp"
     app:cardElevation="6dp"
-    app:strokeColor="@color/primary_green_10"
-    app:strokeWidth="1dp">
+    android:stateListAnimator="@animator/card_raise">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:orientation="vertical">
 
-        <!-- Menu Item Header -->
-        <TextView
-            android:id="@+id/tvMenuItemName"
+        <!-- Food Image Container -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/dark_gray"
-            android:drawableStart="@drawable/ic_menu_item"
-            android:drawablePadding="8dp"
-            tools:text="Grilled Salmon"/>
+            android:layout_height="200dp">
 
-        <!-- Description -->
-        <TextView
-            android:id="@+id/tvMenuItemDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textSize="14sp"
-            android:textColor="@color/medium_gray"
-            tools:text="Fresh Atlantic salmon with herb butter"/>
+            <!-- Gold trim at top -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="@color/luxe_gold" />
 
-        <!-- Price & Availability Section -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp"
-            android:gravity="center_vertical">
+            <!-- Main Image -->
+            <ImageView
+                android:id="@+id/ivMenuItemImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="Menu Item Image"
+                tools:src="@tools:sample/backgrounds/scenic" />
 
+            <!-- Gradient Overlay -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/gradient_menu_image" />
+
+            <!-- Gold Corner Accent -->
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="end"
+                android:src="@drawable/corner_gold"
+                android:alpha="0.7" />
+
+            <!-- Available Badge -->
             <TextView
-                android:id="@+id/tvMenuItemPrice"
-                android:layout_width="0dp"
+                android:id="@+id/tvAvailabilityBadge"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="18sp"
+                android:layout_gravity="bottom|start"
+                android:layout_margin="16dp"
+                android:background="@drawable/bg_badge"
+                android:paddingVertical="4dp"
+                android:paddingHorizontal="12dp"
+                android:text="AVAILABLE"
+                android:textSize="10sp"
+                android:textColor="@color/text_dark"
                 android:textStyle="bold"
-                android:textColor="@color/primary_green"
-                android:drawableStart="@drawable/ic_price_tag"
-                android:drawablePadding="4dp"
-                tools:text="R18.99"/>
+                android:letterSpacing="0.05"
+                android:shadowColor="#40000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2"
+                tools:ignore="SmallSp" />
 
+            <!-- Price Badge -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="16dp"
+                android:background="@drawable/bg_price_tag"
+                android:paddingVertical="6dp"
+                android:paddingHorizontal="12dp"
                 android:gravity="center_vertical">
 
-                <ImageView
-                    android:id="@+id/ivAvailabilityIcon"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="@string/availability"
-
-                    android:src="@drawable/ic_available"
-                    app:tint="@color/primary_green" />
-
                 <TextView
-                    android:id="@+id/tvMenuItemAvailability"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="R"
+                    android:textColor="@color/luxe_gold"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvMenuItemPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="189"
+                    android:textColor="@color/text_white"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Content Area with Dark Background -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/luxe_charcoal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="20dp">
+
+            <!-- Item Name with Elegant Divider -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:id="@+id/tvMenuItemCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SIGNATURE DISH"
+                    android:textColor="@color/luxe_gold"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.15"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:id="@+id/tvMenuItemName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Grilled Salmon Wellington"
+                    android:textColor="@color/text_white"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:fontFamily="serif"
+                    android:gravity="center"
+                    android:maxLines="2"
+                    android:ellipsize="end" />
+
+                <!-- Elegant Divider -->
+                <View
+                    android:layout_width="40dp"
+                    android:layout_height="2dp"
+                    android:background="@color/luxe_gold"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp" />
+            </LinearLayout>
+
+            <!-- Description -->
+            <TextView
+                android:id="@+id/tvMenuItemDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Fresh Atlantic salmon fillet wrapped in a delicate puff pastry with wild mushroom duxelles and prosciutto, served with a champagne beurre blanc sauce and seasonal vegetables."
+                android:textColor="@color/text_light"
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp"
+                android:gravity="center"
+                android:maxLines="4"
+                android:ellipsize="end" />
+
+            <!-- Dish Features -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="16dp">
+
+                <!-- Chef's Special Badge -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:layout_margin="8dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_chef_hat"
+                        app:tint="@color/luxe_gold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Chef's Special"
+                        android:textColor="@color/text_gray"
+                        android:textSize="10sp"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+
+                <!-- Preparation Time -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:layout_margin="8dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_time"
+                        app:tint="@color/luxe_gold" />
+
+                    <TextView
+                        android:id="@+id/tvPrepTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="25 min"
+                        android:textColor="@color/text_gray"
+                        android:textSize="10sp"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+
+                <!-- Calories -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:layout_margin="8dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_calories"
+                        app:tint="@color/luxe_gold" />
+
+                    <TextView
+                        android:id="@+id/tvCalories"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="320 cal"
+                        android:textColor="@color/text_gray"
+                        android:textSize="10sp"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+
+                <!-- Spice Level -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:layout_margin="8dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_spicy"
+                        app:tint="@color/luxe_gold" />
+
+                    <TextView
+                        android:id="@+id/tvSpiceLevel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mild"
+                        android:textColor="@color/text_gray"
+                        android:textSize="10sp"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Action Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp">
+
+                <!-- Add to Order Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAddToOrder"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="ADD TO ORDER"
+                    android:textSize="12sp"
+                    android:textColor="@color/luxe_charcoal"
+                    android:paddingVertical="12dp"
+                    android:backgroundTint="@color/luxe_gold"
+                    app:cornerRadius="4dp"
+                    android:letterSpacing="0.1"
+                    android:textStyle="bold" />
+
+                <!-- Add to Favorites Button -->
+                <ImageButton
+                    android:id="@+id/btnFavorite"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:layout_marginStart="8dp"
-                    android:textSize="16sp"
-                    android:textColor="@color/dark_gray"
-                    tools:text="Available"/>
+                    android:src="@drawable/ic_favorite_border"
+                    android:backgroundTint="@android:color/transparent"
+                    app:tint="@color/luxe_gold"
+                    android:contentDescription="Add to favorites" />
             </LinearLayout>
         </LinearLayout>
-
-        <!-- Order Form -->
-        <EditText
-            android:id="@+id/etTableNumber"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Table Number"
-            android:inputType="number"
-            android:layout_marginTop="16dp"/>
-
-        <EditText
-            android:id="@+id/etCustomerName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Customer Name"
-            android:inputType="textPersonName"
-            android:layout_marginTop="8dp"/>
-
-        <EditText
-            android:id="@+id/etCustomerPhone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Customer Phone"
-            android:inputType="phone"
-            android:layout_marginTop="8dp"/>
-
-        <!-- Bottom Shadow Overlay -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="8dp"
-            android:background="@drawable/shadow_gradient"
-            android:layout_gravity="bottom"/>
-
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -3,12 +3,12 @@ package com.finedine.rms;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,7 +17,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InventoryActivity extends AppCompatActivity {
+public class InventoryActivity extends BaseActivity {
+    private static final String TAG = "InventoryActivity";
     private RecyclerView inventoryRecyclerView;
     private InventoryAdapter inventoryAdapter;
     private final List<Inventory> inventoryItems = new ArrayList<>();
@@ -27,29 +28,64 @@ public class InventoryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inventory);
 
-        inventoryRecyclerView = findViewById(R.id.inventoryRecyclerView);
-        inventoryRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        inventoryAdapter = new InventoryAdapter(inventoryItems, this::onItemSelected);
-        inventoryRecyclerView.setAdapter(inventoryAdapter);
+        try {
+            // Setup navigation panel
+            setupNavigationPanel("Inventory Management");
 
-        // Initialize FloatingActionButton
-        FloatingActionButton fabAddItem = findViewById(R.id.fabAddItem);
-        fabAddItem.setOnClickListener(v -> showAddItemDialog());
+            // Initialize RecyclerView
+            inventoryRecyclerView = findViewById(R.id.inventoryRecyclerView);
+            inventoryRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+            inventoryAdapter = new InventoryAdapter(inventoryItems, this::onItemSelected);
+            inventoryRecyclerView.setAdapter(inventoryAdapter);
 
-        loadInventory();
+            // Initialize FloatingActionButton
+            FloatingActionButton fabAddItem = findViewById(R.id.fabAddItem);
+            fabAddItem.setOnClickListener(v -> showAddItemDialog());
+
+            // Load inventory data
+            loadInventory();
+        } catch (Exception e) {
+            Log.e(TAG, "Error initializing InventoryActivity", e);
+            Toast.makeText(this, "Error initializing inventory screen", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private void loadInventory() {
-        new Thread(() -> {
-            List<Inventory> items = AppDatabase.getDatabase(this).inventoryDao().getAll();
-            runOnUiThread(() -> {
-                inventoryItems.clear();
-                inventoryItems.addAll(items);
-                inventoryAdapter.notifyDataSetChanged();
-                checkLowStockItems();
-            });
-        }).start();
+        try {
+            AppDatabase db = AppDatabase.getDatabase(this);
+
+            new Thread(() -> {
+                try {
+                    // Get inventory items safely
+                    List<Inventory> items = new ArrayList<>();
+                    try {
+                        items = db.inventoryDao().getAll();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Database error when loading inventory", e);
+                    }
+
+                    // Final copy for UI thread
+                    final List<Inventory> finalItems = items;
+
+                    runOnUiThread(() -> {
+                        try {
+                            inventoryItems.clear();
+                            inventoryItems.addAll(finalItems);
+                            inventoryAdapter.notifyDataSetChanged();
+                            checkLowStockItems();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error updating inventory UI", e);
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.e(TAG, "Error in inventory loading thread", e);
+                }
+            }).start();
+        } catch (Exception e) {
+            Log.e(TAG, "Error starting inventory loading", e);
+            Toast.makeText(this, "Error loading inventory data", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void checkLowStockItems() {

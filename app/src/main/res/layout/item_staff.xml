@@ -5,14 +5,24 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="@color/luxe_dark"
+    app:strokeColor="@color/luxe_gold"
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="24dp">
+
+        <!-- Gold trim at top -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="2dp"
+            android:background="@color/luxe_gold"
+            android:layout_marginBottom="16dp" />
 
         <!-- Staff Information Section -->
         <LinearLayout
@@ -26,9 +36,10 @@
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@color/dark_gray"
+                android:textColor="@color/text_white"
                 android:drawableStart="@drawable/ic_person"
                 android:drawablePadding="8dp"
+                android:drawableTint="@color/luxe_gold"
                 android:ellipsize="end"
                 android:maxLines="1"
                 tools:text="Marco Pierre"/>
@@ -39,9 +50,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textSize="14sp"
-                android:textColor="@color/medium_gray"
+                android:textColor="@color/text_white"
                 android:drawableStart="@drawable/ic_role"
                 android:drawablePadding="8dp"
+                android:drawableTint="@color/luxe_gold"
                 tools:text="Sous Chef"/>
 
             <TextView
@@ -50,19 +62,27 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textSize="14sp"
-                android:textColor="@color/medium_gray"
+                android:textColor="@color/text_white"
                 android:drawableStart="@drawable/ic_email"
                 android:drawablePadding="8dp"
+                android:drawableTint="@color/luxe_gold"
                 android:autoLink="email"
                 tools:text="marco@restaurant.com"/>
         </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="16dp"
+            android:background="@color/luxe_gold"
+            android:alpha="0.3" />
 
         <!-- Action Buttons Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp">
+            android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnEdit"
@@ -71,9 +91,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Edit"
+                android:textColor="@color/luxe_gold"
                 android:icon="@drawable/ic_edit"
-                android:iconTint="@color/primary_green"
-                app:strokeColor="@color/primary_green"
+                android:iconTint="@color/luxe_gold"
+                app:strokeColor="@color/luxe_gold"
                 app:cornerRadius="8dp"
                 android:layout_marginEnd="8dp"/>
 
@@ -84,50 +105,21 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Delete"
+                android:textColor="@color/luxe_gold"
                 android:icon="@drawable/ic_delete"
-                android:iconTint="@color/red_600"
-                app:strokeColor="@color/red_600"
+                android:iconTint="@color/luxe_gold"
+                app:strokeColor="@color/luxe_gold"
                 app:cornerRadius="8dp"/>
-
-            <TextView
-                android:id="@+id/text_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                tools:text="John Doe" />
-
-            <TextView
-                android:id="@+id/text_email"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                tools:text="john.doe@example.com" />
-
-            <TextView
-                android:id="@+id/text_phone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                tools:text="+1 234 567 8901" />
-
-            <TextView
-                android:id="@+id/text_role"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                tools:text="Manager" />
-
         </LinearLayout>
 
-
-
-        <!-- Bottom Shadow Overlay -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="8dp"
-            android:background="@drawable/shadow_gradient"
-            android:layout_gravity="bottom"/>
+        <!-- Gold corner accent -->
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/corner_gold"
+            android:alpha="0.7" />
 
     </LinearLayout>
 

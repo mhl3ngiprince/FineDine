@@ -33,7 +33,7 @@ import java.util.Objects;
 import com.finedine.rms.utils.RoleManager;
 import com.finedine.rms.utils.SharedPrefsManager;
 
-public class KitchenActivity extends AppCompatActivity {
+public class KitchenActivity extends BaseActivity {
     private RecyclerView rvOrders;
     private OrderAdapter orderAdapter;
     private final List<Order> orders = new ArrayList<>();
@@ -88,6 +88,9 @@ public class KitchenActivity extends AppCompatActivity {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         ordersRef = database.getReference("orders");
         orderItemsRef = database.getReference("orderItems");
+
+        // Setup navigation panel
+        setupNavigationPanel("Kitchen Orders");
 
         initializeViews();
         setupRecyclerView();

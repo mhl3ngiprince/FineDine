@@ -5,46 +5,68 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/light_green"
-    android:padding="16dp">
+    android:background="@drawable/bg_luxury_pattern">
 
-    <!-- Toolbar with restaurant branding -->
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
-        android:layout_width="379dp"
-        android:layout_height="69dp"
-        android:background="@color/primary_green"
-        android:elevation="4dp"
-        app:navigationIcon="@drawable/ic_menu"
-        app:navigationIconTint="@color/black"
-        app:title="Inventory Management"
-        app:titleTextColor="@color/white" />
-
-    <!-- Inventory List Container -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/inventoryRecyclerView"
+    <!-- Include Navigation Panel -->
+    <include
+        android:id="@+id/navigation_panel"
+        layout="@layout/navigation_panel"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        android:layout_weight="1"
-        android:background="@drawable/rounded_container"
-        android:clipToPadding="false"
-        android:paddingBottom="80dp"
-        android:scrollbars="vertical"
-        tools:listitem="@layout/item_inventory" />
+        android:layout_height="wrap_content" />
 
-    <!-- Floating Action Button -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddItem"
-        android:layout_width="128dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="24dp"
-        android:contentDescription="add_item"
-        android:src="@drawable/ic_add"
-        app:backgroundTint="@color/primary_green"
-        app:elevation="6dp"
-        app:pressedTranslationZ="12dp"
-        app:tint="@color/white" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Section Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="INVENTORY MANAGEMENT"
+            android:textColor="@color/luxe_gold"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:fontFamily="serif"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Gold divider -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="2dp"
+            android:background="@color/luxe_gold"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Inventory List Container -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/inventoryRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"
+            android:background="@color/transparent_black"
+            android:clipToPadding="false"
+            android:paddingBottom="80dp"
+            android:scrollbars="vertical"
+            tools:listitem="@layout/item_inventory" />
+
+        <!-- Floating Action Button -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabAddItem"
+            android:layout_width="128dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:layout_margin="24dp"
+            android:contentDescription="add_item"
+            android:src="@drawable/ic_add"
+            app:backgroundTint="@color/luxe_gold"
+            android:tint="@color/luxe_charcoal"
+            app:borderWidth="0dp"
+            app:elevation="6dp"
+            app:pressedTranslationZ="12dp" />
+
+    </LinearLayout>
 
 </LinearLayout>

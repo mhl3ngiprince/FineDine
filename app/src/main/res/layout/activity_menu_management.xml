@@ -5,60 +5,96 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/light_green"
-    android:padding="24dp">
+    android:background="@drawable/bg_luxury_pattern">
 
-    <!-- Toolbar Container -->
+    <!-- Include Navigation Panel -->
+    <include
+        android:id="@+id/navigation_panel"
+        layout="@layout/navigation_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="24dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="24dp">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="0dp"
+        <!-- Section Title -->
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            app:boxStrokeColor="@color/primary_green"
-            app:hintTextColor="@color/primary_green"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            android:text="MENU MANAGEMENT"
+            android:textColor="@color/luxe_gold"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:fontFamily="serif"
+            android:layout_marginBottom="16dp" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etSearchMenu"
-                android:layout_width="match_parent"
+        <!-- Gold divider -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="2dp"
+            android:background="@color/luxe_gold"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Toolbar Container -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="24dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="search_menu_items"
-                android:drawableStart="@drawable/ic_search"
-                android:drawablePadding="8dp"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_weight="1"
+                app:boxStrokeColor="@color/luxe_gold"
+                app:hintTextColor="@color/luxe_gold"
+                app:boxBackgroundColor="@color/transparent_black"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabAddItem"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:src="@drawable/ic_add"
-            app:backgroundTint="@color/primary_green"
-            app:tint="@color/white"/>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etSearchMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="search_menu_items"
+                    android:textColor="@color/text_white"
+                    android:drawableStart="@drawable/ic_search"
+                    android:drawableTint="@color/luxe_gold"
+                    android:drawablePadding="8dp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabAddItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:src="@drawable/ic_add"
+                app:backgroundTint="@color/luxe_gold"
+                android:tint="@color/luxe_charcoal"
+                app:borderWidth="0dp" />
+        </LinearLayout>
+
+        <!-- Menu Items List -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvMenuItems"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/transparent_black"
+            android:clipToPadding="false"
+            android:padding="8dp"
+            android:scrollbars="vertical"
+            tools:listitem="@layout/item_menu" />
+
+        <!-- Bottom Shadow Overlay -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:background="@drawable/shadow_gradient"
+            android:layout_gravity="bottom" />
+
     </LinearLayout>
-
-    <!-- Menu Items List -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvMenuItems"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="@drawable/rounded_container"
-        android:clipToPadding="false"
-        android:padding="8dp"
-        android:scrollbars="vertical"
-        tools:listitem="@layout/item_menu"/>
-
-    <!-- Bottom Shadow Overlay -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:background="@drawable/shadow_gradient"
-        android:layout_gravity="bottom"/>
-
 </LinearLayout>

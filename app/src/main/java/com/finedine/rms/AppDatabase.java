@@ -1,21 +1,21 @@
 package com.finedine.rms;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
-
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
 @Database(entities = {User.class, Reservation.class, MenuItem.class, Order.class, OrderItem.class, Inventory.class}, version = 2,
-
         exportSchema = true )
-
 public abstract class AppDatabase extends RoomDatabase {
+
+    private static final String TAG = "AppDatabase";
 
     public abstract UserDao userDao();
     public abstract ReservationDao reservationDao();
@@ -41,18 +41,49 @@ public abstract class AppDatabase extends RoomDatabase {
         }
         return INSTANCE;
     }
+
+    // Get Firebase database reference safely
+    private FirebaseDatabase getFirebaseInstance() {
+        try {
+            return FirebaseDatabase.getInstance();
+        } catch (Exception e) {
+            Log.e(TAG, "Firebase is not initialized properly", e);
+            return null;
+        }
+    }
+
     // Get active orders by status
-    DatabaseReference ordersRef = FirebaseDatabase.getInstance().getReference("orders");
-    Query activeOrdersQuery = ordersRef.orderByChild("status").equalTo("preparing");
+    public Query getActiveOrdersQuery() {
+        FirebaseDatabase database = getFirebaseInstance();
+        if (database == null) {
+            Log.e(TAG, "Cannot get active orders: Firebase not initialized");
+            return null;
+        }
+
+        DatabaseReference ordersRef = database.getReference("orders");
+        return ordersRef.orderByChild("status").equalTo("preparing");
+    }
 
     // Get unread notifications
-    DatabaseReference notificationsRef = FirebaseDatabase.getInstance().getReference("notifications");
-    Query unreadNotificationsQuery = notificationsRef.orderByChild("read").equalTo(false);
+    public Query getUnreadNotificationsQuery() {
+        FirebaseDatabase database = getFirebaseInstance();
+        if (database == null) {
+            Log.e(TAG, "Cannot get notifications: Firebase not initialized");
+            return null;
+        }
+
+        DatabaseReference notificationsRef = database.getReference("notifications");
+        return notificationsRef.orderByChild("read").equalTo(false);
+    }
 
     // Get order with items
-    DatabaseReference orderRef = FirebaseDatabase.getInstance().getReference("orders/orderId2");
+    public DatabaseReference getOrderRef(String orderId) {
+        FirebaseDatabase database = getFirebaseInstance();
+        if (database == null) {
+            Log.e(TAG, "Cannot get order reference: Firebase not initialized");
+            return null;
+        }
 
-    public DatabaseReference getOrderRef() {
-        return orderRef;
+        return database.getReference("orders").child(orderId);
     }
 }

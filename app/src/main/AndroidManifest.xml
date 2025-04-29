@@ -19,80 +19,111 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/logoj"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat">
+        android:theme="@style/Theme.MaterialComponents"
+        android:largeHeap="true"
+        android:hardwareAccelerated="true">
 
-        <!-- Login Activity as launcher -->
+        <!-- Splash Activity -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".SplashActivityNew"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar">
+            android:theme="@style/Theme.MaterialComponents.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <!-- Login Activity -->
+        <activity
+            android:name=".LoginActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MaterialComponents.NoActionBar"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Register Activity -->
         <activity
             android:name=".RegisterActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar" />
+            android:theme="@style/Theme.MaterialComponents.NoActionBar"
+            android:windowSoftInputMode="adjustResize"
+            android:launchMode="singleTask" />
 
-        <!-- Order Details Activity -->
+        <!-- Forgot Password Activity -->
+        <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialComponents.NoActionBar"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Order Activity -->
         <activity
             android:name=".OrderActivity"
             android:exported="true"
-            android:parentActivityName=".LoginActivity" />
+            android:parentActivityName=".LoginActivity"
+            android:configChanges="orientation|screenSize" />
 
         <activity
             android:name=".KitchenActivity"
             android:exported="true"
-            android:parentActivityName=".LoginActivity" />
+            android:parentActivityName=".LoginActivity"
+            android:configChanges="orientation|screenSize" />
 
         <activity
             android:name=".ManagerDashboardActivity"
             android:exported="true"
-            android:parentActivityName=".LoginActivity" />
+            android:parentActivityName=".LoginActivity"
+            android:configChanges="orientation|screenSize" />
 
         <activity
             android:name=".MenuManagementActivity"
             android:exported="true"
-            android:parentActivityName=".LoginActivity" />
+            android:parentActivityName=".ManagerDashboardActivity"
+            android:configChanges="orientation|screenSize" />
 
         <activity
             android:name=".ReservationActivity"
             android:exported="true"
-            android:parentActivityName=".LoginActivity" />
+            android:parentActivityName=".LoginActivity"
+            android:configChanges="orientation|screenSize" />
 
         <activity
             android:name=".CreateReservationActivity"
             android:exported="true"
-            android:parentActivityName=".ReservationActivity" />
+            android:parentActivityName=".ReservationActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize" />
 
         <activity
             android:name=".AdminActivity"
             android:exported="true"
-            android:parentActivityName=".LoginActivity" />
+            android:parentActivityName=".LoginActivity"
+            android:configChanges="orientation|screenSize" />
 
         <activity
             android:name=".StaffActivity"
             android:exported="true"
-            android:parentActivityName=".LoginActivity" />
+            android:parentActivityName=".LoginActivity"
+            android:configChanges="orientation|screenSize" />
 
         <activity
             android:name=".StaffManagementActivity"
             android:exported="true"
-            android:parentActivityName=".LoginActivity" />
+            android:parentActivityName=".ManagerDashboardActivity"
+            android:configChanges="orientation|screenSize" />
 
         <activity
             android:name=".EditStaffActivity"
             android:exported="true"
-            android:parentActivityName=".LoginActivity" />
+            android:parentActivityName=".StaffManagementActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize" />
 
         <activity
             android:name=".InventoryActivity"
             android:exported="true"
-            android:parentActivityName=".LoginActivity" />
+            android:parentActivityName=".ManagerDashboardActivity"
+            android:configChanges="orientation|screenSize" />
         
 
         <!-- Firebase Messaging Service -->
