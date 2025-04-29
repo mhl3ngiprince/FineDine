@@ -166,7 +166,21 @@ public class BaseActivity extends AppCompatActivity {
 
             Log.d(TAG, "Navigating to " + destinationClass.getSimpleName());
             Intent intent = new Intent(this, destinationClass);
+
+            // Pass along user role
+            if (prefsManager != null) {
+                String role = prefsManager.getUserRole();
+                if (role != null && !role.isEmpty()) {
+                    intent.putExtra("user_role", role);
+                }
+            }
+
+            // Start the activity
             startActivity(intent);
+
+            // Show toast to indicate navigation
+            Toast.makeText(this, "Opening " + destinationClass.getSimpleName().replace("Activity", ""),
+                    Toast.LENGTH_SHORT).show();
 
         } catch (Exception e) {
             Log.e(TAG, "Error navigating to " + destinationClass.getSimpleName(), e);

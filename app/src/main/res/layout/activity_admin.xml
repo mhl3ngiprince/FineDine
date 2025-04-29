@@ -182,109 +182,48 @@
                                 android:textSize="12sp"
                                 android:textColor="@color/text_gray" />
                         </LinearLayout>
-
-                        <!-- Menu Items Count -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="MENU ITEMS"
-                                android:textSize="12sp"
-                                android:textColor="@color/luxe_gold"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvMenuItemCount"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="38"
-                                android:textSize="28sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/text_white" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Signature Dishes"
-                                android:textSize="12sp"
-                                android:textColor="@color/text_gray" />
-                        </LinearLayout>
-
-                        <!-- Inventory Count -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="INVENTORY"
-                                android:textSize="12sp"
-                                android:textColor="@color/luxe_gold"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvInventoryCount"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="94"
-                                android:textSize="28sp"
-                                android:textStyle="bold"
-                                android:textColor="@color/text_white" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Stocked Items"
-                                android:textSize="12sp"
-                                android:textColor="@color/text_gray" />
-                        </LinearLayout>
                     </GridLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- Dashboard Options -->
+                <!-- Quick Actions Section -->
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:text="MANAGEMENT CONTROLS"
+                    android:text="QUICK ACTIONS"
                     android:textSize="14sp"
                     android:textColor="@color/text_gold"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.1" />
+                    android:letterSpacing="0.1"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginBottom="16dp" />
 
+                <!-- Action Buttons Grid -->
                 <GridLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
                     android:columnCount="2"
-                    android:useDefaultMargins="true">
+                    android:rowCount="2"
+                    android:alignmentMode="alignMargins"
+                    android:columnOrderPreserved="false">
 
-                    <!-- Staff Management -->
+                    <!-- Staff Management Button -->
                     <androidx.cardview.widget.CardView
                         android:id="@+id/cardStaff"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="120dp"
                         android:layout_columnWeight="1"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="4dp"
+                        app:cardBackgroundColor="@color/luxe_dark"
                         android:clickable="true"
                         android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        app:cardCornerRadius="8dp"
-                        app:cardElevation="4dp"
-                        app:cardBackgroundColor="@color/luxe_dark">
+                        android:foreground="?attr/selectableItemBackground">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:gravity="center"
                             android:orientation="vertical"
+                            android:gravity="center"
                             android:padding="16dp">
 
                             <!-- Gold trim at top -->
@@ -295,41 +234,41 @@
                                 android:layout_marginBottom="16dp" />
 
                             <ImageView
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
                                 android:src="@drawable/ic_people"
                                 app:tint="@color/luxe_gold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="12dp"
+                                android:layout_marginTop="8dp"
                                 android:text="Staff"
                                 android:textSize="16sp"
                                 android:textColor="@color/text_white"
-                                android:textAlignment="center"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
-                    <!-- Menu Management -->
+                    <!-- Menu Management Button -->
                     <androidx.cardview.widget.CardView
                         android:id="@+id/cardMenu"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="120dp"
                         android:layout_columnWeight="1"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="4dp"
+                        app:cardBackgroundColor="@color/luxe_dark"
                         android:clickable="true"
                         android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        app:cardCornerRadius="8dp"
-                        app:cardElevation="4dp"
-                        app:cardBackgroundColor="@color/luxe_dark">
+                        android:foreground="?attr/selectableItemBackground">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:gravity="center"
                             android:orientation="vertical"
+                            android:gravity="center"
                             android:padding="16dp">
 
                             <!-- Gold trim at top -->
@@ -340,41 +279,42 @@
                                 android:layout_marginBottom="16dp" />
 
                             <ImageView
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
                                 android:src="@drawable/ic_menu_item"
                                 app:tint="@color/luxe_gold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="12dp"
+                                android:layout_marginTop="8dp"
                                 android:text="Menu"
                                 android:textSize="16sp"
                                 android:textColor="@color/text_white"
-                                android:textAlignment="center"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
-                    <!-- Order Management -->
+                    <!-- Back Button -->
                     <androidx.cardview.widget.CardView
-                        android:id="@+id/cardOrders"
+                        android:id="@+id/backButton"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="120dp"
+                        android:layout_columnSpan="2"
                         android:layout_columnWeight="1"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="4dp"
+                        app:cardBackgroundColor="@color/luxe_burgundy"
                         android:clickable="true"
                         android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        app:cardCornerRadius="8dp"
-                        app:cardElevation="4dp"
-                        app:cardBackgroundColor="@color/luxe_dark">
+                        android:foreground="?attr/selectableItemBackground">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:gravity="center"
                             android:orientation="vertical"
+                            android:gravity="center"
                             android:padding="16dp">
 
                             <!-- Gold trim at top -->
@@ -384,155 +324,12 @@
                                 android:background="@color/luxe_gold"
                                 android:layout_marginBottom="16dp" />
 
-                            <ImageView
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
-                                android:src="@drawable/ic_food"
-                                app:tint="@color/luxe_gold" />
-
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="12dp"
-                                android:text="Orders"
-                                android:textSize="16sp"
-                                android:textColor="@color/text_white"
-                                android:textAlignment="center"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-
-                    <!-- Reservation Management -->
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardReservation"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        app:cardCornerRadius="8dp"
-                        app:cardElevation="4dp"
-                        app:cardBackgroundColor="@color/luxe_dark">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="16dp">
-
-                            <!-- Gold trim at top -->
-                            <View
-                                android:layout_width="40dp"
-                                android:layout_height="2dp"
-                                android:background="@color/luxe_gold"
-                                android:layout_marginBottom="16dp" />
-
-                            <ImageView
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
-                                android:src="@drawable/ic_calendar"
-                                app:tint="@color/luxe_gold" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="12dp"
-                                android:text="Reservations"
-                                android:textSize="16sp"
-                                android:textColor="@color/text_white"
-                                android:textAlignment="center"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-
-                    <!-- Inventory Management -->
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardInventory"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        app:cardCornerRadius="8dp"
-                        app:cardElevation="4dp"
-                        app:cardBackgroundColor="@color/luxe_dark">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="16dp">
-
-                            <!-- Gold trim at top -->
-                            <View
-                                android:layout_width="40dp"
-                                android:layout_height="2dp"
-                                android:background="@color/luxe_gold"
-                                android:layout_marginBottom="16dp" />
-
-                            <ImageView
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
-                                android:src="@drawable/ic_inventory"
-                                app:tint="@color/luxe_gold" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="12dp"
-                                android:text="Inventory"
-                                android:textSize="16sp"
-                                android:textColor="@color/text_white"
-                                android:textAlignment="center"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-
-                    <!-- Reports -->
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/cardReports"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        app:cardCornerRadius="8dp"
-                        app:cardElevation="4dp"
-                        app:cardBackgroundColor="@color/luxe_dark">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="16dp">
-
-                            <!-- Gold trim at top -->
-                            <View
-                                android:layout_width="40dp"
-                                android:layout_height="2dp"
-                                android:background="@color/luxe_gold"
-                                android:layout_marginBottom="16dp" />
-
-                            <ImageView
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
-                                android:src="@drawable/ic_analytics"
-                                app:tint="@color/luxe_gold" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="12dp"
-                                android:text="Reports"
-                                android:textSize="16sp"
-                                android:textColor="@color/text_white"
-                                android:textAlignment="center"
+                                android:text="Back to Login"
+                                android:textSize="18sp"
+                                android:textColor="@color/luxe_gold"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>

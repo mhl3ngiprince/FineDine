@@ -1,5 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base application theme -->
+    <style name="Theme.MaterialComponents" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <item name="colorPrimary">@color/luxe_burgundy</item>
+        <item name="colorPrimaryVariant">@color/luxe_burgundy_dark</item>
+        <item name="colorOnPrimary">@color/text_white</item>
+        <item name="colorSecondary">@color/luxe_gold</item>
+        <item name="colorSecondaryVariant">@color/luxe_gold_dark</item>
+        <item name="colorOnSecondary">@color/text_dark</item>
+        <item name="android:statusBarColor">@color/luxe_burgundy_dark</item>
+        <item name="android:windowBackground">@color/luxe_light_bg</item>
+    </style>
 
-    <style name="Theme.FineDineRMS" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- No action bar theme used by splash and login screens -->
+    <style name="Theme.MaterialComponents.NoActionBar" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/luxe_burgundy</item>
+        <item name="colorPrimaryVariant">@color/luxe_burgundy_dark</item>
+        <item name="colorOnPrimary">@color/text_white</item>
+        <item name="colorSecondary">@color/luxe_gold</item>
+        <item name="colorSecondaryVariant">@color/luxe_gold_dark</item>
+        <item name="colorOnSecondary">@color/text_dark</item>
+        <item name="android:statusBarColor">@color/luxe_burgundy_dark</item>
+        <item name="android:windowBackground">@color/luxe_charcoal</item>
+    </style>
+
+    <!-- Legacy theme for compatibility -->
+    <style name="Theme.FineDineRMS" parent="Theme.MaterialComponents.NoActionBar" />
 </resources>

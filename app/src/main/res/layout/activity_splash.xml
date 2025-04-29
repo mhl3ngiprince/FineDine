@@ -29,6 +29,7 @@
         android:translationX="50dp" />
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/logoCardView"
         android:layout_width="220dp"
         android:layout_height="220dp"
         android:elevation="8dp"
@@ -41,10 +42,12 @@
         app:layout_constraintVertical_bias="0.4">
 
         <ImageView
+            android:id="@+id/logoImageView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="24dp"
-            android:src="@drawable/logoj" />
+            android:src="@drawable/logoj"
+            android:contentDescription="@string/app_name" />
 
         <!-- Gold corner accent -->
         <View
@@ -83,6 +86,7 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
+        android:id="@+id/taglineTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="EXCEPTIONAL DINING EXPERIENCE"

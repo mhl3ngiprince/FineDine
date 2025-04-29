@@ -179,7 +179,6 @@ public class StaffActivity extends AppCompatActivity implements NavigationView.O
             StaffMember staff = staffList.get(position);
             holder.nameTextView.setText(staff.getName());
             holder.emailTextView.setText(staff.getEmail());
-            holder.phoneTextView.setText(staff.getPhone());
             holder.roleTextView.setText(staff.getRole());
             
             holder.itemView.setOnClickListener(v -> {
@@ -196,13 +195,12 @@ public class StaffActivity extends AppCompatActivity implements NavigationView.O
         }
         
         static class StaffViewHolder extends RecyclerView.ViewHolder {
-            TextView nameTextView, emailTextView, phoneTextView, roleTextView;
+            TextView nameTextView, emailTextView, roleTextView;
             
             StaffViewHolder(View itemView) {
                 super(itemView);
                 nameTextView = itemView.findViewById(R.id.tvStaffName);
                 emailTextView = itemView.findViewById(R.id.tvStaffEmail);
-                phoneTextView = itemView.findViewById(R.id.text_phone);
                 roleTextView = itemView.findViewById(R.id.tvStaffRole);
             }
         }

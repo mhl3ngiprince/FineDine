@@ -38,8 +38,17 @@ public class SharedPrefsManager {
                     editor.putString(KEY_USER_ROLE, "customer");
                 }
 
-                editor.apply();
-                Log.d(TAG, "User session saved successfully");
+                // Always set user as logged in when saving a session
+                editor.putBoolean(KEY_IS_LOGGED_IN, true);
+
+                // Use commit() instead of apply() to ensure immediate write
+                boolean success = editor.commit();
+
+                if (success) {
+                    Log.d(TAG, "User session saved successfully with commit()");
+                } else {
+                    Log.w(TAG, "Commit returned false, session may not be saved properly");
+                }
             } else {
                 Log.w(TAG, "Not saving session due to old Android version");
             }
@@ -49,12 +58,19 @@ public class SharedPrefsManager {
 
         // Double check that role was saved correctly
         String savedRole = getUserRole();
-        Log.d(TAG, "User session saved. Role confirmed: " + savedRole);
+        boolean isLoggedIn = isUserLoggedIn();
+        Log.d(TAG, "User session saved. Role: " + savedRole + ", IsLoggedIn: " + isLoggedIn);
 
         // If role wasn't saved correctly, try a direct approach
         if (role != null && !role.equals(savedRole)) {
             Log.w(TAG, "Role mismatch, forcing direct role setting");
             setUserRole(role);
+        }
+
+        // If login status wasn't saved correctly, try a direct approach
+        if (!isLoggedIn) {
+            Log.w(TAG, "Login status mismatch, forcing direct login setting");
+            setUserLoggedIn(true);
         }
     }
 
@@ -120,9 +136,19 @@ public class SharedPrefsManager {
                     .putBoolean(KEY_IS_LOGGED_IN, isLoggedIn)
                     .apply();
         }
+
+        // Verify the value was saved correctly
+        boolean storedValue = isUserLoggedIn();
+        if (storedValue != isLoggedIn) {
+            Log.w(TAG, "Login status mismatch! Expected: " + isLoggedIn + ", Got: " + storedValue);
+            // Try using commit instead of apply as a fallback
+            prefs.edit().putBoolean(KEY_IS_LOGGED_IN, isLoggedIn).commit();
+        }
     }
 
     public boolean isUserLoggedIn() {
-        return prefs.getBoolean(KEY_IS_LOGGED_IN, false);
+        boolean loggedIn = prefs.getBoolean(KEY_IS_LOGGED_IN, false);
+        Log.d(TAG, "Checking if user is logged in: " + loggedIn);
+        return loggedIn;
     }
 }
