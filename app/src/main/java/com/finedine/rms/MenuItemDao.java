@@ -29,4 +29,7 @@ public interface MenuItemDao {
 
     @Query("SELECT * FROM menu_items WHERE name LIKE :query AND availability = 1")
     List<MenuItem> searchAvailable(String query);
+
+    @Query("SELECT * FROM menu_items WHERE name = :name LIMIT 1")
+    MenuItem getByName(String name);
 }

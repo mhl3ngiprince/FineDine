@@ -85,6 +85,11 @@
             android:exported="true"
             android:theme="@style/Theme.MaterialComponents" />
 
+        <activity
+            android:name=".MenuItemDetailActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MaterialComponents" />
+
         <!-- Firebase Messaging Service -->
         <service
             android:name=".MyFirebaseMessagingService"

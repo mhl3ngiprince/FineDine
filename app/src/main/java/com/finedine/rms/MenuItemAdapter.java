@@ -66,7 +66,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
 
         holder.tvName.setText(item.name);
         holder.tvDescription.setText(item.description);
-        holder.tvPrice.setText(String.format("$%.2f", item.price));
+        holder.tvPrice.setText(String.format("R%.2f", item.price));
         holder.tvAvailability.setText(item.availability ? "Available" : "Not Available");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             holder.tvAvailability.setTextColor(item.availability ?

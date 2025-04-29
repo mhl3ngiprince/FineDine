@@ -2,6 +2,7 @@ package com.finedine.rms;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -96,10 +97,22 @@ public class OrderActivity extends BaseActivity {
                         items = new ArrayList<>();
                     }
 
-                    // If no items found, add sample menu items to database
+                    // If no items found, add all premium menu items to database
                     if (items.isEmpty()) {
                         try {
-                            // Skip this part since the dao doesn't support insertAll
+                            // Load all premium menu items
+                            MenuItem[] premiumItems = MenuItem.premiumMenu();
+                            items = new ArrayList<>();
+                            for (MenuItem premiumItem : premiumItems) {
+                                // Insert each item to database
+                                db.menuItemDao().insert(premiumItem);
+                                // Add to our list
+                                items.add(premiumItem);
+                            }
+                            Log.i(TAG, "Added " + premiumItems.length + " premium menu items to database");
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error adding premium menu items", e);
+                            // Fallback to sample menu item if premium menu fails
                             items = new ArrayList<>();
                             MenuItem item = new MenuItem();
                             item.name = "Sample Item";
@@ -107,8 +120,6 @@ public class OrderActivity extends BaseActivity {
                             item.description = "Sample description";
                             item.category = "Main Course";
                             items.add(item);
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error adding sample menu items", e);
                         }
                     }
 
@@ -136,6 +147,21 @@ public class OrderActivity extends BaseActivity {
     }
 
     private void onItemSelected(MenuItem item) {
+        try {
+            // Redirect to MenuItemDetailActivity
+            Intent intent = new Intent(OrderActivity.this, MenuItemDetailActivity.class);
+            intent.putExtra("item_name", item.name);
+            intent.putExtra("item_id", item.item_id);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "Error showing menu item details", e);
+
+            // Fallback to the quantity dialog if intent fails
+            showQuantityDialog(item);
+        }
+    }
+
+    private void showQuantityDialog(MenuItem item) {
         try {
             // Show quantity dialog
             AlertDialog.Builder builder = new AlertDialog.Builder(this);

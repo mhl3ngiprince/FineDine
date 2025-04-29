@@ -28,6 +28,7 @@ public class OrderItem {
     private int quantity;
     private String orderId;
     private String notes;
+    private double price;
 
     public OrderItem() {
         // Default constructor required for Room
@@ -56,5 +57,13 @@ public class OrderItem {
 
     public void setNotes(String notes) {
         this.notes = notes != null ? notes : "";
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 }

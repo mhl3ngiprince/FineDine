@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bg_luxury_pattern"
+    tools:context=".MenuItemDetailActivity">
+
+    <!-- Include Navigation Panel -->
+    <include
+        android:id="@+id/navigation_panel"
+        layout="@layout/navigation_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Image Container -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="8dp"
+                android:layout_marginBottom="16dp">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <!-- Gold trim at top -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="3dp"
+                        android:background="@color/luxe_gold" />
+
+                    <!-- Main Image -->
+                    <ImageView
+                        android:id="@+id/ivMenuItemDetailImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:contentDescription="Menu Item Image"
+                        tools:src="@drawable/placeholder_food" />
+
+                    <!-- Gradient Overlay -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/gradient_menu_image" />
+
+                    <!-- Gold Corner Accent -->
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="end"
+                        android:src="@drawable/corner_gold"
+                        android:alpha="0.7" />
+
+                    <!-- Price Badge -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_gravity="bottom|end"
+                        android:layout_margin="16dp"
+                        android:background="@drawable/bg_price_tag"
+                        android:paddingVertical="6dp"
+                        android:paddingHorizontal="12dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/tvMenuItemDetailPrice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="R29.99"
+                            android:textColor="@color/text_white"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.05" />
+                    </LinearLayout>
+                </FrameLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Item Details Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp"
+                app:cardBackgroundColor="@color/luxe_charcoal"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <!-- Item Name and Category -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/tvMenuItemDetailCategory"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="SIGNATURE DISH"
+                            android:textColor="@color/luxe_gold"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.15"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:id="@+id/tvMenuItemDetailName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Wagyu Beef Tenderloin"
+                            android:textColor="@color/text_white"
+                            android:textSize="26sp"
+                            android:textStyle="bold"
+                            android:fontFamily="serif"
+                            android:textAlignment="center" />
+
+                        <!-- Elegant Divider -->
+                        <View
+                            android:layout_width="60dp"
+                            android:layout_height="2dp"
+                            android:background="@color/luxe_gold"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="16dp" />
+                    </LinearLayout>
+
+                    <!-- Item Description -->
+                    <TextView
+                        android:id="@+id/tvMenuItemDetailDescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="A5 Japanese wagyu with smoked potato purée, heirloom carrots, and red wine jus"
+                        android:textColor="@color/text_light"
+                        android:textSize="16sp"
+                        android:lineSpacingExtra="6dp"
+                        android:gravity="center"
+                        android:layout_marginBottom="20dp" />
+
+                    <!-- Item Details Grid -->
+                    <GridLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:columnCount="2"
+                        android:rowCount="2"
+                        android:alignmentMode="alignMargins"
+                        android:columnOrderPreserved="false"
+                        android:layout_marginBottom="20dp">
+
+                        <!-- Prep Time -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:layout_margin="8dp">
+
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:src="@drawable/ic_time"
+                                app:tint="@color/luxe_gold" />
+
+                            <TextView
+                                android:id="@+id/tvMenuItemDetailPrepTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="35 min"
+                                android:textColor="@color/text_light"
+                                android:textSize="14sp"
+                                android:layout_marginTop="6dp" />
+                        </LinearLayout>
+
+                        <!-- Calories -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:layout_margin="8dp">
+
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:src="@drawable/ic_calories"
+                                app:tint="@color/luxe_gold" />
+
+                            <TextView
+                                android:id="@+id/tvMenuItemDetailCalories"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="620 cal"
+                                android:textColor="@color/text_light"
+                                android:textSize="14sp"
+                                android:layout_marginTop="6dp" />
+                        </LinearLayout>
+
+                        <!-- Chef's Special Badge -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:layout_margin="8dp">
+
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:src="@drawable/ic_chef_hat"
+                                app:tint="@color/luxe_gold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Chef's Special"
+                                android:textColor="@color/text_light"
+                                android:textSize="14sp"
+                                android:layout_marginTop="6dp" />
+                        </LinearLayout>
+
+                        <!-- Spice Level -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:layout_margin="8dp">
+
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:src="@drawable/ic_spicy"
+                                app:tint="@color/luxe_gold" />
+
+                            <TextView
+                                android:id="@+id/tvMenuItemDetailSpiceLevel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Medium"
+                                android:textColor="@color/text_light"
+                                android:textSize="14sp"
+                                android:layout_marginTop="6dp" />
+                        </LinearLayout>
+                    </GridLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Order Now Button -->
+            <Button
+                android:id="@+id/btnOrderNow"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="ORDER NOW"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/luxe_charcoal"
+                android:backgroundTint="@color/luxe_gold"
+                app:cornerRadius="8dp"
+                android:letterSpacing="0.1" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

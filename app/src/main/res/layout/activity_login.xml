@@ -1,56 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:padding="24dp"
     android:gravity="center"
-    android:background="@color/luxe_charcoal"
+    android:background="@drawable/bg_luxury_pattern"
     tools:context="com.finedine.rms.LoginActivity">
 
-    <ImageView
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:layout_marginBottom="32dp"
-        android:src="@drawable/logoj"
-        android:contentDescription="@string/app_name" />
+    <!-- Logo in CardView with gold corner accent, matching register style -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="24dp"
+        app:cardCornerRadius="100dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="@color/luxe_burgundy">
 
+        <ImageView
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:padding="16dp"
+            android:src="@drawable/logoj"
+            android:contentDescription="@string/app_name" />
+
+        <!-- Gold corner accent -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="end|bottom"
+            android:background="@drawable/corner_gold" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- Title -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/app_name"
         android:textColor="@color/luxe_gold"
-        android:textSize="28sp"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.1"
         android:gravity="center"
-        android:layout_marginBottom="24dp"
-        android:textStyle="bold" />
+        android:fontFamily="serif"
+        android:layout_marginBottom="24dp" />
 
-    <EditText
-        android:id="@+id/emailInput"
+    <!-- Email Field - Using Material TextInputLayout like register -->
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/Email"
-        android:inputType="textEmailAddress"
-        android:padding="16dp"
         android:layout_marginBottom="16dp"
-        android:textColor="@color/white"
+        app:boxStrokeColor="@color/luxe_gold"
+        app:hintTextColor="@color/luxe_gold"
+        app:boxBackgroundColor="@color/transparent_black"
         android:textColorHint="@color/text_gray"
-        android:background="@color/luxe_dark" />
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-    <EditText
-        android:id="@+id/passwordInput"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/emailInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/Email"
+            android:inputType="textEmailAddress"
+            android:textColor="@color/text_white"
+            android:textColorHint="@color/text_gray" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Password Field - Using Material TextInputLayout with toggle -->
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/password"
-        android:inputType="textPassword"
-        android:padding="16dp"
         android:layout_marginBottom="24dp"
-        android:textColor="@color/white"
+        app:boxStrokeColor="@color/luxe_gold"
+        app:hintTextColor="@color/luxe_gold"
+        app:boxBackgroundColor="@color/transparent_black"
         android:textColorHint="@color/text_gray"
-        android:background="@color/luxe_dark" />
+        app:passwordToggleEnabled="true"
+        app:passwordToggleTint="@color/luxe_gold"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/passwordInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/password"
+            android:inputType="textPassword"
+            android:textColor="@color/text_white"
+            android:textColorHint="@color/text_gray" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Login Button - Styled like register -->
     <Button
         android:id="@+id/loginButton"
         android:layout_width="match_parent"
@@ -58,32 +100,47 @@
         android:text="@string/login"
         android:backgroundTint="@color/luxe_burgundy"
         android:textColor="@color/luxe_gold"
-        android:padding="16dp" />
+        app:cornerRadius="8dp"
+        android:textStyle="bold"
+        android:paddingVertical="12dp"
+        android:letterSpacing="0.05"
+        app:strokeColor="@color/luxe_gold"
+        app:strokeWidth="1dp" />
 
-    <TextView
-        android:id="@+id/forgotPasswordText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Forgot Password?"
-        android:textColor="@color/luxe_gold"
-        android:textSize="14sp"
-        android:padding="16dp"
-        android:layout_marginTop="8dp" />
-
+    <!-- Progress Bar -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:visibility="gone"
+        android:layout_marginTop="16dp"
         android:indeterminateTint="@color/luxe_gold" />
 
-    <Button
+    <!-- Forgot Password - Styled to match register's link text -->
+    <TextView
+        android:id="@+id/forgotPasswordText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Forgot Password?"
+        android:textColor="@color/luxe_gold"
+        android:textSize="14sp"
+        android:layout_marginTop="16dp"
+        android:textStyle="bold"
+        android:padding="8dp" />
+
+    <!-- Create Account Button - Styled like text button in register -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/registerText"
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:text="CREATE ACCOUNT"
         android:textColor="@color/luxe_gold"
-        android:layout_marginTop="16dp" />
+        android:textStyle="bold"
+        android:letterSpacing="0.05"
+        android:layout_marginTop="8dp" />
 
 </LinearLayout>

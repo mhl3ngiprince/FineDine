@@ -81,7 +81,7 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
         public void bind(MenuItem item, OnItemClickListener listener) {
             itemName.setText(item.name);
             itemDescription.setText(item.description);
-            itemPrice.setText(String.format("$%.2f", item.price));
+            itemPrice.setText(String.format("R%.2f", item.price));
             itemCategory.setText(item.category);
             prepTime.setText(String.format("Prep Time: %s minutes", item.prepTimeMinutes));
             calories.setText(String.format("Calories: %s", item.calories));
@@ -99,6 +99,7 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
                     .into(itemImage);
 
             itemView.setOnClickListener(v -> listener.onItemClick(item));
+            itemView.findViewById(R.id.btnAddToOrder).setOnClickListener(v -> listener.onItemClick(item));
         }
     }
 }

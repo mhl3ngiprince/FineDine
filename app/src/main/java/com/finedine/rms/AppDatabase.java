@@ -80,6 +80,19 @@ public class AppDatabase {
         public void insertAll(com.finedine.rms.MenuItem[] items) {
             // Do nothing
         }
+
+        public long insert(com.finedine.rms.MenuItem item) {
+            // Return a dummy ID
+            return 1L;
+        }
+
+        public com.finedine.rms.MenuItem getById(int id) {
+            return null;
+        }
+
+        public com.finedine.rms.MenuItem getByName(String name) {
+            return null;
+        }
     }
 
     public static class InventoryDao {

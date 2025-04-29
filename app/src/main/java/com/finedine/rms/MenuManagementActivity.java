@@ -51,10 +51,27 @@ public class MenuManagementActivity extends BaseActivity {
             new Thread(() -> {
                 try {
                     List<MenuItem> items = db.menuItemDao().getAllAvailable();
+
+                    if (items.isEmpty()) {
+                        try {
+                            MenuItem[] premiumItems = MenuItem.premiumMenu();
+                            items = new ArrayList<>();
+                            for (MenuItem item : premiumItems) {
+                                db.menuItemDao().insert(item);
+                                items.add(item);
+                            }
+                            Log.i(TAG, "Added " + premiumItems.length + " premium menu items to database");
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error adding premium menu items", e);
+                        }
+                    }
+
+                    // Update UI with items
+                    final List<MenuItem> finalItems = new ArrayList<>(items);
                     runOnUiThread(() -> {
                         try {
                             // Update adapter with loaded items
-                            adapter.updateItems(items);
+                            adapter.updateItems(finalItems);
                         } catch (Exception e) {
                             Log.e(TAG, "Error updating menu items UI", e);
                         }
