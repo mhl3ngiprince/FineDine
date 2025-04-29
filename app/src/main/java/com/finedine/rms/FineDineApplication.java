@@ -2,8 +2,9 @@ package com.finedine.rms;
 
 import android.app.Application;
 import android.content.Context;
-import android.os.StrictMode;
 import android.util.Log;
+
+import com.google.firebase.FirebaseApp;
 
 public class FineDineApplication extends Application {
 
@@ -14,9 +15,6 @@ public class FineDineApplication extends Application {
     public void onCreate() {
         // Ensure we catch any exception but still continue app initialization
         try {
-            // Enable strict mode in debug builds for better detection of issues
-            // Removed BuildConfig dependency as it may cause issues
-
             // Call super.onCreate() first to ensure proper initialization
             super.onCreate();
 
@@ -27,6 +25,14 @@ public class FineDineApplication extends Application {
 
             // Initialize basic app components, but not Firebase yet
             // Firebase will be initialized on-demand when needed
+
+            // Initialize Firebase safely
+            try {
+                FirebaseApp.initializeApp(this);
+                Log.d(TAG, "Firebase initialized successfully");
+            } catch (Exception e) {
+                Log.e(TAG, "Error initializing Firebase, continuing without it", e);
+            }
 
             Log.d(TAG, "Application onCreate - completed successfully");
         } catch (Throwable t) {
@@ -50,6 +56,10 @@ public class FineDineApplication extends Application {
      * Check if Firebase is initialized - always return false for safety
      */
     public static boolean isFirebaseInitialized() {
-        return false;
+        try {
+            return FirebaseApp.getInstance() != null;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

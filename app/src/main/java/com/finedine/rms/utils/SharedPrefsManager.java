@@ -18,7 +18,20 @@ public class SharedPrefsManager {
     private final SharedPreferences prefs;
 
     public SharedPrefsManager(Context context) {
-        prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        if (context == null) {
+            Log.e(TAG, "Context is null in SharedPrefsManager constructor");
+            throw new IllegalArgumentException("Context cannot be null");
+        }
+
+        try {
+            prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            // Test immediately if we can access the prefs
+            prefs.getBoolean(KEY_IS_LOGGED_IN, false);
+            Log.d(TAG, "SharedPreferences initialized successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize SharedPreferences", e);
+            throw e; // Re-throw to let caller know initialization failed
+        }
     }
 
     public void saveUserSession(int userId, String role, String name) {
@@ -147,8 +160,13 @@ public class SharedPrefsManager {
     }
 
     public boolean isUserLoggedIn() {
-        boolean loggedIn = prefs.getBoolean(KEY_IS_LOGGED_IN, false);
-        Log.d(TAG, "Checking if user is logged in: " + loggedIn);
+        boolean loggedIn = false;
+        try {
+            loggedIn = prefs.getBoolean(KEY_IS_LOGGED_IN, false);
+            Log.d(TAG, "Checking if user is logged in: " + loggedIn);
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking login status, assuming not logged in", e);
+        }
         return loggedIn;
     }
 }

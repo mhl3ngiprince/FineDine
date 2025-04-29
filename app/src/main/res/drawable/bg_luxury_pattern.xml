@@ -21,10 +21,7 @@
 
     <!-- Subtle pattern texture -->
     <item>
-        <bitmap
-            android:src="@drawable/pattern_luxury"
-            android:tileMode="repeat"
-            android:alpha="0.12" />
+        <color android:color="@android:color/transparent" />
     </item>
 
     <!-- Enhanced golden gradient overlay -->

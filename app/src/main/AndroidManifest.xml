@@ -70,6 +70,21 @@
             android:exported="true"
             android:theme="@style/Theme.MaterialComponents" />
 
+        <activity
+            android:name=".InventoryActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MaterialComponents" />
+
+        <activity
+            android:name=".MenuManagementActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MaterialComponents" />
+
+        <activity
+            android:name=".StaffManagementActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MaterialComponents" />
+
         <!-- Firebase Messaging Service -->
         <service
             android:name=".MyFirebaseMessagingService"

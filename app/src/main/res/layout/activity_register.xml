@@ -162,7 +162,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/register"
-        android:onClick="attemptRegistration"
         android:backgroundTint="@color/luxe_burgundy"
         android:textColor="@color/luxe_gold"
         app:cornerRadius="8dp"
@@ -188,7 +187,6 @@
         android:layout_marginTop="16dp"
         android:text="@string/already_have_an_account_login"
         android:textColor="@color/luxe_gold"
-        android:onClick="goToLogin"
         android:drawablePadding="8dp"
         android:drawableTint="@color/luxe_gold"
         android:textStyle="bold"/>

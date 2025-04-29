@@ -6,9 +6,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-public class ManagerDashboardActivity extends AppCompatActivity {
+public class ManagerDashboardActivity extends BaseActivity {
     private static final String TAG = "ManagerDashboard";
 
     @Override

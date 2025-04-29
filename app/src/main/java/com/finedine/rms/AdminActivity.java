@@ -3,22 +3,12 @@ package com.finedine.rms;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.google.android.material.navigation.NavigationView;
-
-public class AdminActivity extends AppCompatActivity {
+public class AdminActivity extends BaseActivity {
     private static final String TAG = "AdminActivity";
-    private DrawerLayout drawerLayout;
     private TextView tvStaffCount, tvReservationCount;
 
     @Override
@@ -26,26 +16,10 @@ public class AdminActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin);
 
+        // Setup navigation panel
+        setupNavigationPanel("Administration");
+
         try {
-            // Set up toolbar
-            Toolbar toolbar = findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Administration");
-            }
-
-            // Set up navigation drawer
-            drawerLayout = findViewById(R.id.drawer_layout);
-            NavigationView navigationView = findViewById(R.id.nav_view);
-
-            // Set up drawer toggle
-            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                    this, drawerLayout, toolbar,
-                    R.string.navigation_drawer_open,
-                    R.string.navigation_drawer_close);
-            drawerLayout.addDrawerListener(toggle);
-            toggle.syncState();
-
             // Initialize TextViews for counts
             tvStaffCount = findViewById(R.id.tvStaffCount);
             tvReservationCount = findViewById(R.id.tvReservationCount);
@@ -109,15 +83,6 @@ public class AdminActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(TAG, "Error initializing AdminActivity", e);
             Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
         }
     }
 }

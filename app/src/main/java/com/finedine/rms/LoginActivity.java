@@ -13,6 +13,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.finedine.rms.utils.SharedPrefsManager;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -25,6 +27,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextView forgotPasswordText;
     private ProgressBar progressBar;
     private SharedPrefsManager prefsManager;
+    private String email;  // Store email for later use
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,13 +43,8 @@ public class LoginActivity extends AppCompatActivity {
             // Initialize SharedPrefsManager
             prefsManager = new SharedPrefsManager(this);
 
-            // Check if already logged in
-            if (prefsManager != null && prefsManager.isUserLoggedIn()) {
-                String role = prefsManager.getUserRole();
-                Log.d(TAG, "User already logged in as: " + role);
-                navigateBasedOnRole(role);
-                return;
-            }
+            // Log that we're staying on the login screen
+            Log.d(TAG, "Showing login screen regardless of login state");
 
             // Initialize UI components
             emailEditText = findViewById(R.id.emailInput);
@@ -84,7 +82,7 @@ public class LoginActivity extends AppCompatActivity {
     private void attemptLogin() {
         try {
             // Get input values
-            String email = emailEditText.getText().toString().trim();
+            email = emailEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
 
             // Validate inputs
@@ -98,73 +96,190 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            // Show progress
-            if (progressBar != null) {
-                progressBar.setVisibility(View.VISIBLE);
-            }
-
-            // Disable login button
-            loginButton.setEnabled(false);
-
-            // For demo mode, use hardcoded credentials
-            if (email.equals("admin") && password.equals("admin")) {
-                handleSuccessfulLogin("admin");
-                return;
-            } else if (email.equals("manager") && password.equals("manager")) {
-                handleSuccessfulLogin("manager");
-                return;
-            } else if (email.equals("chef") && password.equals("chef")) {
-                handleSuccessfulLogin("chef");
-                return;
-            } else if (email.equals("waiter") && password.equals("waiter")) {
-                handleSuccessfulLogin("waiter");
-                return;
-            } else if (email.equals("customer") && password.equals("customer")) {
-                handleSuccessfulLogin("customer");
-                return;
-            } else if (email.contains("@") && password.length() >= 4) {
-                // Any valid email format with password >= 4 chars
-                handleSuccessfulLogin("customer");
-                return;
-            }
-
-            // Invalid credentials
-            resetUiAfterLoginAttempt();
-            Toast.makeText(this, "Invalid credentials", Toast.LENGTH_SHORT).show();
-
+            authenticateUser(email, password);
         } catch (Exception e) {
             Log.e(TAG, "Error attempting login", e);
-            resetUiAfterLoginAttempt();
             Toast.makeText(this, "Login error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void resetUiAfterLoginAttempt() {
-        if (progressBar != null) {
-            progressBar.setVisibility(View.GONE);
+    private void authenticateUser(String email, String password) {
+        try {
+            // If Firebase is not available, use local authentication as fallback
+            if (!FineDineApplication.isFirebaseInitialized()) {
+                Log.w(TAG, "Firebase not initialized, using local authentication");
+                authenticateLocally(email, password);
+                return;
+            }
+
+            // Get Firebase Auth instance
+            FirebaseAuth mAuth = FirebaseAuth.getInstance();
+            if (mAuth == null) {
+                Log.e(TAG, "Firebase Auth instance is null, using local authentication");
+                authenticateLocally(email, password);
+                return;
+            }
+
+            showProgressDialog("Authenticating...");
+
+            // Attempt Firebase authentication
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, task -> {
+                        try {
+                            hideProgressDialog();
+                            if (task.isSuccessful()) {
+                                Log.d(TAG, "Firebase authentication successful");
+                                // Get user ID from Firebase
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    getUserRole(user.getUid(), user.getEmail());
+                                } else {
+                                    Log.e(TAG, "Firebase user is null after successful login");
+                                    showErrorMessage("Login failed, please try again");
+                                    authenticateLocally(email, password);
+                                }
+                            } else {
+                                Log.w(TAG, "Firebase authentication failed", task.getException());
+                                showErrorMessage("Authentication failed: " +
+                                        (task.getException() != null ? task.getException().getLocalizedMessage() : "Unknown error"));
+                                // Try local authentication as fallback
+                                authenticateLocally(email, password);
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error in Firebase auth callback", e);
+                            hideProgressDialog();
+                            showErrorMessage("Authentication error: " + e.getLocalizedMessage());
+                            authenticateLocally(email, password);
+                        }
+                    });
+        } catch (Exception e) {
+            Log.e(TAG, "Error during authentication", e);
+            hideProgressDialog();
+            showErrorMessage("Authentication error: " + e.getLocalizedMessage());
+            authenticateLocally(email, password);
+        }
+    }
+
+    private void authenticateLocally(String email, String password) {
+        // For demo mode, use hardcoded credentials
+        if (email.equals("admin") && password.equals("admin")) {
+            handleSuccessfulLogin("admin");
+            return;
+        } else if (email.equals("manager") && password.equals("manager")) {
+            handleSuccessfulLogin("manager");
+            return;
+        } else if (email.equals("chef") && password.equals("chef")) {
+            handleSuccessfulLogin("chef");
+            return;
+        } else if (email.equals("waiter") && password.equals("waiter")) {
+            handleSuccessfulLogin("waiter");
+            return;
+        } else if (email.equals("customer") && password.equals("customer")) {
+            handleSuccessfulLogin("customer");
+            return;
+        } else if (email.contains("@") && password.length() >= 4) {
+            // Any valid email format with password >= 4 chars
+            handleSuccessfulLogin("customer");
+            return;
         }
 
-        if (loginButton != null) {
-            loginButton.setEnabled(true);
-        }
+        // Invalid credentials
+        resetUiAfterLoginAttempt();
+        Toast.makeText(this, "Invalid credentials", Toast.LENGTH_SHORT).show();
+    }
+
+    private void getUserRole(String uid, String email) {
+        // TO DO: implement getting user role from server or database
+        handleSuccessfulLogin("customer");
     }
 
     private void handleSuccessfulLogin(String role) {
         try {
-            // Save login session
-            if (prefsManager != null) {
-                prefsManager.saveUserSession(123, role, "User");
-                prefsManager.setUserLoggedIn(true);
-                prefsManager.setUserRole(role);
+            Log.d(TAG, "Login successful for role: " + role);
+
+            // Hide progress
+            if (progressBar != null) {
+                progressBar.setVisibility(View.GONE);
             }
 
-            // Navigate to appropriate screen
-            navigateBasedOnRole(role);
+            // Store user session
+            SharedPrefsManager prefsManager = new SharedPrefsManager(this);
+            prefsManager.saveUserSession(1, role, email != null ? email : "User");
+
+            // Figure out which activity to start based on role
+            Intent intent;
+            switch (role.toLowerCase()) {
+                case "admin":
+                    intent = new Intent(this, AdminActivity.class);
+                    break;
+                case "manager":
+                    intent = new Intent(this, ManagerDashboardActivity.class);
+                    break;
+                case "chef":
+                    intent = new Intent(this, KitchenActivity.class);
+                    break;
+                case "waiter":
+                    intent = new Intent(this, OrderActivity.class);
+                    break;
+                case "customer":
+                default:
+                    intent = new Intent(this, ReservationActivity.class);
+                    break;
+            }
+
+            intent.putExtra("user_role", role);
+
+            startActivity(intent);
+            finish();
+
         } catch (Exception e) {
             Log.e(TAG, "Error handling successful login", e);
-            resetUiAfterLoginAttempt();
-            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error navigating to next screen", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void showProgressDialog(String message) {
+        try {
+            if (progressBar != null) {
+                progressBar.setVisibility(View.VISIBLE);
+            }
+
+            if (loginButton != null) {
+                loginButton.setEnabled(false);
+            }
+
+            if (message != null && !message.isEmpty()) {
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error showing progress", e);
+        }
+    }
+
+    private void hideProgressDialog() {
+        try {
+            if (progressBar != null) {
+                progressBar.setVisibility(View.GONE);
+            }
+
+            if (loginButton != null) {
+                loginButton.setEnabled(true);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error hiding progress", e);
+        }
+    }
+
+    private void showErrorMessage(String message) {
+        try {
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Log.e(TAG, "Error showing error message", e);
+        }
+    }
+
+    private void resetUiAfterLoginAttempt() {
+        hideProgressDialog();
     }
 
     private void navigateBasedOnRole(String role) {

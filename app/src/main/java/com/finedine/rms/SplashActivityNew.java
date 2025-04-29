@@ -13,14 +13,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.finedine.rms.utils.ResourceChecker;
 import com.finedine.rms.utils.SharedPrefsManager;
 
 public class SplashActivityNew extends AppCompatActivity {
     private static final String TAG = "SplashActivity";
     private static final int SPLASH_DELAY = 3000; // 3 seconds
     private SharedPrefsManager prefsManager;
-    private ImageView logoImageView;
-    private TextView titleTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,15 +29,29 @@ public class SplashActivityNew extends AppCompatActivity {
         try {
             Log.d(TAG, "SplashActivity onCreate called");
 
-            // Initialize UI elements
-            logoImageView = findViewById(R.id.logoImageView);
-            titleTextView = findViewById(R.id.titleTextView);
+            // Check critical resources first
+            if (!ResourceChecker.validateCriticalResources(this)) {
+                Log.e(TAG, "Critical resources missing, may cause crashes");
+                Toast.makeText(this, "Error loading app resources", Toast.LENGTH_LONG).show();
+            }
 
-            // Apply fade-in animation
-            applyAnimations();
+            // Initialize SharedPrefsManager first to avoid null issues
+            try {
+                prefsManager = new SharedPrefsManager(this);
 
-            // Initialize SharedPrefsManager
-            prefsManager = new SharedPrefsManager(this);
+                // Clear any previous login state to ensure we always go to login screen
+                if (prefsManager != null) {
+                    prefsManager.clearUserSession();
+                    prefsManager.setUserLoggedIn(false);
+                    Log.d(TAG, "Cleared previous login state");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error initializing SharedPrefsManager", e);
+                prefsManager = null;
+            }
+
+            // Create animations
+            createAndStartAnimations();
 
             // Use a handler to delay the transition
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -56,25 +69,29 @@ public class SplashActivityNew extends AppCompatActivity {
         }
     }
 
-    private void applyAnimations() {
+    private void createAndStartAnimations() {
         try {
+            // Find views
+            ImageView logoView = findViewById(com.finedine.rms.R.id.logoImageView);
+            TextView textView = findViewById(com.finedine.rms.R.id.titleTextView);
+
             // Create fade-in animation
             AlphaAnimation fadeIn = new AlphaAnimation(0.0f, 1.0f);
             fadeIn.setDuration(1500);
             fadeIn.setFillAfter(true);
 
-            // Apply to logo and title
-            if (logoImageView != null) {
-                logoImageView.startAnimation(fadeIn);
+            // Apply to logo
+            if (logoView != null) {
+                logoView.startAnimation(fadeIn);
             }
 
             // Delayed animation for title
-            if (titleTextView != null) {
+            if (textView != null) {
                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
                     Animation titleFadeIn = new AlphaAnimation(0.0f, 1.0f);
                     titleFadeIn.setDuration(1000);
                     titleFadeIn.setFillAfter(true);
-                    titleTextView.startAnimation(titleFadeIn);
+                    textView.startAnimation(titleFadeIn);
                 }, 500);
             }
         } catch (Exception e) {
@@ -84,14 +101,8 @@ public class SplashActivityNew extends AppCompatActivity {
 
     private void checkLoginStatusAndNavigate() {
         try {
-            // Check if user is already logged in
-            if (prefsManager != null && prefsManager.isUserLoggedIn()) {
-                String role = prefsManager.getUserRole();
-                Log.d(TAG, "User already logged in with role: " + role);
-                navigateBasedOnRole(role);
-            } else {
-                navigateToLogin();
-            }
+            // Always navigate to login screen regardless of login status
+            navigateToLogin();
         } catch (Exception e) {
             Log.e(TAG, "Error checking login status", e);
             // Fallback to login screen if any error occurs
@@ -120,6 +131,7 @@ public class SplashActivityNew extends AppCompatActivity {
             // Default to customer role if role is invalid
             if (role == null || role.trim().isEmpty()) {
                 role = "customer";
+                Log.w(TAG, "Role was null or empty, defaulting to: customer");
             }
 
             switch (role.toLowerCase()) {
@@ -137,6 +149,7 @@ public class SplashActivityNew extends AppCompatActivity {
                     break;
                 case "customer":
                 default:
+                    Log.d(TAG, "Navigating to Reservation Activity as customer");
                     intent = new Intent(this, ReservationActivity.class);
                     break;
             }
