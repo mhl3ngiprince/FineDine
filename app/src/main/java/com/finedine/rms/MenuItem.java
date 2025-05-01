@@ -17,11 +17,31 @@ public class MenuItem {
     public String description;
     public double price;
     public boolean availability;
-    public String imageUrl; // URL or resource path for the menu item image
-    public String category; // Category of the menu item (e.g., "Starters", "Main Courses", etc.)
-    public int prepTimeMinutes; // Preparation time in minutes
-    public int calories; // Calories in the dish
-    public String spiceLevel; // Spice level (e.g., "Mild", "Medium", "Hot")
+    public String imageUrl;
+    public int imageResourceId;
+    public String category;
+    public int prepTimeMinutes;
+    public int calories;
+    public String spiceLevel;
+
+    // Standard categories
+    public static final String CATEGORY_STARTERS = "Starters";
+    public static final String CATEGORY_MAIN = "Main Course";
+    public static final String CATEGORY_DESSERTS = "Desserts";
+    public static final String CATEGORY_BEVERAGES = "Beverages";
+
+    // Drawable image resources for menu items
+    public static final int IMG_SCALLOPS = R.drawable.scallops;
+    public static final int IMG_FOIE_GRAS = R.drawable.torchon;
+    public static final int IMG_WAGYU = R.drawable.tenderloin;
+    public static final int IMG_LOBSTER = R.drawable.lobster;
+    public static final int IMG_TRUFFLE_RISOTTO = R.drawable.black_truffle_risotto_recipe;
+    public static final int IMG_VENISON = R.drawable.tenderloin; // Using tenderloin as fallback
+    public static final int IMG_SOUFFLE = R.drawable.marniersuffle;
+    public static final int IMG_CHOCOLATE = R.drawable.chocolate_symphony;
+    public static final int IMG_CHAMPAGNE = R.drawable.dom_perigon;
+    public static final int IMG_COFFEE = R.drawable.greek_coffee_demitasse_cup;
+    public static final int IMG_PLACEHOLDER = R.drawable.placeholder_food;
 
     // Sample Menu Items
     public static MenuItem[] premiumMenu() {
@@ -30,10 +50,10 @@ public class MenuItem {
                 new MenuItem(
                         "Seared Scallops",
                         "Day boat scallops with cauliflower purée, truffle foam, and micro herbs",
-                        28.50,
+                        80.00,
                         true,
-                        "https://raw.githubusercontent.com/finedine/menu-images/main/seared_scallops.jpg",
-                        "Starters",
+                        IMG_SCALLOPS,
+                        CATEGORY_STARTERS,
                         15,
                         210,
                         "Mild"
@@ -41,10 +61,10 @@ public class MenuItem {
                 new MenuItem(
                         "Foie Gras Torchon",
                         "Sous-vide duck liver terrine with spiced pear chutney and brioche toast",
-                        42.00,
+                        140.00,
                         true,
-                        "https://raw.githubusercontent.com/finedine/menu-images/main/foie_gras.jpg",
-                        "Starters",
+                        IMG_FOIE_GRAS,
+                        CATEGORY_STARTERS,
                         20,
                         380,
                         "Mild"
@@ -54,10 +74,10 @@ public class MenuItem {
                 new MenuItem(
                         "Wagyu Beef Tenderloin",
                         "A5 Japanese wagyu with smoked potato purée, heirloom carrots, and red wine jus",
-                        89.00,
+                        200.00,
                         true,
-                        "https://raw.githubusercontent.com/finedine/menu-images/main/wagyu_beef.jpg",
-                        "Main Courses",
+                        IMG_WAGYU,
+                        CATEGORY_MAIN,
                         35,
                         620,
                         "Medium"
@@ -67,8 +87,8 @@ public class MenuItem {
                         "Atlantic lobster with cognac cream sauce, gruyère gratin, and asparagus tips",
                         275.00,
                         true,
-                        "https://raw.githubusercontent.com/finedine/menu-images/main/lobster_thermidor.jpg",
-                        "Main Courses",
+                        IMG_LOBSTER,
+                        CATEGORY_MAIN,
                         40,
                         580,
                         "Mild"
@@ -78,10 +98,10 @@ public class MenuItem {
                 new MenuItem(
                         "Black Truffle Risotto",
                         "Carnaroli rice with white Alba truffle shavings and Parmigiano-Reggiano",
-                        65.00,
+                        234.00,
                         true,
-                        "https://raw.githubusercontent.com/finedine/menu-images/main/truffle_risotto.jpg",
-                        "Chef's Specials",
+                        IMG_TRUFFLE_RISOTTO,
+                        CATEGORY_MAIN,
                         30,
                         450,
                         "Mild"
@@ -89,10 +109,10 @@ public class MenuItem {
                 new MenuItem(
                         "Venison Medallions",
                         "New Zealand red deer with juniper berry reduction and root vegetable pave",
-                        78.00,
+                        260.00,
                         true,
-                        "https://raw.githubusercontent.com/finedine/menu-images/main/venison.jpg",
-                        "Chef's Specials",
+                        IMG_VENISON,
+                        CATEGORY_MAIN,
                         25,
                         520,
                         "Medium"
@@ -102,10 +122,10 @@ public class MenuItem {
                 new MenuItem(
                         "Grand Marnier Soufflé",
                         "Freshly baked orange-liqueur soufflé with crème anglaise",
-                        22.00,
+                        90.00,
                         true,
-                        "https://raw.githubusercontent.com/finedine/menu-images/main/souffle.jpg",
-                        "Desserts",
+                        IMG_SOUFFLE,
+                        CATEGORY_DESSERTS,
                         20,
                         320,
                         "None"
@@ -113,10 +133,10 @@ public class MenuItem {
                 new MenuItem(
                         "Chocolate Symphony",
                         "70% Valrhona chocolate trio: mousse, ganache, and flourless cake",
-                        24.50,
+                        100.00,
                         true,
-                        "https://raw.githubusercontent.com/finedine/menu-images/main/chocolate_symphony.jpg",
-                        "Desserts",
+                        IMG_CHOCOLATE,
+                        CATEGORY_DESSERTS,
                         15,
                         410,
                         "None"
@@ -128,8 +148,8 @@ public class MenuItem {
                         "Three 2oz pours of Krug Grande Cuvée, Dom Pérignon, and Bollinger RD",
                         150.00,
                         true,
-                        "https://raw.githubusercontent.com/finedine/menu-images/main/champagne_flight.jpg",
-                        "Beverages",
+                        IMG_CHAMPAGNE,
+                        CATEGORY_BEVERAGES,
                         5,
                         120,
                         "None"
@@ -137,10 +157,10 @@ public class MenuItem {
                 new MenuItem(
                         "Artisan Coffee Service",
                         "French press of rare Ethiopian Yirgacheffe with handmade chocolates",
-                        18.00,
+                        40.00,
                         true,
-                        "https://raw.githubusercontent.com/finedine/menu-images/main/artisan_coffee.jpg",
-                        "Beverages",
+                        IMG_COFFEE,
+                        CATEGORY_BEVERAGES,
                         10,
                         85,
                         "None"
@@ -157,6 +177,20 @@ public class MenuItem {
         this.price = price;
         this.availability = availability;
         this.imageUrl = imageUrl;
+        this.imageResourceId = IMG_PLACEHOLDER; // Default to placeholder
+        this.category = category;
+        this.prepTimeMinutes = prepTimeMinutes;
+        this.calories = calories;
+        this.spiceLevel = spiceLevel;
+    }
+
+    public MenuItem(String name, String description, double price, boolean availability, int imageResourceId, String category, int prepTimeMinutes, int calories, String spiceLevel) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.availability = availability;
+        this.imageUrl = ""; // Empty URL
+        this.imageResourceId = imageResourceId;
         this.category = category;
         this.prepTimeMinutes = prepTimeMinutes;
         this.calories = calories;
@@ -209,6 +243,14 @@ public class MenuItem {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public int getImageResourceId() {
+        return imageResourceId;
+    }
+
+    public void setImageResourceId(int imageResourceId) {
+        this.imageResourceId = imageResourceId;
     }
 
     public String getCategory() {

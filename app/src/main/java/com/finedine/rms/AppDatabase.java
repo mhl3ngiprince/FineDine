@@ -67,8 +67,25 @@ public class AppDatabase {
     }
 
     public static class OrderItemDao {
-        public void insert(com.finedine.rms.OrderItem item) {
-            // Do nothing
+        public long insert(com.finedine.rms.OrderItem item) {
+            try {
+                // Print debug information
+                Log.d("AppDatabase", "Inserting OrderItem: " + item.getName() +
+                        ", quantity=" + item.getQuantity() +
+                        ", orderId=" + item.getOrderId());
+
+                // Check if orderId is set
+                if (item.getOrderId() == null || item.getOrderId().isEmpty()) {
+                    Log.e("AppDatabase", "OrderItem has no orderId set!");
+                    throw new IllegalArgumentException("OrderItem must have orderId set");
+                }
+
+                // This is a stub implementation, so just return a dummy ID
+                return 1L;
+            } catch (Exception e) {
+                Log.e("AppDatabase", "Error in OrderItemDao.insert: " + e.getMessage(), e);
+                throw e;
+            }
         }
     }
 
@@ -140,8 +157,17 @@ public class AppDatabase {
             return new java.util.ArrayList<>();
         }
 
-        public void insert(com.finedine.rms.Reservation reservation) {
-            // Do nothing
+        public long insert(com.finedine.rms.Reservation reservation) {
+            // Return a dummy ID
+            return 1L;
+        }
+
+        public java.util.List<com.finedine.rms.Reservation> getUserReservations(int userId) {
+            return new java.util.ArrayList<>();
+        }
+
+        public int getTodayReservationCount() {
+            return 0;
         }
     }
 }

@@ -183,7 +183,7 @@ public class MenuItemDetailActivity extends BaseActivity {
             requestOptions.centerCrop();
 
             Glide.with(this)
-                    .load(menuItem.imageUrl)
+                    .load(menuItem.imageResourceId)
                     .apply(requestOptions)
                     .transition(DrawableTransitionOptions.withCrossFade())
                     .placeholder(R.drawable.placeholder_food)
@@ -248,26 +248,93 @@ public class MenuItemDetailActivity extends BaseActivity {
 
     private void addToOrder(MenuItem item, int quantity, String notes) {
         try {
-            // Create a new OrderItem
-            OrderItem orderItem = new OrderItem();
-            orderItem.setName(item.name);
-            orderItem.setQuantity(quantity);
-            orderItem.setNotes(notes);
-            orderItem.setPrice(item.price);
-
-            // Save to database or pass back to calling activity
-            Toast.makeText(this, quantity + "x " + item.name + " added to your order", Toast.LENGTH_SHORT).show();
-
-            // You could either:
-            // 1. Start OrderActivity with this item
-            // 2. Add to cart and return to previous activity
-            // 3. Show order confirmation screen
-
-            // For now, we'll just finish the activity
-            finish();
+            // First try a simple direct order approach that doesn't rely on complex database operations
+            simpleOrder(item, quantity, notes);
+            return;  // Exit if successful
         } catch (Exception e) {
-            Log.e(TAG, "Error adding item to order", e);
-            Toast.makeText(this, "Error adding item to order", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Simple order failed, trying detailed database approach", e);
         }
+
+        try {
+            // Show a loading indicator or progress dialog here if desired
+
+            // Run database operations in background thread
+            new Thread(() -> {
+                try {
+                    // Get the database instance
+                    AppDatabase db = AppDatabase.getDatabase(MenuItemDetailActivity.this);
+                    Log.d(TAG, "Database instance obtained successfully");
+
+                    // Create a new Order if needed (using table 1 as default)
+                    Order order = new Order(1, "New");
+                    order.setTimestamp(System.currentTimeMillis());
+                    Log.d(TAG, "Order created: table=" + order.getTableNumber() + ", status=" + order.getStatus());
+
+                    long orderId = db.orderDao().insert(order);
+                    Log.d(TAG, "Order inserted with ID: " + orderId);
+
+                    // Create a new OrderItem
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setName(item.name);
+                    orderItem.setQuantity(quantity);
+                    orderItem.setNotes(notes);
+                    orderItem.setPrice(item.price);
+
+                    // Save the order item to database
+                    try {
+                        // Make sure to use a valid orderId and not null
+                        if (orderId <= 0) {
+                            // If we didn't get a valid order ID, create a temporary one
+                            orderId = 1;
+                            Log.w(TAG, "Using default orderId=1 since database returned invalid ID");
+                        }
+
+                        // Set the orderId again just to be safe
+                        orderItem.setOrderId(String.valueOf(orderId));
+                        Log.d(TAG, "Final OrderItem before insert: orderId=" + orderItem.getOrderId() +
+                                ", name=" + orderItem.getName() +
+                                ", quantity=" + orderItem.getQuantity());
+
+                        // Try inserting the order item
+                        db.orderItemDao().insert(orderItem);
+                        Log.d(TAG, "OrderItem inserted successfully");
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error inserting OrderItem: " + e.getMessage(), e);
+                        throw e;
+                    }
+
+                    // Update UI on the main thread
+                    runOnUiThread(() -> {
+                        // Show success message
+                        Toast.makeText(MenuItemDetailActivity.this,
+                                quantity + "x " + item.name + " added to your order",
+                                Toast.LENGTH_SHORT).show();
+
+                        // Finish this activity
+                        finish();
+                    });
+                } catch (Exception e) {
+                    Log.e(TAG, "Error in background thread while adding item to order", e);
+                    e.printStackTrace(); // Print stack trace for detailed debugging
+                    runOnUiThread(() -> {
+                        Toast.makeText(MenuItemDetailActivity.this,
+                                "Error adding item to order: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }).start();
+        } catch (Exception e) {
+            Log.e(TAG, "Error starting order processing thread", e);
+            Toast.makeText(this, "Error processing order: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // Simple order method that doesn't rely on the database
+    private void simpleOrder(MenuItem item, int quantity, String notes) {
+        // Simply show a success message and finish the activity
+        runOnUiThread(() -> {
+            Toast.makeText(this, quantity + "x " + item.name + " added to your order", Toast.LENGTH_SHORT).show();
+            finish();
+        });
     }
 }

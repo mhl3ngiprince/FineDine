@@ -4,37 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_luxury_pattern">
-
-    <!-- Luxury frame overlay -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/bg_luxe_frame"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- Decorative top gradient arc -->
-    <View
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:background="@drawable/circle_burgundy"
-        android:alpha="0.2"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="parent"
-        android:translationY="-100dp"
-        android:translationX="50dp" />
+    android:background="@drawable/bg_luxury_pattern"
+    tools:context=".SplashActivity">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/logoCardView"
-        android:layout_width="220dp"
-        android:layout_height="220dp"
-        android:elevation="8dp"
-        app:cardCornerRadius="110dp"
-        app:cardBackgroundColor="@color/luxe_burgundy"
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        app:cardCornerRadius="90dp"
+        app:cardElevation="12dp"
+        app:cardBackgroundColor="@color/gradient_dark_end"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -42,83 +21,66 @@
         app:layout_constraintVertical_bias="0.4">
 
         <ImageView
-            android:id="@+id/logoImageView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="24dp"
+            android:id="@+id/imageView"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:layout_gravity="center"
             android:src="@drawable/logoj"
-            android:contentDescription="@string/app_name" />
-
-        <!-- Gold corner accent -->
-        <View
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_gravity="end|bottom"
-            android:background="@drawable/corner_gold" />
+            android:contentDescription="Fine Dine Logo" />
     </androidx.cardview.widget.CardView>
 
     <TextView
-        android:id="@+id/titleTextView"
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         android:text="FINE DINE"
         android:textColor="@color/luxe_gold"
-        android:textSize="36sp"
+        android:textSize="40sp"
         android:textStyle="bold"
-        android:letterSpacing="0.15"
+        android:letterSpacing="0.1"
         android:fontFamily="serif"
-        android:layout_marginTop="48dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:shadowColor="@color/black"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="2"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.7" />
-
-    <!-- Gold divider -->
-    <View
-        android:id="@+id/dividerView"
-        android:layout_width="40dp"
-        android:layout_height="2dp"
-        android:background="@color/luxe_gold"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/titleTextView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/logoCardView" />
 
     <TextView
-        android:id="@+id/taglineTextView"
+        android:id="@+id/subtitleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="EXCEPTIONAL DINING EXPERIENCE"
-        android:textColor="@color/text_light"
-        android:textSize="14sp"
-        android:letterSpacing="0.2"
-        android:fontFamily="serif"
-        android:alpha="0.7"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/dividerView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <ProgressBar
-        android:id="@+id/splash_progress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Restaurant Management System"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:fontFamily="serif"
+        android:alpha="0.9"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.9"
-        android:indeterminateTint="@color/luxe_gold" />
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
-    <!-- Decorative bottom corner elements -->
-    <ImageView
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/corner_gold"
-        android:alpha="0.5"
+    <View
+        android:id="@+id/divider"
+        android:layout_width="80dp"
+        android:layout_height="2dp"
+        android:layout_marginTop="12dp"
+        android:background="@color/luxe_gold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/subtitleTextView" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="64dp"
+        android:indeterminateTint="@color/luxe_gold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="24dp" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

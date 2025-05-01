@@ -11,54 +11,56 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.OrderItemViewHolder> {
+public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.ViewHolder> {
     private final List<OrderItem> orderItems;
-    private final OnItemDeleteListener deleteListener;
+    private final OnItemClickListener listener;
 
-    public interface OnItemDeleteListener {
-        void onDeleteClick(int position);
+    public interface OnItemClickListener {
+        void onDeleteItem(int position);
     }
 
-    public OrderItemAdapter(List<OrderItem> orderItems, OnItemDeleteListener deleteListener) {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        public TextView tvName, tvQuantity;
+        public ImageButton btnDelete;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            tvName = itemView.findViewById(R.id.tvOrderItemName);
+            tvQuantity = itemView.findViewById(R.id.tvOrderItemQuantity);
+            btnDelete = itemView.findViewById(R.id.ibDeleteOrderItem);
+        }
+    }
+
+    public OrderItemAdapter(List<OrderItem> orderItems, OnItemClickListener listener) {
         this.orderItems = orderItems;
-        this.deleteListener = deleteListener;
+        this.listener = listener;
     }
 
     @NonNull
     @Override
-    public OrderItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_order_item, parent, false);
-        return new OrderItemViewHolder(view);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull OrderItemViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         OrderItem item = orderItems.get(position);
-        holder.bind(item, position, deleteListener);
+
+        holder.tvName.setText(item.getName());
+        holder.tvQuantity.setText("x" + item.getQuantity());
+
+        // Delete button click listener
+        holder.btnDelete.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onDeleteItem(position);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
         return orderItems.size();
-    }
-
-    static class OrderItemViewHolder extends RecyclerView.ViewHolder {
-        private final TextView itemName;
-        private final TextView itemQuantity;
-        private final ImageButton deleteButton;
-
-        public OrderItemViewHolder(@NonNull View itemView) {
-            super(itemView);
-            itemName = itemView.findViewById(R.id.tvOrderItemName);
-            itemQuantity = itemView.findViewById(R.id.tvOrderItemQuantity);
-            deleteButton = itemView.findViewById(R.id.ibDeleteOrderItem);
-        }
-
-        public void bind(OrderItem item, int position, OnItemDeleteListener listener) {
-            itemName.setText(item.getName());
-            itemQuantity.setText("x" + item.getQuantity());
-            deleteButton.setOnClickListener(v -> listener.onDeleteClick(position));
-        }
     }
 }

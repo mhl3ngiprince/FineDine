@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="12dp"
-    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="8dp"
+    android:layout_marginHorizontal="6dp"
     android:foreground="?attr/selectableItemBackground"
     app:cardCornerRadius="10dp"
     app:cardElevation="6dp"
@@ -19,7 +19,7 @@
         <!-- Food Image Container -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp">
+            android:layout_height="170dp">
 
             <!-- Gold trim at top -->
             <View
@@ -61,7 +61,7 @@
                 android:paddingVertical="4dp"
                 android:paddingHorizontal="12dp"
                 android:text="AVAILABLE"
-                android:textSize="10sp"
+                android:textSize="9sp"
                 android:textColor="@color/text_dark"
                 android:textStyle="bold"
                 android:letterSpacing="0.05"
@@ -125,7 +125,7 @@
                     android:layout_height="wrap_content"
                     android:text="SIGNATURE DISH"
                     android:textColor="@color/luxe_gold"
-                    android:textSize="11sp"
+                    android:textSize="10sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.15"
                     android:layout_marginBottom="6dp" />
@@ -136,11 +136,11 @@
                     android:layout_height="wrap_content"
                     android:text="Grilled Salmon Wellington"
                     android:textColor="@color/text_white"
-                    android:textSize="22sp"
+                    android:textSize="18sp"
                     android:textStyle="bold"
                     android:fontFamily="serif"
                     android:gravity="center"
-                    android:maxLines="2"
+                    android:maxLines="1"
                     android:ellipsize="end" />
 
                 <!-- Elegant Divider -->
@@ -159,10 +159,10 @@
                 android:layout_height="wrap_content"
                 android:text="Fresh Atlantic salmon fillet wrapped in a delicate puff pastry with wild mushroom duxelles and prosciutto, served with a champagne beurre blanc sauce and seasonal vegetables."
                 android:textColor="@color/text_light"
-                android:textSize="14sp"
+                android:textSize="12sp"
                 android:lineSpacingExtra="4dp"
                 android:gravity="center"
-                android:maxLines="4"
+                android:maxLines="3"
                 android:ellipsize="end" />
 
             <!-- Dish Features -->

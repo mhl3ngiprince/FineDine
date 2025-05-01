@@ -4,15 +4,19 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -24,6 +28,10 @@ public class ReservationActivity extends BaseActivity {
     private int selectedHour = 18; // Default 6 PM
     private int selectedMinute = 0;
     private int partySize = 2;
+    private TextInputEditText etSpecialRequests;
+    private TextInputEditText etCustomerName;
+    private TextInputEditText etPhone;
+    private TextInputEditText etEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +41,26 @@ public class ReservationActivity extends BaseActivity {
         try {
             // Setup navigation panel
             setupNavigationPanel("Reservations");
+
+            // Initialize input fields
+            etSpecialRequests = findViewById(R.id.etSpecialRequests);
+            etCustomerName = findViewById(R.id.etCustomerName);
+            etPhone = findViewById(R.id.etPhone);
+            etEmail = findViewById(R.id.etEmail);
+
+            // Prefill user name and contact if available
+            if (prefsManager != null) {
+                String userName = prefsManager.getUserName();
+                if (userName != null && !userName.isEmpty() && etCustomerName != null) {
+                    etCustomerName.setText(userName);
+                }
+            }
+
+            // Setup button click listeners
+            findViewById(R.id.btnDate).setOnClickListener(v -> selectDate(v));
+            findViewById(R.id.btnTime).setOnClickListener(v -> selectTime(v));
+            findViewById(R.id.etPartySize).setOnClickListener(v -> changePartySize(v));
+            findViewById(R.id.btnSubmitReservation).setOnClickListener(v -> confirmReservation(v));
 
             updateDateTimeDisplay();
         } catch (Exception e) {
@@ -124,7 +152,121 @@ public class ReservationActivity extends BaseActivity {
 
     public void confirmReservation(View view) {
         try {
-            Toast.makeText(this, "Thank you! Your reservation is confirmed.", Toast.LENGTH_LONG).show();
+            // Get input values
+            String name = etCustomerName.getText().toString().trim();
+            String phone = etPhone.getText().toString().trim();
+            String email = etEmail.getText().toString().trim();
+            String specialRequests = etSpecialRequests.getText().toString().trim();
+
+            // Validate input fields
+            if (name.isEmpty()) {
+                etCustomerName.setError("Name is required");
+                etCustomerName.requestFocus();
+                return;
+            }
+
+            if (phone.isEmpty()) {
+                etPhone.setError("Phone number is required");
+                etPhone.requestFocus();
+                return;
+            }
+
+            // Show progress dialog
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Submitting reservation...");
+            builder.setCancelable(false);
+            AlertDialog progressDialog = builder.create();
+            progressDialog.show();
+
+            // Save reservation in database
+            new Thread(() -> {
+                try {
+                    // Get database instance
+                    AppDatabase db = AppDatabase.getDatabase(ReservationActivity.this);
+
+                    // Create new reservation
+                    Reservation reservation = new Reservation();
+
+                    // Format date for database
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                    String formattedDate = dateFormat.format(selectedDate.getTime());
+
+                    // Format time for database
+                    String formattedTime = String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute);
+
+                    reservation.setReservation_date(formattedDate);
+                    reservation.setReservation_time(formattedTime);
+                    reservation.setNumber_of_guests(partySize);
+                    reservation.setCustomerName(name);
+                    reservation.setPhone(phone);
+                    reservation.setEmail(email);
+                    reservation.setSpecialRequests(specialRequests);
+                    reservation.setStatus("pending");
+
+                    // Get user ID from SharedPreferences if available
+                    int userId = 1; // Default ID
+                    if (prefsManager != null) {
+                        userId = prefsManager.getUserId();
+                        if (userId <= 0) userId = 1;
+                    }
+                    reservation.setUser_id(userId);
+
+                    // Insert reservation and get ID
+                    long reservationId = db.reservationDao().insert(reservation);
+                    final long finalReservationId = reservationId;
+
+                    // Update UI on success
+                    runOnUiThread(() -> {
+                        try {
+                            if (progressDialog.isShowing()) {
+                                progressDialog.dismiss();
+                            }
+
+                            // Build confirmation message
+                            String confirmationMessage = String.format(
+                                    "Your reservation for %d people on %s at %s has been confirmed! Reservation #%d",
+                                    partySize,
+                                    dateFormat.format(selectedDate.getTime()),
+                                    formattedTime,
+                                    finalReservationId
+                            );
+
+                            // Show success dialog with option to view menu
+                            AlertDialog.Builder successBuilder = new AlertDialog.Builder(this);
+                            successBuilder.setTitle("Reservation Confirmed!");
+                            successBuilder.setMessage(confirmationMessage);
+                            successBuilder.setPositiveButton("View Menu", (dialog, which) -> {
+                                // Navigate to menu (OrderActivity)
+                                Intent intent = new Intent(this, OrderActivity.class);
+                                intent.putExtra("user_role", "customer");
+                                startActivity(intent);
+                            });
+                            successBuilder.setNegativeButton("OK", null);
+                            successBuilder.show();
+
+                            // Clear input fields
+                            etSpecialRequests.setText("");
+
+                            // Send notification
+                            sendConfirmationNotification();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error updating UI after reservation submission", e);
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.e(TAG, "Error submitting reservation", e);
+
+                    // Update UI on error
+                    runOnUiThread(() -> {
+                        if (progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                        Toast.makeText(ReservationActivity.this,
+                                "Error submitting reservation: " + e.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                    });
+                }
+            }).start();
         } catch (Exception e) {
             Log.e(TAG, "Error confirming reservation", e);
             Toast.makeText(this, "Error confirming reservation", Toast.LENGTH_SHORT).show();

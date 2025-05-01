@@ -26,9 +26,25 @@ public class ImageLoader {
                 .into(imageView);
     }
 
+    public static void loadMenuImage(Context context, int resourceId, ImageView imageView) {
+        Glide.with(context)
+                .load(resourceId)
+                .placeholder(R.drawable.ic_food_placeholder)
+                .error(R.drawable.ic_broken_image)
+                .into(imageView);
+    }
+
     public static void loadProfileImage(Context context, String imageUrl, ImageView imageView) {
         Glide.with(context)
                 .load(imageUrl)
+                .circleCrop()
+                .placeholder(R.drawable.ic_profile_placeholder)
+                .into(imageView);
+    }
+
+    public static void loadProfileImage(Context context, int resourceId, ImageView imageView) {
+        Glide.with(context)
+                .load(resourceId)
                 .circleCrop()
                 .placeholder(R.drawable.ic_profile_placeholder)
                 .into(imageView);

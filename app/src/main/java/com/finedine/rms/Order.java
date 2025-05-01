@@ -28,8 +28,9 @@ public class Order {
     @ColumnInfo(name = "customerNotes")
     private String customerNotes;
 
-    long order_time;
+    private long order_time;
     public int waiterId;
+    private double total;
 
     public Order(int tableNumber, String status) {
         this.tableNumber = tableNumber;
@@ -72,5 +73,21 @@ public class Order {
 
     public void setCustomerNotes(String customerNotes) {
         this.customerNotes = customerNotes;
+    }
+
+    public int getWaiterId() {
+        return waiterId;
+    }
+
+    public void setWaiterId(int waiterId) {
+        this.waiterId = waiterId;
+    }
+
+    public double getTotal() {
+        return total;
+    }
+
+    public void setTotal(double total) {
+        this.total = total;
     }
 }

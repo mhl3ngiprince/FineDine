@@ -177,10 +177,6 @@ public class LoginActivity extends AppCompatActivity {
         } else if (email.equals("customer") && password.equals("customer")) {
             handleSuccessfulLogin("customer");
             return;
-        } else if (email.contains("@") && password.length() >= 4) {
-            // Any valid email format with password >= 4 chars
-            handleSuccessfulLogin("customer");
-            return;
         }
 
         // Invalid credentials
@@ -189,8 +185,23 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void getUserRole(String uid, String email) {
-        // TO DO: implement getting user role from server or database
-        handleSuccessfulLogin("customer");
+        // Determine role based on email prefix for Firebase users
+        String role = "customer";
+
+        if (email != null) {
+            email = email.toLowerCase();
+            if (email.startsWith("admin")) {
+                role = "admin";
+            } else if (email.startsWith("manager")) {
+                role = "manager";
+            } else if (email.startsWith("chef")) {
+                role = "chef";
+            } else if (email.startsWith("waiter")) {
+                role = "waiter";
+            }
+        }
+
+        handleSuccessfulLogin(role);
     }
 
     private void handleSuccessfulLogin(String role) {
@@ -223,10 +234,12 @@ public class LoginActivity extends AppCompatActivity {
                     break;
                 case "customer":
                 default:
-                    intent = new Intent(this, ReservationActivity.class);
+                    // Change to OrderActivity (menu) for customers
+                    intent = new Intent(this, OrderActivity.class);
                     break;
             }
 
+            Log.d(TAG, "Navigating to " + intent.getComponent().getClassName() + " for role: " + role);
             intent.putExtra("user_role", role);
 
             startActivity(intent);
@@ -306,7 +319,8 @@ public class LoginActivity extends AppCompatActivity {
                     break;
                 case "customer":
                 default:
-                    intent = new Intent(this, ReservationActivity.class);
+                    // Change to OrderActivity (menu) for customers
+                    intent = new Intent(this, OrderActivity.class);
                     break;
             }
 

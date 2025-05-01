@@ -3,8 +3,11 @@ package com.finedine.rms;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -65,6 +68,8 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
         private final TextView prepTime;
         private final TextView calories;
         private final TextView spiceLevel;
+        private final Button btnAddToOrder;
+        private final ImageButton btnFavorite;
 
         public MenuViewHolder(View itemView) {
             super(itemView);
@@ -76,30 +81,61 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
             prepTime = itemView.findViewById(R.id.tvPrepTime);
             calories = itemView.findViewById(R.id.tvCalories);
             spiceLevel = itemView.findViewById(R.id.tvSpiceLevel);
+            btnAddToOrder = itemView.findViewById(R.id.btnAddToOrder);
+            btnFavorite = itemView.findViewById(R.id.btnFavorite);
         }
 
         public void bind(MenuItem item, OnItemClickListener listener) {
             itemName.setText(item.name);
             itemDescription.setText(item.description);
-            itemPrice.setText(String.format("R%.2f", item.price));
-            itemCategory.setText(item.category);
-            prepTime.setText(String.format("Prep Time: %s minutes", item.prepTimeMinutes));
-            calories.setText(String.format("Calories: %s", item.calories));
-            spiceLevel.setText(String.format("Spice Level: %s", item.spiceLevel));
+            itemPrice.setText(String.format("%.2f", item.price));
+            itemCategory.setText(item.category.toUpperCase());
+            prepTime.setText(String.format("%d min", item.prepTimeMinutes));
+            calories.setText(String.format("%d cal", item.calories));
+            spiceLevel.setText(item.spiceLevel);
 
             RequestOptions requestOptions = new RequestOptions();
             requestOptions.centerCrop();
 
+            int imageResource = item.imageResourceId;
+            if (imageResource <= 0) {
+                imageResource = R.drawable.placeholder_food;
+            }
+
             Glide.with(itemView.getContext())
-                    .load(item.imageUrl)
+                    .load(imageResource)
                     .apply(requestOptions)
                     .transition(DrawableTransitionOptions.withCrossFade())
                     .placeholder(R.drawable.placeholder_food)
                     .error(R.drawable.placeholder_food)
                     .into(itemImage);
 
+            // Set click listeners for all interactive elements
             itemView.setOnClickListener(v -> listener.onItemClick(item));
-            itemView.findViewById(R.id.btnAddToOrder).setOnClickListener(v -> listener.onItemClick(item));
+
+            // Add to order button
+            btnAddToOrder.setOnClickListener(v -> {
+                listener.onItemClick(item);
+                Toast.makeText(itemView.getContext(),
+                        item.name + " added to order", Toast.LENGTH_SHORT).show();
+            });
+
+            // Favorite button
+            btnFavorite.setOnClickListener(v -> {
+                // Toggle favorite status
+                btnFavorite.setImageResource(
+                        btnFavorite.getTag() != null && (Boolean) btnFavorite.getTag()
+                                ? R.drawable.ic_favorite_border
+                                : R.drawable.ic_favorite);
+
+                btnFavorite.setTag(btnFavorite.getTag() != null && (Boolean) btnFavorite.getTag() ? false : true);
+
+                Toast.makeText(itemView.getContext(),
+                        (btnFavorite.getTag() != null && (Boolean) btnFavorite.getTag())
+                                ? item.name + " added to favorites"
+                                : item.name + " removed from favorites",
+                        Toast.LENGTH_SHORT).show();
+            });
         }
     }
 }

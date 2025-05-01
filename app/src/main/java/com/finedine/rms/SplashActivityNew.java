@@ -72,8 +72,8 @@ public class SplashActivityNew extends AppCompatActivity {
     private void createAndStartAnimations() {
         try {
             // Find views
-            ImageView logoView = findViewById(com.finedine.rms.R.id.logoImageView);
-            TextView textView = findViewById(com.finedine.rms.R.id.titleTextView);
+            ImageView logoView = findViewById(com.finedine.rms.R.id.imageView);
+            TextView textView = findViewById(com.finedine.rms.R.id.textView);
 
             // Create fade-in animation
             AlphaAnimation fadeIn = new AlphaAnimation(0.0f, 1.0f);

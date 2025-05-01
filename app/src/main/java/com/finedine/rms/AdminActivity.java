@@ -3,9 +3,16 @@ package com.finedine.rms;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
+
+import com.finedine.rms.utils.EmailSender;
+import com.finedine.rms.utils.SharedPrefsManager;
+import com.google.android.material.textfield.TextInputEditText;
 
 public class AdminActivity extends BaseActivity {
     private static final String TAG = "AdminActivity";
@@ -28,6 +35,8 @@ public class AdminActivity extends BaseActivity {
             CardView cardStaff = findViewById(R.id.cardStaff);
             CardView cardMenu = findViewById(R.id.cardMenu);
             CardView backButton = findViewById(R.id.backButton);
+            CardView cardEmailSettings = findViewById(R.id.cardEmailSettings);
+            CardView cardBackup = findViewById(R.id.cardBackup);
 
             if (cardStaff != null) {
                 cardStaff.setOnClickListener(v -> {
@@ -66,6 +75,18 @@ public class AdminActivity extends BaseActivity {
                 });
             }
 
+            if (cardEmailSettings != null) {
+                cardEmailSettings.setOnClickListener(v -> {
+                    onEmailSettingsClicked(v);
+                });
+            }
+
+            if (cardBackup != null) {
+                cardBackup.setOnClickListener(v -> {
+                    onBackupClicked(v);
+                });
+            }
+
             // Set welcome message
             String role = getIntent().getStringExtra("user_role");
             if (role == null) role = "admin";
@@ -84,5 +105,47 @@ public class AdminActivity extends BaseActivity {
             Log.e(TAG, "Error initializing AdminActivity", e);
             Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void onBackupClicked(View view) {
+        Toast.makeText(this, "Backup/Restore functionality coming soon", Toast.LENGTH_SHORT).show();
+    }
+
+    public void onEmailSettingsClicked(View view) {
+        configureEmailSettings();
+    }
+
+    private void configureEmailSettings() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Email Settings");
+
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_email_settings, null);
+        builder.setView(dialogView);
+
+        TextInputEditText etGmailEmail = dialogView.findViewById(R.id.etGmailEmail);
+        TextInputEditText etGmailPassword = dialogView.findViewById(R.id.etGmailPassword);
+        TextInputEditText etOutlookEmail = dialogView.findViewById(R.id.etOutlookEmail);
+        TextInputEditText etOutlookPassword = dialogView.findViewById(R.id.etOutlookPassword);
+
+        builder.setPositiveButton("Save", (dialog, which) -> {
+            // Save the email settings
+            String gmailEmail = etGmailEmail.getText().toString().trim();
+            String gmailPassword = etGmailPassword.getText().toString().trim();
+            String outlookEmail = etOutlookEmail.getText().toString().trim();
+            String outlookPassword = etOutlookPassword.getText().toString().trim();
+
+            if (!gmailEmail.isEmpty() && !gmailPassword.isEmpty() &&
+                    !outlookEmail.isEmpty() && !outlookPassword.isEmpty()) {
+
+                // Save credentials
+                EmailSender.setEmailCredentials(this, gmailEmail, gmailPassword, outlookEmail, outlookPassword);
+                Toast.makeText(this, "Email settings saved", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Please fill in all email settings", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
     }
 }

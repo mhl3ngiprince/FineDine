@@ -28,8 +28,12 @@ public class FineDineApplication extends Application {
 
             // Initialize Firebase safely
             try {
-                FirebaseApp.initializeApp(this);
-                Log.d(TAG, "Firebase initialized successfully");
+                if (FirebaseApp.getApps(this).isEmpty()) {
+                    FirebaseApp.initializeApp(this);
+                    Log.d(TAG, "Firebase initialized successfully");
+                } else {
+                    Log.d(TAG, "Firebase was already initialized");
+                }
             } catch (Exception e) {
                 Log.e(TAG, "Error initializing Firebase, continuing without it", e);
             }
@@ -57,8 +61,9 @@ public class FineDineApplication extends Application {
      */
     public static boolean isFirebaseInitialized() {
         try {
-            return FirebaseApp.getInstance() != null;
+            return !FirebaseApp.getApps(applicationContext).isEmpty();
         } catch (Exception e) {
+            Log.e(TAG, "Error checking Firebase initialization", e);
             return false;
         }
     }

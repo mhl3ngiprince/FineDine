@@ -181,19 +181,30 @@ public class BaseActivity extends AppCompatActivity {
             if (menuBtn != null) {
                 Log.d(TAG, "Setting up menu button with special attention");
                 menuBtn.setOnClickListener(v -> {
-                    Log.d(TAG, "Menu button clicked! Navigating to MenuManagementActivity");
+                    Log.d(TAG, "Menu button clicked!");
                     Toast.makeText(this, "Opening Menu...", Toast.LENGTH_SHORT).show();
                     try {
-                        Class<?> activityClass = Class.forName("com.finedine.rms.MenuManagementActivity");
-                        if (isActivityRegisteredInManifest(activityClass)) {
-                            Intent intent = new Intent(this, activityClass);
-                            intent.putExtra("user_role", prefsManager != null ? prefsManager.getUserRole() : "customer");
+                        // Determine which activity to open based on user role
+                        String role = prefsManager != null ? prefsManager.getUserRole() : "customer";
+                        Class<?> targetClass;
+
+                        if ("customer".equalsIgnoreCase(role)) {
+                            // Customers see the menu via OrderActivity
+                            targetClass = Class.forName("com.finedine.rms.OrderActivity");
+                        } else {
+                            // Staff use MenuManagementActivity
+                            targetClass = Class.forName("com.finedine.rms.MenuManagementActivity");
+                        }
+
+                        if (isActivityRegisteredInManifest(targetClass)) {
+                            Intent intent = new Intent(this, targetClass);
+                            intent.putExtra("user_role", role);
                             startActivity(intent);
                         } else {
-                            Toast.makeText(this, "Error: MenuManagementActivity not registered in manifest", Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, "Error: Activity not registered in manifest", Toast.LENGTH_LONG).show();
                         }
                     } catch (Exception e) {
-                        Log.e(TAG, "Failed to start MenuManagementActivity", e);
+                        Log.e(TAG, "Failed to start menu activity", e);
                         Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });
@@ -328,11 +339,11 @@ public class BaseActivity extends AppCompatActivity {
 
                 case "customer":
                 default:
-                    // Customer can only access reservations
+                    // Customer can only access reservations and menu
                     if (ordersBtn != null) ordersBtn.setVisibility(View.GONE);
                     if (dashboardBtn != null) dashboardBtn.setVisibility(View.GONE);
                     if (staffBtn != null) staffBtn.setVisibility(View.GONE);
-                    if (menuBtn != null) menuBtn.setVisibility(View.GONE);
+                    if (menuBtn != null) menuBtn.setVisibility(View.VISIBLE);
                     if (inventoryBtn != null) inventoryBtn.setVisibility(View.GONE);
                     if (kitchenBtn != null) kitchenBtn.setVisibility(View.GONE);
                     break;
@@ -398,6 +409,48 @@ public class BaseActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Log.e(TAG, "Error setting up navigation button for " + destinationClass.getSimpleName(), e);
+        }
+    }
+
+    private void navigateBasedOnRole(String role) {
+        try {
+            Log.d(TAG, "Navigating to role: " + role);
+            Intent intent;
+
+            if (role == null || role.isEmpty()) {
+                role = "customer";
+            }
+
+            switch (role.toLowerCase()) {
+                case "admin":
+                    intent = new Intent(this, AdminActivity.class);
+                    break;
+                case "manager":
+                    intent = new Intent(this, ManagerDashboardActivity.class);
+                    break;
+                case "chef":
+                    intent = new Intent(this, KitchenActivity.class);
+                    break;
+                case "waiter":
+                    intent = new Intent(this, OrderActivity.class);
+                    break;
+                case "customer":
+                default:
+                    // Change to OrderActivity (menu) for customers
+                    intent = new Intent(this, OrderActivity.class);
+                    break;
+            }
+
+            // Pass role in intent
+            intent.putExtra("user_role", role);
+
+            Log.d(TAG, "Role-based navigation: " + role + " → " + intent.getComponent().getClassName());
+            // Start activity
+            startActivity(intent);
+            finish();
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error navigating based on role", e);
         }
     }
 

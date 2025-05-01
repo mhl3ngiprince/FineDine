@@ -22,9 +22,10 @@
 
         <!-- Section Title -->
         <TextView
+            android:id="@+id/activityTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="CREATE ORDER"
+            android:text="OUR MENU"
             android:textColor="@color/luxe_gold"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -139,7 +140,28 @@
             android:textColor="@color/luxe_gold"
             android:layout_marginBottom="8dp" />
 
-        <!-- Menu Items List -->
+        <!-- Search Bar -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:boxStrokeColor="@color/luxe_gold"
+            app:hintTextColor="@color/luxe_gold"
+            app:boxBackgroundColor="@color/transparent_black"
+            app:startIconDrawable="@android:drawable/ic_menu_search"
+            app:startIconTint="@color/luxe_gold"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <EditText
+                android:id="@+id/etSearchMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Search menu items..."
+                android:textColor="@color/text_white"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Menu Items Grid -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/menuRecyclerView"
             android:layout_width="match_parent"
@@ -149,7 +171,7 @@
             android:clipToPadding="false"
             android:padding="12dp"
             android:scrollbars="vertical"
-            tools:listitem="@layout/item_order_entry" />
+            tools:listitem="@layout/item_menu" />
 
         <!-- Current Order Section -->
         <TextView
@@ -172,6 +194,20 @@
             android:padding="12dp"
             android:scrollbars="vertical"
             tools:listitem="@layout/item_order_item" />
+
+        <!-- Order Total -->
+        <TextView
+            android:id="@+id/tvOrderTotal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Total: R0.00"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/luxe_gold"
+            android:gravity="end"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:paddingEnd="16dp" />
 
         <!-- Action Button -->
         <Button

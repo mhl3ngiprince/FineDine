@@ -80,7 +80,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         holder.tvSpiceLevel.setText(String.format("Spice Level: %s", item.spiceLevel));
 
         Glide.with(holder.itemView.getContext())
-                .load(item.imageUrl)
+                .load(item.imageResourceId)
                 .apply(new RequestOptions().centerCrop())
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .placeholder(R.drawable.placeholder_food)
