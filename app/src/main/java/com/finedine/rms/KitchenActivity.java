@@ -1,245 +1,318 @@
 package com.finedine.rms;
 
-import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.finedine.rms.R;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.finedine.rms.utils.EmailSender;
+import com.finedine.rms.utils.NotificationUtils;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.Locale;
+import java.util.concurrent.ExecutorService;
 
-import com.finedine.rms.utils.RoleManager;
-import com.finedine.rms.utils.SharedPrefsManager;
-
-public class KitchenActivity extends BaseActivity {
-    private RecyclerView rvOrders;
-    private OrderAdapter orderAdapter;
-    private final List<Order> orders = new ArrayList<>();
-    private DatabaseReference ordersRef;
-    private DatabaseReference orderItemsRef;
-    private SharedPrefsManager prefsManager;
+public class KitchenActivity extends AppCompatActivity {
     private static final String TAG = "KitchenActivity";
+
+    private RecyclerView recyclerView;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private TextView emptyView;
+    private TextView kitchenNameView;
+    private TextView timeView;
+    private TextView dateView;
+    private FloatingActionButton refreshButton;
+    private TextView orderCountView;
+
+    private List<Order> activeOrders;
+    private KitchenOrderAdapter orderAdapter;
+
+    private AppDatabase appDatabase;
+    private ExecutorService databaseExecutor;
+    private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, MMM d, yyyy", Locale.getDefault());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kitchen);
 
-        // Initialize SharedPrefsManager
-        prefsManager = new SharedPrefsManager(this);
+        try {
+            // Initialize database
+            appDatabase = ((FineDineApplication) getApplication()).getDatabase();
+            databaseExecutor = ((FineDineApplication) getApplication()).getDatabaseExecutor();
 
-        // Verify user role
-        String userRole = prefsManager.getUserRole();
-        Log.d(TAG, "KitchenActivity - Current user role: " + userRole);
-
-        // Get intent extras if coming from login/registration
-        Intent intent = getIntent();
-        if (intent.hasExtra("user_role")) {
-            String intentRole = intent.getStringExtra("user_role");
-            Log.d(TAG, "Role from intent: " + intentRole);
-
-            // If intent provides a role and it's different from what's in prefs, update prefs
-            if (intentRole != null && !intentRole.isEmpty() && !intentRole.equals(userRole)) {
-                Log.w(TAG, "Role mismatch between SharedPrefs and Intent. Updating to: " + intentRole);
-                prefsManager.setUserRole(intentRole);
-                userRole = intentRole;
-            }
-        }
-
-        // Check if role is valid for this activity
-        if (!RoleManager.ROLE_CHEF.equals(userRole) && !RoleManager.ROLE_MANAGER.equals(userRole)) {
-            Log.e(TAG, "Unauthorized role for KitchenActivity: " + userRole);
-            Toast.makeText(this, "Unauthorized access. Chef or manager role required.", Toast.LENGTH_SHORT).show();
-
-            // Launch the OrderActivity as a fallback
-            try {
-                startActivity(new Intent(this, OrderActivity.class));
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to launch fallback activity", e);
+            if (appDatabase == null || databaseExecutor == null) {
+                Toast.makeText(this, "Error: Database not initialized", Toast.LENGTH_LONG).show();
+                finish();
+                return;
             }
 
-            finish();
-            return;
-        }
+            // Set up UI components
+            recyclerView = findViewById(R.id.kitchenOrdersList);
+            swipeRefreshLayout = findViewById(R.id.swipeRefresh);
+            emptyView = findViewById(R.id.emptyView);
+            kitchenNameView = findViewById(R.id.kitchenName);
+            timeView = findViewById(R.id.timeView);
+            dateView = findViewById(R.id.dateView);
+            refreshButton = findViewById(R.id.refreshFab);
+            orderCountView = findViewById(R.id.orderCountView);
 
-        // Initialize Firebase Database references
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        ordersRef = database.getReference("orders");
-        orderItemsRef = database.getReference("orderItems");
+            // Initialize activeOrders
+            activeOrders = new ArrayList<>();
 
-        // Setup navigation panel
-        setupNavigationPanel("Kitchen Orders");
-
-        initializeViews();
-        setupRecyclerView();
-        loadActiveOrders();
-    }
-
-    private void initializeViews() {
-        rvOrders = findViewById(R.id.rvOrders);
-    }
-
-    private void setupRecyclerView() {
-        rvOrders.setLayoutManager(new LinearLayoutManager(this));
-        orderAdapter = new OrderAdapter(orders, this::onOrderSelected);
-        rvOrders.setAdapter(orderAdapter);
-    }
-
-    private void loadActiveOrders() {
-        ordersRef.orderByChild("status").addValueEventListener(new ValueEventListener() {
-            @SuppressLint("NotifyDataSetChanged")
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                orders.clear();
-                for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
-                    Order order = orderSnapshot.getValue(Order.class);
-                    if (order != null && ("received".equals(order.getStatus()) ||
-                            "preparing".equals(order.getStatus()))) {
-                        order.setOrderId(Long.parseLong(Objects.requireNonNull(orderSnapshot.getKey())));
-                        orders.add(order);
-                    }
+            // Setup RecyclerView
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            orderAdapter = new KitchenOrderAdapter(this, activeOrders, (order, action) -> {
+                if (order != null) {
+                    handleOrderAction(order, action);
                 }
-                orderAdapter.notifyDataSetChanged();
-            }
+            });
+            recyclerView.setAdapter(orderAdapter);
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(KitchenActivity.this, "Failed to load orders: " +
-                        databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+            // Setup SwipeRefreshLayout
+            swipeRefreshLayout.setOnRefreshListener(this::refreshOrders);
+
+            // Setup refresh button
+            refreshButton.setOnClickListener(v -> refreshOrders());
+
+            // Initial data load
+            updateDateTime();
+            refreshOrders();
+        } catch (Exception e) {
+            Log.e("KitchenActivity", "Error initializing Kitchen: " + e.getMessage(), e);
+            Toast.makeText(this, "Error initializing Kitchen screen", Toast.LENGTH_LONG).show();
+            finish();
+        }
     }
 
-    private void onOrderSelected(Order order) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Order #" + order.getOrderId() + " - Table " + order.getTableNumber());
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshOrders();
+    }
 
-        View view = LayoutInflater.from(this).inflate(R.layout.dialog_order_details, null);
-        RecyclerView rvItems = view.findViewById(R.id.rvOrderItems);
-        Button btnUpdateStatus = view.findViewById(R.id.btnUpdateStatus);
+    private void refreshOrders() {
+        swipeRefreshLayout.setRefreshing(true);
 
-        rvItems.setLayoutManager(new LinearLayoutManager(this));
-        List<OrderItem> items = new ArrayList<>();
+        try {
+            if (databaseExecutor == null || appDatabase == null) {
+                Log.e("KitchenActivity", "Database or executor null");
+                swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(this, "Database connection error", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-        // Load order items from Firebase
-        orderItemsRef.orderByChild("orderId").equalTo(order.getOrderId())
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for (DataSnapshot itemSnapshot : dataSnapshot.getChildren()) {
-                            OrderItem item = itemSnapshot.getValue(OrderItem.class);
-                            if (item != null) {
-                                items.add(item);
+            databaseExecutor.execute(() -> {
+                try {
+                    // Get pending and preparing orders
+                    List<Order> newOrders = new ArrayList<>();
+
+                    try {
+                        List<Order> pendingOrders = appDatabase.orderDao().getOrdersByStatus("pending");
+                        if (pendingOrders != null) {
+                            newOrders.addAll(pendingOrders);
+                        }
+                    } catch (Exception e) {
+                        Log.e("KitchenActivity", "Error loading pending orders: " + e.getMessage(), e);
+                    }
+
+                    try {
+                        List<Order> preparingOrders = appDatabase.orderDao().getOrdersByStatus("preparing");
+                        if (preparingOrders != null) {
+                            newOrders.addAll(preparingOrders);
+                        }
+                    } catch (Exception e) {
+                        Log.e("KitchenActivity", "Error loading preparing orders: " + e.getMessage(), e);
+                    }
+
+                    // For each order, fetch the items separately
+                    List<OrderWithItems> ordersWithItems = new ArrayList<>();
+                    for (Order order : newOrders) {
+                        try {
+                            if (order != null && order.getOrderId() > 0) {
+                                OrderWithItems orderWithItems = appDatabase.orderDao().getOrderWithItems(order.getOrderId());
+                                if (orderWithItems != null && orderWithItems.orderItems != null && !orderWithItems.orderItems.isEmpty()) {
+                                    ordersWithItems.add(orderWithItems);
+                                }
+                            }
+                        } catch (Exception e) {
+                            Log.e("KitchenActivity", "Error loading items for order " + order.getOrderId() + ": " + e.getMessage(), e);
+                        }
+                    }
+
+                    // Convert to UI-ready list
+                    final List<Order> finalOrders = new ArrayList<>();
+                    for (OrderWithItems orderWithItems : ordersWithItems) {
+                        if (orderWithItems != null && orderWithItems.order != null) {
+                            finalOrders.add(orderWithItems.order);
+                        }
+                    }
+
+                    // Update UI on the main thread
+                    runOnUiThread(() -> {
+                        try {
+                            if (isFinishing() || isDestroyed()) return;
+
+                            activeOrders.clear();
+                            activeOrders.addAll(finalOrders);
+
+                            if (orderAdapter != null) {
+                                orderAdapter.notifyDataSetChanged();
+                            }
+
+                            if (orderCountView != null) {
+                                orderCountView.setText(String.valueOf(activeOrders.size()));
+                            }
+
+                            if (activeOrders.isEmpty()) {
+                                if (emptyView != null) emptyView.setVisibility(View.VISIBLE);
+                                if (recyclerView != null) recyclerView.setVisibility(View.GONE);
+                            } else {
+                                if (emptyView != null) emptyView.setVisibility(View.GONE);
+                                if (recyclerView != null) recyclerView.setVisibility(View.VISIBLE);
+                            }
+
+                            if (swipeRefreshLayout != null) {
+                                swipeRefreshLayout.setRefreshing(false);
+                            }
+                            updateDateTime();
+                        } catch (Exception e) {
+                            Log.e("KitchenActivity", "Error updating UI: " + e.getMessage(), e);
+                            if (swipeRefreshLayout != null) {
+                                swipeRefreshLayout.setRefreshing(false);
                             }
                         }
-                        com.finedine.rms.OrderItemAdapter adapter = new com.finedine.rms.OrderItemAdapter(
-                                items,
-                                position -> { /* No deletion in kitchen view */ }
-                        );
-                        rvItems.setAdapter(adapter);
+                    });
+                } catch (Exception e) {
+                    Log.e("KitchenActivity", "Error refreshing orders: " + e.getMessage(), e);
+                    runOnUiThread(() -> {
+                        if (swipeRefreshLayout != null) {
+                            swipeRefreshLayout.setRefreshing(false);
+                        }
+                        Toast.makeText(KitchenActivity.this, "Error loading orders", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
+        } catch (Exception e) {
+            Log.e("KitchenActivity", "Error executing database query: " + e.getMessage(), e);
+            swipeRefreshLayout.setRefreshing(false);
+            Toast.makeText(this, "Error connecting to database", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void updateDateTime() {
+        Date now = new Date();
+        timeView.setText(timeFormat.format(now));
+        dateView.setText(dateFormat.format(now));
+    }
+
+    private void handleOrderAction(Order order, String action) {
+        if (order == null) return;
+
+        try {
+            if (databaseExecutor == null || appDatabase == null) {
+                Toast.makeText(this, "Database connection error", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            databaseExecutor.execute(() -> {
+                try {
+                    if ("start".equals(action)) {
+                        // Update order status to preparing
+                        appDatabase.orderDao().updateOrderStatus(order.getOrderId(), "preparing");
+
+                        runOnUiThread(() -> {
+                            try {
+                                Toast.makeText(this, "Started preparing order #" + order.getOrderId(), Toast.LENGTH_SHORT).show();
+                                refreshOrders();
+                            } catch (Exception e) {
+                                Log.e("KitchenActivity", "UI update error: " + e.getMessage(), e);
+                            }
+                        });
+
+                    } else if ("ready".equals(action)) {
+                        // Update order status to ready
+                        appDatabase.orderDao().updateOrderStatus(order.getOrderId(), "ready");
+
+                        runOnUiThread(() -> {
+                            try {
+                                Toast.makeText(this, "Order #" + order.getOrderId() + " is ready for serving", Toast.LENGTH_SHORT).show();
+
+                                // Send notification to customer if we have their contact information
+                                if (order.getCustomerPhone() != null && !order.getCustomerPhone().isEmpty()) {
+                                    notifyCustomerOrderReady(order);
+                                }
+
+                                refreshOrders();
+                            } catch (Exception e) {
+                                Log.e("KitchenActivity", "UI update error: " + e.getMessage(), e);
+                            }
+                        });
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error updating order status: " + e.getMessage(), e);
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "Error updating order: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error processing order action: " + e.getMessage(), e);
+            Toast.makeText(this, "Error processing action: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Notify customer that their order is ready
+     *
+     * @param order The order that is ready
+     */
+    private void notifyCustomerOrderReady(Order order) {
+        // In a real app, we would send an SMS to the customer's phone number
+        // For now, we'll just use a notification and, if available, email
+
+        // Create a notification for the customer
+        NotificationUtils notificationUtils = new NotificationUtils();
+        notificationUtils.sendOrderReadyNotification(this, (int) order.getOrderId(),
+                order.getTableNumber(), order.getCustomerName());
+
+        // If we have an email, also send an email notification
+        if (order.getCustomerEmail() != null && !order.getCustomerEmail().isEmpty()) {
+            sendOrderReadyEmail(order);
+        }
+    }
+
+    /**
+     * Send email notification to customer
+     *
+     * @param order The order that is ready
+     */
+    private void sendOrderReadyEmail(Order order) {
+        // Using Gmail provider
+        EmailSender.sendOrderReadyEmail(this, order.getCustomerEmail(),
+                order.getCustomerName(), order.getOrderId(), EmailSender.EmailProvider.GMAIL,
+                new EmailSender.EmailCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(TAG, "Email notification sent successfully to " + order.getCustomerEmail());
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Toast.makeText(KitchenActivity.this, "Failed to load items: " +
-                                databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                    public void onFailure(String error) {
+                        Log.e(TAG, "Failed to send email notification: " + error);
                     }
                 });
-
-        btnUpdateStatus.setOnClickListener(v -> updateOrderStatus(order));
-
-        builder.setView(view);
-        builder.setNegativeButton("Close", null);
-        builder.show();
-    }
-
-    private void updateOrderStatus(Order order) {
-        String[] statusOptions = {"Received", "Preparing", "Ready", "Served"};
-        int currentStatusIndex = Arrays.asList(statusOptions).indexOf(capitalize(order.getStatus()));
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Update Order Status");
-        builder.setSingleChoiceItems(statusOptions, currentStatusIndex,
-                (dialog, which) -> {
-                    String newStatus = statusOptions[which].toLowerCase();
-
-                    // Update status in Firebase
-                    Map<String, Object> updates = new HashMap<>();
-                    updates.put("status", newStatus);
-
-                    ordersRef.child(String.valueOf(order.getOrderId())).updateChildren(updates)
-                            .addOnSuccessListener(aVoid -> {
-                                loadActiveOrders();
-                                dialog.dismiss();
-                                if ("ready".equals(newStatus)) {
-                                    notifyWaiter(order);
-                                }
-                            })
-                            .addOnFailureListener(e -> {
-                                Toast.makeText(this, "Update failed: " + e.getMessage(),
-                                        Toast.LENGTH_SHORT).show();
-                            });
-                });
-
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
-    }
-
-    private void notifyWaiter(Order order) {
-        // Send notification to waiters through Firebase
-        DatabaseReference notificationsRef = FirebaseDatabase.getInstance()
-                .getReference("notifications");
-
-        String notificationId = notificationsRef.push().getKey();
-        Map<String, Object> notification = new HashMap<>();
-        notification.put("orderId", order.getOrderId());
-        notification.put("tableNumber", order.getTableNumber());
-        notification.put("message", "Order #" + order.getOrderId() + " is ready");
-        notification.put("timestamp", System.currentTimeMillis());
-        notification.put("read", false);
-
-        assert notificationId != null;
-        notificationsRef.child(notificationId).setValue(notification)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this,
-                            "Waiter notified that order #" + order.getOrderId() + " is ready",
-                            Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this,
-                            "Failed to notify waiter: " + e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
-                });
-    }
-
-    private String capitalize(String str) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-            if (str == null || str.isEmpty()) {
-                return str;
-            }
-        }
-        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 }

@@ -1,13 +1,19 @@
 package com.finedine.rms;
 
 import android.annotation.SuppressLint;
+import android.content.res.ColorStateList;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -20,6 +26,7 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
 
     private List<MenuItem> menuItems;
     private final OnMenuItemClickListener listener;
+    private int lastPosition = -1;
 
     public interface OnMenuItemClickListener {
         void onMenuItemClick(MenuItem item);
@@ -31,6 +38,8 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
         public TextView tvName, tvDescription, tvPrice, tvAvailability;
         public ImageView ivMenuItemImage;
         public TextView tvCategory, tvPrepTime, tvCalories, tvSpiceLevel;
+        public CardView cardView;
+        public View divider;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -43,6 +52,8 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
             tvPrepTime = itemView.findViewById(R.id.tvPrepTime);
             tvCalories = itemView.findViewById(R.id.tvCalories);
             tvSpiceLevel = itemView.findViewById(R.id.tvSpiceLevel);
+            cardView = itemView.findViewById(R.id.cardMenuItem);
+            divider = itemView.findViewById(R.id.menuItemDivider);
         }
     }
 
@@ -64,27 +75,80 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MenuItem item = menuItems.get(position);
 
+        // Apply styling for item name
         holder.tvName.setText(item.name);
+        holder.tvName.setTypeface(holder.tvName.getTypeface(), Typeface.BOLD);
+
+        // Apply styling for description
         holder.tvDescription.setText(item.description);
+
+        // Format and style price
         holder.tvPrice.setText(String.format("R%.2f", item.price));
-        holder.tvAvailability.setText(item.availability ? "Available" : "Not Available");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            holder.tvAvailability.setTextColor(item.availability ?
-                    holder.itemView.getContext().getColor(R.color.green) :
-                    holder.itemView.getContext().getColor(R.color.red));
+        holder.tvPrice.setTypeface(holder.tvPrice.getTypeface(), Typeface.BOLD);
+
+        // Set divider color
+        if (holder.divider != null) {
+            holder.divider.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(),
+                    R.color.restaurant_divider));
         }
 
+        // Apply elevation to card
+        if (holder.cardView != null) {
+            holder.cardView.setCardElevation(8f);
+            holder.cardView.setRadius(16f);
+
+            // Add ripple effect for better touch feedback
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                holder.cardView.setForeground(ContextCompat.getDrawable(
+                        holder.itemView.getContext(),
+                        R.drawable.ripple_effect));
+            }
+        }
+
+        // Check if tvAvailability view exists before trying to use it
+        if (holder.tvAvailability != null) {
+            // Set availability status with enhanced styling
+            holder.tvAvailability.setText(item.availability ? "Available" : "Not Available");
+
+            int textColor;
+            int backgroundColor;
+
+            if (item.availability) {
+                textColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.restaurant_text_light);
+                backgroundColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.restaurant_success);
+            } else {
+                textColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.restaurant_text_light);
+                backgroundColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.restaurant_error);
+            }
+
+            holder.tvAvailability.setTextColor(textColor);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                holder.tvAvailability.setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
+            } else {
+                holder.tvAvailability.setBackgroundColor(backgroundColor);
+            }
+
+            // Add rounded corners to availability badge
+            holder.tvAvailability.setPadding(20, 8, 20, 8);
+        }
+
+        // Style category, prep time, calories, and spice level
         holder.tvCategory.setText(item.category);
-        holder.tvPrepTime.setText(String.format("Prep Time: %s minutes", item.prepTimeMinutes));
+        holder.tvCategory.setTypeface(holder.tvCategory.getTypeface(), Typeface.ITALIC);
+
+        holder.tvPrepTime.setText(String.format("Prep Time: %s min", item.prepTimeMinutes));
         holder.tvCalories.setText(String.format("Calories: %d", item.calories));
         holder.tvSpiceLevel.setText(String.format("Spice Level: %s", item.spiceLevel));
 
+        // Enhanced image loading with smoother transitions and better placeholder handling
         Glide.with(holder.itemView.getContext())
                 .load(item.imageResourceId)
-                .apply(new RequestOptions().centerCrop())
-                .transition(DrawableTransitionOptions.withCrossFade())
-                .placeholder(R.drawable.placeholder_food)
-                .error(R.drawable.placeholder_food)
+                .apply(new RequestOptions()
+                        .centerCrop()
+                        .placeholder(R.drawable.placeholder_food)
+                        .error(R.drawable.placeholder_food))
+                .transition(DrawableTransitionOptions.withCrossFade(300))
                 .into(holder.ivMenuItemImage);
 
         holder.itemView.setOnClickListener(v -> {
@@ -92,6 +156,42 @@ public class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHo
                 listener.onMenuItemClick(item);
             }
         });
+
+        // Apply animations for smoother scrolling
+        setAnimation(holder.itemView, position);
+    }
+
+    private void setAnimation(View viewToAnimate, int position) {
+        // If the bound view wasn't previously displayed on screen, animate it
+        if (position > lastPosition) {
+            Animation animation = AnimationUtils.loadAnimation(viewToAnimate.getContext(),
+                    android.R.anim.slide_in_left);
+            animation.setDuration(350);
+            animation.setInterpolator(new android.view.animation.DecelerateInterpolator());
+            viewToAnimate.startAnimation(animation);
+            lastPosition = position;
+        }
+    }
+
+    // Reset the animation when adapter is attached to prevent issues on scroll direction change
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    // Reset position counter when scrolling stops to ensure animations play when scrolling direction changes
+                    lastPosition = -1;
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull ViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+        holder.itemView.clearAnimation();
     }
 
     @Override

@@ -8,15 +8,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.textfield.TextInputEditText;
 
 import com.finedine.rms.utils.EmailSender;
 import com.finedine.rms.utils.SharedPrefsManager;
-import com.google.android.material.textfield.TextInputEditText;
 
 public class AdminActivity extends BaseActivity {
     private static final String TAG = "AdminActivity";
     private TextView tvStaffCount, tvReservationCount;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +32,9 @@ public class AdminActivity extends BaseActivity {
 
         // Setup navigation panel
         setupNavigationPanel("Administration");
+
+        // Setup drawer menu
+        setupDrawerMenu();
 
         try {
             // Initialize TextViews for counts
@@ -107,12 +117,71 @@ public class AdminActivity extends BaseActivity {
         }
     }
 
+    public void onEmailSettingsClicked(View view) {
+        configureEmailSettings();
+    }
+
     public void onBackupClicked(View view) {
         Toast.makeText(this, "Backup/Restore functionality coming soon", Toast.LENGTH_SHORT).show();
     }
 
-    public void onEmailSettingsClicked(View view) {
-        configureEmailSettings();
+    /**
+     * Set up the drawer navigation menu
+     */
+    private void setupDrawerMenu() {
+        try {
+            drawerLayout = findViewById(R.id.drawer_layout);
+            navigationView = findViewById(R.id.nav_view);
+
+            // Set up toolbar if it exists
+            Toolbar toolbar = findViewById(R.id.toolbar);
+            if (toolbar != null) {
+                setSupportActionBar(toolbar);
+            }
+
+            // Set up drawer toggle if drawer layout exists
+            if (drawerLayout != null && navigationView != null) {
+                // Set the drawer menu resource
+                navigationView.getMenu().clear();
+                navigationView.inflateMenu(R.menu.admin_drawer_menu);
+
+                // Set up toggle
+                ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                        this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                drawerLayout.addDrawerListener(toggle);
+                toggle.syncState();
+
+                // Set up navigation item selection
+                navigationView.setNavigationItemSelectedListener(item -> {
+                    int id = item.getItemId();
+
+                    // Handle navigation item clicks
+                    if (id == R.id.nav_dashboard) {
+                        // Already on admin dashboard
+                        drawerLayout.closeDrawers();
+                    } else if (id == R.id.nav_staff) {
+                        navigateToActivitySafely(StaffManagementActivity.class);
+                    } else if (id == R.id.nav_menu) {
+                        navigateToActivitySafely(MenuManagementActivity.class);
+                    } else if (id == R.id.nav_orders) {
+                        navigateToActivitySafely(OrderActivity.class);
+                    } else if (id == R.id.nav_reservations) {
+                        navigateToActivitySafely(ReservationActivity.class);
+                    } else if (id == R.id.nav_inventory) {
+                        navigateToActivitySafely(InventoryActivity.class);
+                    } else if (id == R.id.nav_logout) {
+                        logout();
+                    }
+
+                    drawerLayout.closeDrawers();
+                    return true;
+                });
+            } else {
+                Log.e(TAG, "Drawer layout or navigation view not found");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting up drawer menu", e);
+        }
     }
 
     private void configureEmailSettings() {
@@ -137,8 +206,8 @@ public class AdminActivity extends BaseActivity {
             if (!gmailEmail.isEmpty() && !gmailPassword.isEmpty() &&
                     !outlookEmail.isEmpty() && !outlookPassword.isEmpty()) {
 
-                // Save credentials
-                EmailSender.setEmailCredentials(this, gmailEmail, gmailPassword, outlookEmail, outlookPassword);
+                // Save credentials - use gmail as the primary email
+                EmailSender.setEmailCredentials(this, gmailEmail);
                 Toast.makeText(this, "Email settings saved", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Please fill in all email settings", Toast.LENGTH_SHORT).show();

@@ -2,6 +2,7 @@ package com.finedine.rms;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -9,6 +10,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.finedine.rms.MenuAdapter;
 import com.finedine.rms.OrderItemAdapter;
+import com.finedine.rms.utils.NotificationUtils;
 import com.finedine.rms.utils.SharedPrefsManager;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
@@ -28,7 +31,9 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 public class OrderActivity extends BaseActivity {
     private static final String TAG = "OrderActivity";
@@ -39,6 +44,7 @@ public class OrderActivity extends BaseActivity {
     private TextInputEditText etTableNumber;
     private TextInputEditText etCustomerName;
     private TextInputEditText etCustomerPhone;
+    private TextInputEditText etCustomerEmail;
     private EditText etSearchMenu;
     private int currentTableNumber = 0; // Will be set from user input
     private String userRole = "waiter"; // Default role
@@ -48,6 +54,8 @@ public class OrderActivity extends BaseActivity {
     private MaterialCardView btnViewCart;
     private ExtendedFloatingActionButton fabCart;
     private String currentCategory = "All"; // Track current category
+    private AppDatabase appDatabase;
+    private ExecutorService databaseExecutor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +71,10 @@ public class OrderActivity extends BaseActivity {
             } else if (prefsManager != null) {
                 userRole = prefsManager.getUserRole();
             }
+
+            // Initialize database and executor
+            appDatabase = AppDatabase.getDatabase(this);
+            databaseExecutor = java.util.concurrent.Executors.newSingleThreadExecutor();
 
             // Set appropriate layout based on user role
             if ("customer".equalsIgnoreCase(userRole)) {
@@ -124,19 +136,30 @@ public class OrderActivity extends BaseActivity {
                 setupCategoryChip(R.id.chipMain);
                 setupCategoryChip(R.id.chipDesserts);
                 setupCategoryChip(R.id.chipBeverages);
+
+                // Make sure All is initially selected
+                Chip allChip = findViewById(R.id.chipAll);
+                if (allChip != null) {
+                    allChip.setChecked(true);
+                }
             }
 
             // Initialize cart button and badge
             btnViewCart = findViewById(R.id.btnViewCart);
             tvCartItemCount = findViewById(R.id.tvCartItemCount);
-            fabCart = findViewById(R.id.fabCart);
+
+            // Note: fabCart might not be present in all layouts
+            try {
+                fabCart = findViewById(R.id.fabCart);
+                if (fabCart != null) {
+                    fabCart.setOnClickListener(v -> showCart());
+                }
+            } catch (Exception e) {
+                Log.d(TAG, "fabCart not found in this layout, continuing initialization");
+            }
 
             if (btnViewCart != null) {
                 btnViewCart.setOnClickListener(v -> showCart());
-            }
-
-            if (fabCart != null) {
-                fabCart.setOnClickListener(v -> showCart());
             }
 
             updateCartBadge();
@@ -146,11 +169,23 @@ public class OrderActivity extends BaseActivity {
             // Use more columns for grid display in landscape mode
             int columnCount = getResources().getConfiguration().orientation ==
                     android.content.res.Configuration.ORIENTATION_LANDSCAPE ? 3 : 2;
-            menuRecyclerView.setLayoutManager(new GridLayoutManager(this, columnCount));
+            GridLayoutManager gridLayoutManager = new GridLayoutManager(this, columnCount);
+            menuRecyclerView.setLayoutManager(gridLayoutManager);
+            // Add item decoration for spacing
+            int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.grid_spacing);
+            menuRecyclerView.addItemDecoration(new GridSpacingItemDecoration(columnCount, spacingInPixels, true));
 
             // Create menu adapter
             menuAdapter = new MenuAdapter(menuItems, this::onItemSelected);
             menuRecyclerView.setAdapter(menuAdapter);
+
+            // Long press on search box to enable menu reset option
+            if (etSearchMenu != null) {
+                etSearchMenu.setOnLongClickListener(v -> {
+                    showMenuResetOption();
+                    return true;
+                });
+            }
 
             // Load menu items safely
             loadMenuItems();
@@ -175,7 +210,20 @@ public class OrderActivity extends BaseActivity {
             etTableNumber = findViewById(R.id.etTableNumber);
             etCustomerName = findViewById(R.id.etCustomerName);
             etCustomerPhone = findViewById(R.id.etCustomerPhone);
+            etCustomerEmail = findViewById(R.id.etCustomerEmail);
             etSearchMenu = findViewById(R.id.etSearchMenu);
+
+            // Initialize reset menu button
+            Button btnResetMenu = findViewById(R.id.btnResetMenu);
+            if (btnResetMenu != null) {
+                btnResetMenu.setOnClickListener(v -> {
+                    resetAllMenuItems();
+                });
+            }
+
+            if (btnViewCart != null) {
+                btnViewCart.setOnClickListener(v -> showCart());
+            }
 
             // Adjust UI based on user role
             TextView activityTitle = findViewById(R.id.activityTitle);
@@ -186,7 +234,13 @@ public class OrderActivity extends BaseActivity {
             // Initialize Menu RecyclerView
             RecyclerView menuRecyclerView = findViewById(R.id.menuRecyclerView);
             // Use GridLayoutManager with 2 columns for grid display
-            menuRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+            int columnCount = getResources().getConfiguration().orientation ==
+                    android.content.res.Configuration.ORIENTATION_LANDSCAPE ? 3 : 2;
+            GridLayoutManager gridLayoutManager = new GridLayoutManager(this, columnCount);
+            menuRecyclerView.setLayoutManager(gridLayoutManager);
+            // Add item decoration for spacing
+            int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.grid_spacing);
+            menuRecyclerView.addItemDecoration(new GridSpacingItemDecoration(columnCount, spacingInPixels, true));
 
             // Create menu adapter
             menuAdapter = new MenuAdapter(menuItems, this::onItemSelected);
@@ -403,7 +457,7 @@ public class OrderActivity extends BaseActivity {
                 try {
                     int tableNum = Integer.parseInt(tableNumStr);
                     currentTableNumber = tableNum;
-                    processOrderSubmission(name, phone, calculateOrderTotal());
+                    processOrderSubmission(name, phone, phone + "@customer.com", calculateOrderTotal());
                 } catch (NumberFormatException e) {
                     Toast.makeText(this, "Please enter a valid table number", Toast.LENGTH_SHORT).show();
                 }
@@ -455,74 +509,118 @@ public class OrderActivity extends BaseActivity {
 
     private void loadMenuItems() {
         try {
+            // If user is customer, show a welcome message with loading indicator
+            if ("customer".equalsIgnoreCase(userRole)) {
+                Toast.makeText(this, "Welcome to Fine Dine! Loading our delicious menu...", Toast.LENGTH_SHORT).show();
+            }
+
             new Thread(() -> {
                 try {
                     // Get AppDatabase instance safely
                     AppDatabase db = AppDatabase.getDatabase(OrderActivity.this);
 
-                    // Use try-catch to handle potential exceptions
-                    List<MenuItem> items;
+                    // FORCE RESET: Clear and reload all menu items every time
                     try {
-                        items = db.menuItemDao().getAllAvailable();
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error loading menu items", e);
-                        items = new ArrayList<>();
-                    }
+                        // Clear existing menu items
+                        db.menuItemDao().deleteAll();
+                        Log.d(TAG, "Force cleared existing menu items");
 
-                    // If no items found, add all premium menu items to database
-                    if (items.isEmpty()) {
-                        try {
-                            // Load all premium menu items
-                            MenuItem[] premiumItems = MenuItem.premiumMenu();
-                            items = new ArrayList<>();
-                            for (MenuItem premiumItem : premiumItems) {
-                                // Insert each item to database
-                                db.menuItemDao().insert(premiumItem);
-                                // Add to our list
-                                items.add(premiumItem);
+                        // Add all premium menu items
+                        MenuItem[] premiumItems = MenuItem.premiumMenu();
+                        for (MenuItem premiumItem : premiumItems) {
+                            // Insert each item to database
+                            db.menuItemDao().insert(premiumItem);
+                        }
+                        Log.d(TAG, "Force added " + premiumItems.length + " menu items with images");
+
+                        // Get the newly added items
+                        List<MenuItem> items = new ArrayList<>(Arrays.asList(premiumItems));
+
+                        // Make a final copy of items for the UI thread
+                        final List<MenuItem> finalItems = new ArrayList<>(items);
+
+                        // Update UI safely on main thread
+                        runOnUiThread(() -> {
+                            try {
+                                menuItems.clear();
+                                menuItems.addAll(finalItems);
+                                if (menuAdapter != null) {
+                                    menuAdapter.notifyDataSetChanged();
+                                    Log.d(TAG, "Successfully displayed " + finalItems.size() + " menu items");
+
+                                    // For customers, select "All" category to show all items
+                                    if ("customer".equalsIgnoreCase(userRole)) {
+                                        Chip allChip = findViewById(R.id.chipAll);
+                                        if (allChip != null) {
+                                            allChip.setChecked(true);
+                                            currentCategory = "All";
+                                        }
+                                    }
+
+                                } else {
+                                    Log.e(TAG, "menuAdapter is null");
+                                    // Create adapter if it's null
+                                    menuAdapter = new MenuAdapter(menuItems, OrderActivity.this::onItemSelected);
+
+                                    // Try to find the RecyclerView
+                                    RecyclerView menuRecyclerView = findViewById(R.id.menuRecyclerView);
+                                    if (menuRecyclerView != null) {
+                                        menuRecyclerView.setAdapter(menuAdapter);
+                                    }
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error updating menu UI", e);
+                                // If UI update fails, try direct population
+                                loadMenuItemsDirectFromClass();
                             }
-                            Log.i(TAG, "Added " + premiumItems.length + " premium menu items to database");
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error adding premium menu items", e);
-                            // Fallback to sample menu item if premium menu fails
-                            items = new ArrayList<>();
-                            MenuItem item = new MenuItem();
-                            item.name = "Sample Item";
-                            item.price = 10.99;
-                            item.description = "Sample description";
-                            item.category = "Main Course";
-                            items.add(item);
-                        }
+                        });
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error in force reset of menu items", e);
+                        // Fallback to standard loading
+                        loadMenuItemsDirectFromClass();
                     }
-
-                    // Make a final copy of items for the UI thread
-                    final List<MenuItem> finalItems = new ArrayList<>(items);
-
-                    // Update UI safely
-                    runOnUiThread(() -> {
-                        try {
-                            menuItems.clear();
-                            menuItems.addAll(finalItems);
-                            menuAdapter.notifyDataSetChanged();
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error updating menu UI", e);
-                        }
-                    });
                 } catch (Exception e) {
                     Log.e(TAG, "Error in loadMenuItems thread", e);
+                    loadMenuItemsDirectFromClass();
                 }
             }).start();
         } catch (Exception e) {
             Log.e(TAG, "Error starting menu load thread", e);
             Toast.makeText(this, "Error loading menu items", Toast.LENGTH_SHORT).show();
+            // Last-ditch attempt to load menus directly
+            loadMenuItemsDirectFromClass();
+        }
+    }
+
+    /**
+     * Direct loading method that bypasses database to ensure menu items always appear
+     */
+    private void loadMenuItemsDirectFromClass() {
+        try {
+            // Load directly from class method
+            final MenuItem[] premiumItems = MenuItem.premiumMenu();
+
+            runOnUiThread(() -> {
+                try {
+                    menuItems.clear();
+                    menuItems.addAll(Arrays.asList(premiumItems));
+                    menuAdapter.notifyDataSetChanged();
+                    Log.d(TAG, "Emergency direct load successful: " + premiumItems.length + " items");
+                    Toast.makeText(this, "Menu loaded successfully", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to update UI in direct load", e);
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Fatal error in direct menu loading", e);
         }
     }
 
     private void onItemSelected(MenuItem item) {
         try {
-            // Show quantity dialog
+            // Show quantity dialog with view details option
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Add " + item.name);
+            builder.setTitle(item.name);
 
             View view = LayoutInflater.from(this).inflate(R.layout.dialog_quantity, null);
             TextInputEditText quantityInput = view.findViewById(R.id.quantityInput);
@@ -531,8 +629,9 @@ public class OrderActivity extends BaseActivity {
             // Set default quantity
             quantityInput.setText("1");
 
+            // Add View Details button
             builder.setView(view);
-            builder.setPositiveButton("Add", (dialog, which) -> {
+            builder.setPositiveButton("Add to Order", (dialog, which) -> {
                 try {
                     // Safely parse quantity with error handling
                     int quantity = 1;
@@ -555,6 +654,16 @@ public class OrderActivity extends BaseActivity {
                             "Error adding item to order", Toast.LENGTH_SHORT).show();
                 }
             });
+            builder.setNeutralButton("View Details", (dialog, which) -> {
+                // Launch the detail view
+                try {
+                    MenuItemDetailActivity.launch(this, item);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error launching detail view", e);
+                    Toast.makeText(this, "Error viewing details", Toast.LENGTH_SHORT).show();
+                }
+            });
+
             builder.setNegativeButton("Cancel", null);
             builder.show();
         } catch (Exception e) {
@@ -646,6 +755,7 @@ public class OrderActivity extends BaseActivity {
             String tableNumberStr = etTableNumber.getText().toString().trim();
             String customerName = etCustomerName.getText().toString().trim();
             String customerPhone = etCustomerPhone.getText().toString().trim();
+            String customerEmail = etCustomerEmail.getText().toString().trim();
 
             if (tableNumberStr.isEmpty()) {
                 etTableNumber.setError("Table number is required");
@@ -656,6 +766,12 @@ public class OrderActivity extends BaseActivity {
             if (customerName.isEmpty()) {
                 etCustomerName.setError("Customer name is required");
                 etCustomerName.requestFocus();
+                return;
+            }
+
+            if (customerEmail.isEmpty()) {
+                etCustomerEmail.setError("Customer email is required");
+                etCustomerEmail.requestFocus();
                 return;
             }
 
@@ -681,7 +797,7 @@ public class OrderActivity extends BaseActivity {
             builder.setMessage(String.format("Submit order for table #%d?\nTotal: R%.2f",
                     currentTableNumber, finalOrderTotal));
             builder.setPositiveButton("Submit", (dialog, which) -> {
-                processOrderSubmission(customerName, customerPhone, finalOrderTotal);
+                processOrderSubmission(customerName, customerPhone, customerEmail, finalOrderTotal);
             });
             builder.setNegativeButton("Cancel", null);
             builder.show();
@@ -691,7 +807,7 @@ public class OrderActivity extends BaseActivity {
         }
     }
 
-    private void processOrderSubmission(String customerName, String customerPhone, double orderTotal) {
+    private void processOrderSubmission(String customerName, String customerPhone, String customerEmail, double orderTotal) {
         // Show progress dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Processing order...");
@@ -699,70 +815,92 @@ public class OrderActivity extends BaseActivity {
         AlertDialog progressDialog = builder.create();
         progressDialog.show();
 
-        new Thread(() -> {
-            try {
-                AppDatabase db = AppDatabase.getDatabase(OrderActivity.this);
+        try {
+            // Create order object
+            Order order = new Order();
+            order.setTableNumber(currentTableNumber);
 
-                // Create order
-                Order order = new Order();
-                order.setTableNumber(currentTableNumber);
+            // Get user ID from SharedPreferences if available
+            int waiterId = 1; // Default ID
+            if (prefsManager != null) {
+                waiterId = prefsManager.getUserId();
+                if (waiterId <= 0) waiterId = 1;
+            }
+            order.waiterId = waiterId;
 
-                // Get user ID from SharedPreferences if available
-                int waiterId = 1; // Default ID
-                if (prefsManager != null) {
-                    waiterId = prefsManager.getUserId();
-                    if (waiterId <= 0) waiterId = 1;
-                }
-                order.waiterId = waiterId;
+            order.setTimestamp(System.currentTimeMillis());
+            order.setStatus("pending");
 
-                order.setTimestamp(System.currentTimeMillis());
-                order.setStatus("received");
+            // Add customer information
+            order.setCustomerName(customerName);
+            order.setCustomerPhone(customerPhone);
+            order.setCustomerEmail(customerEmail);
+            order.setTotal(orderTotal);
 
-                // Add customer information
-                order.setCustomerName(customerName);
-                order.setCustomerPhone(customerPhone);
-                order.setTotal(orderTotal);
+            // Create a copy of the current order items to avoid modification issues
+            final List<OrderItem> orderItemsCopy = new ArrayList<>(currentOrderItems);
 
-                // Insert order and get ID
-                long orderId = db.orderDao().insert(order);
+            // Use the OrderProcessor to handle order submission
+            com.finedine.rms.utils.OrderProcessor.processOrder(
+                    this,
+                    databaseExecutor,
+                    appDatabase,
+                    order,
+                    orderItemsCopy,
+                    new com.finedine.rms.utils.OrderProcessor.OrderCallback() {
+                        @Override
+                        public void onSuccess(long orderId) {
+                            runOnUiThread(() -> {
+                                try {
+                                    if (progressDialog.isShowing()) {
+                                        progressDialog.dismiss();
+                                    }
 
-                // Add order items, avoiding foreign key errors
-                for (OrderItem item : currentOrderItems) {
-                    try {
-                        item.setOrderId(String.valueOf((int) orderId));
-                        db.orderItemDao().insert(item);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error inserting order item", e);
-                    }
-                }
-
-                // Update UI on success
-                runOnUiThread(() -> {
-                    try {
-                        if (progressDialog.isShowing()) {
-                            progressDialog.dismiss();
+                                    // Show payment options dialog
+                                    showPaymentOptionsDialog(orderId, orderTotal);
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error updating UI after order submission", e);
+                                    Toast.makeText(OrderActivity.this,
+                                            "Order submitted successfully but UI update failed",
+                                            Toast.LENGTH_SHORT).show();
+                                    clearOrder();
+                                }
+                            });
                         }
 
-                        // Show payment options dialog
-                        showPaymentOptionsDialog(orderId, orderTotal);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error updating UI after order submission", e);
+                        @Override
+                        public void onFailure(String error) {
+                            runOnUiThread(() -> {
+                                if (progressDialog.isShowing()) {
+                                    progressDialog.dismiss();
+                                }
+                                Toast.makeText(OrderActivity.this,
+                                        "Error submitting order: " + error,
+                                        Toast.LENGTH_LONG).show();
+                            });
+                        }
                     }
-                });
-            } catch (Exception e) {
-                Log.e(TAG, "Error submitting order", e);
+            );
+        } catch (Exception e) {
+            Log.e(TAG, "Error submitting order", e);
 
-                // Update UI on error
-                runOnUiThread(() -> {
-                    if (progressDialog.isShowing()) {
-                        progressDialog.dismiss();
-                    }
-                    Toast.makeText(OrderActivity.this,
-                            "Error submitting order: " + e.getMessage(),
-                            Toast.LENGTH_LONG).show();
-                });
+            // Update UI on error
+            if (progressDialog.isShowing()) {
+                progressDialog.dismiss();
             }
-        }).start();
+            Toast.makeText(OrderActivity.this,
+                    "Error submitting order: " + e.getMessage(),
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void notifyKitchenAboutNewOrder(long orderId, int tableNumber) {
+        try {
+            NotificationUtils notificationUtils = new NotificationUtils();
+            notificationUtils.sendOrderNotification(this, (int) orderId, tableNumber);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to send kitchen notification: " + e.getMessage());
+        }
     }
 
     private void showPaymentOptionsDialog(long orderId, double total) {
@@ -834,6 +972,7 @@ public class OrderActivity extends BaseActivity {
         etTableNumber.setText("");
         etCustomerName.setText("");
         etCustomerPhone.setText("");
+        etCustomerEmail.setText("");
 
         // If we're in customer mode, refill name from prefs
         if ("customer".equalsIgnoreCase(userRole) && prefsManager != null) {
@@ -885,5 +1024,75 @@ public class OrderActivity extends BaseActivity {
     private void filterMenuItems(String searchText) {
         // Use the combined filter method instead
         filterMenuByCategoryAndSearch(currentCategory, searchText);
+    }
+
+    /**
+     * Show dialog to reset all menu items
+     */
+    private void showMenuResetOption() {
+        new AlertDialog.Builder(this)
+                .setTitle("Restore Menu Items")
+                .setMessage("Would you like to restore all menu items with their images?")
+                .setPositiveButton("Restore All Items", (dialog, which) -> {
+                    resetAllMenuItems();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    /**
+     * Reset all menu items in the database
+     */
+    private void resetAllMenuItems() {
+        // Show progress dialog
+        AlertDialog progressDialog = new AlertDialog.Builder(this)
+                .setMessage("Restoring menu items...")
+                .setCancelable(false)
+                .create();
+        progressDialog.show();
+
+        AppDatabase db = AppDatabase.getDatabase(this);
+        new Thread(() -> {
+            try {
+                // Clear existing menu items
+                db.menuItemDao().deleteAll();
+
+                // Add all premium menu items
+                MenuItem[] premiumItems = MenuItem.premiumMenu();
+                for (MenuItem item : premiumItems) {
+                    db.menuItemDao().insert(item);
+                }
+
+                // Reload menu items
+                List<MenuItem> items = db.menuItemDao().getAllAvailable();
+
+                // Update UI on main thread
+                runOnUiThread(() -> {
+                    try {
+                        // Dismiss progress dialog
+                        progressDialog.dismiss();
+
+                        // Update adapter with new items
+                        menuItems.clear();
+                        menuItems.addAll(items);
+                        menuAdapter.notifyDataSetChanged();
+
+                        // Show success message
+                        Toast.makeText(this, "Successfully restored " + items.size() + " menu items!",
+                                Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error updating UI after menu reset", e);
+                    }
+                });
+
+            } catch (Exception e) {
+                Log.e(TAG, "Error resetting menu items", e);
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(this, "Error restoring menu items: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                });
+            }
+        }).start();
     }
 }

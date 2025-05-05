@@ -1,5 +1,6 @@
 package com.finedine.rms;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -11,26 +12,35 @@ import java.util.List;
 @Dao
 public interface InventoryDao {
     @Insert
-    void insert(Inventory inventory);
+    long insert(Inventory item);
 
     @Update
-    void update(Inventory inventory);
+    void update(Inventory item);
 
     @Delete
-    void delete(Inventory inventory);
+    void delete(Inventory item);
 
     @Query("SELECT * FROM inventory ORDER BY item_name ASC")
     List<Inventory> getAll();
 
-    @Query("SELECT * FROM inventory WHERE quantity_in_stock < reorder_threshold")
+    @Query("SELECT * FROM inventory WHERE quantity_in_stock <= reorder_threshold ORDER BY (quantity_in_stock/reorder_threshold) ASC")
     List<Inventory> getLowStockItems();
 
     @Query("SELECT * FROM inventory WHERE item_id = :id")
-    Inventory getById(int id);
+    Inventory getItemById(int id);
 
-    @Query("UPDATE inventory SET quantity_in_stock = quantity_in_stock - :amount WHERE item_id = :id")
-    void decreaseQuantity(int id, double amount);
+    @Query("SELECT * FROM inventory WHERE item_name = :name LIMIT 1")
+    Inventory getItemByName(String name);
 
-    @Query("SELECT * FROM inventory")
-    List<Inventory> getItems();
+    @Query("UPDATE inventory SET quantity_in_stock = quantity_in_stock + :amount, last_updated = :timestamp WHERE item_id = :id")
+    void updateStock(int id, double amount, long timestamp);
+
+    @Query("SELECT * FROM inventory WHERE item_name LIKE '%' || :searchTerm || '%'")
+    List<Inventory> searchInventory(String searchTerm);
+
+    @Query("SELECT COUNT(*) FROM inventory WHERE quantity_in_stock <= reorder_threshold")
+    int getLowStockCount();
+
+    @Query("DELETE FROM inventory WHERE item_id = :id")
+    void deleteById(int id);
 }

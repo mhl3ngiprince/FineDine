@@ -4,81 +4,80 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_luxury_pattern"
-    tools:context=".SplashActivity">
+    android:background="@drawable/modern_restaurant_bg"
+    tools:context=".SplashActivityNew">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/logoCardView"
-        android:layout_width="180dp"
-        android:layout_height="180dp"
-        app:cardCornerRadius="90dp"
-        app:cardElevation="12dp"
-        app:cardBackgroundColor="@color/gradient_dark_end"
+    <View
+        android:id="@+id/backgroundOverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#99000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/ivLogo"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:contentDescription="Fine Dine Logo"
+        android:src="@drawable/logo_finedine"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.4">
-
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="140dp"
-            android:layout_height="140dp"
-            android:layout_gravity="center"
-            android:src="@drawable/logoj"
-            android:contentDescription="Fine Dine Logo" />
-    </androidx.cardview.widget.CardView>
+        app:layout_constraintVertical_bias="0.4" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/tvAppName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:fontFamily="sans-serif-medium"
         android:text="FINE DINE"
-        android:textColor="@color/luxe_gold"
-        android:textSize="40sp"
+        android:textColor="@color/restaurant_accent"
+        android:textSize="32sp"
         android:textStyle="bold"
-        android:letterSpacing="0.1"
-        android:fontFamily="serif"
-        android:shadowColor="@color/black"
-        android:shadowDx="2"
-        android:shadowDy="2"
-        android:shadowRadius="2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logoCardView" />
+        app:layout_constraintTop_toBottomOf="@+id/ivLogo" />
 
     <TextView
-        android:id="@+id/subtitleTextView"
+        android:id="@+id/tvTagline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif"
         android:text="Restaurant Management System"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        android:fontFamily="serif"
-        android:alpha="0.9"
+        android:textColor="@color/text_white"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
-
-    <View
-        android:id="@+id/divider"
-        android:layout_width="80dp"
-        android:layout_height="2dp"
-        android:layout_marginTop="12dp"
-        android:background="@color/luxe_gold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/subtitleTextView" />
+        app:layout_constraintTop_toBottomOf="@+id/tvAppName" />
 
     <ProgressBar
         android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyle"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="80dp"
+        android:indeterminate="true"
+        android:max="100"
+        android:progress="0"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tvVersion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="64dp"
-        android:indeterminateTint="@color/luxe_gold"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="sans-serif"
+        android:text="Version 1.0"
+        android:textColor="@color/text_white"
+        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

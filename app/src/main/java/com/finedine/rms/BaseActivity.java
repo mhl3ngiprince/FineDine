@@ -11,107 +11,241 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Lifecycle;
 
 import com.google.android.material.button.MaterialButton;
 import com.finedine.rms.utils.SharedPrefsManager;
+
+import java.lang.ref.WeakReference;
 
 public class BaseActivity extends AppCompatActivity {
     private static final String TAG = "BaseActivity";
     protected String userRole = "customer"; // Default role
     protected TextView navTitle;
     protected Button logoutButton;
+    protected Button logoutButtonAlt;
     protected SharedPrefsManager prefsManager;
+    private boolean isNavigationSetup = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         try {
             super.onCreate(savedInstanceState);
-            Log.d(TAG, "BaseActivity onCreate");
-            prefsManager = new SharedPrefsManager(this);
+            Log.d(TAG, "BaseActivity onCreate: " + getClass().getSimpleName());
+
+            // Initialize SharedPrefsManager only once
+            if (prefsManager == null) {
+                prefsManager = new SharedPrefsManager(getApplicationContext());
+            }
+
+            // Get user role from SharedPrefs or intent
+            initUserRole();
         } catch (Exception e) {
             Log.e(TAG, "Error in BaseActivity onCreate", e);
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "BaseActivity onDestroy: " + getClass().getSimpleName());
+        // Clean up resources
+        cleanupReferences();
+    }
+
+    private void cleanupReferences() {
+        navTitle = null;
+        logoutButton = null;
+        logoutButtonAlt = null;
+        // Don't set prefsManager to null as it uses application context
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "BaseActivity onPause: " + getClass().getSimpleName());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "BaseActivity onResume: " + getClass().getSimpleName());
+
+        // Refresh navigation if already set up
+        if (isNavigationSetup) {
+            refreshNavigationBasedOnRole();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Save current user role
+        outState.putString("current_user_role", userRole);
+        Log.d(TAG, "BaseActivity onSaveInstanceState: " + getClass().getSimpleName());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // Restore user role
+        if (savedInstanceState.containsKey("current_user_role")) {
+            userRole = savedInstanceState.getString("current_user_role", "customer");
+            Log.d(TAG, "Restored user role: " + userRole);
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull android.content.res.Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Log.d(TAG, "BaseActivity onConfigurationChanged: " + getClass().getSimpleName());
+    }
+
+    private void initUserRole() {
+        // Get role from SharedPrefsManager first
+        if (prefsManager != null) {
+            String savedRole = prefsManager.getUserRole();
+            if (savedRole != null && !savedRole.isEmpty()) {
+                userRole = savedRole;
+                Log.d(TAG, "Got role from SharedPrefs: " + userRole);
+                return;
+            }
+        }
+
+        // Fall back to intent extra
+        if (getIntent() != null && getIntent().hasExtra("user_role")) {
+            String intentRole = getIntent().getStringExtra("user_role");
+            if (intentRole != null && !intentRole.isEmpty()) {
+                userRole = intentRole;
+                Log.d(TAG, "Got role from Intent: " + userRole);
+                // Save this to SharedPrefs for consistency
+                if (prefsManager != null) {
+                    prefsManager.setUserRole(userRole);
+                }
+            }
+        }
+
+        Log.d(TAG, "Using role: " + userRole);
+    }
+
     protected void setupNavigationPanel(String activityTitle) {
         try {
+            // Find navigation title
             navTitle = findViewById(R.id.nav_title);
             if (navTitle != null) {
                 navTitle.setText(activityTitle);
+            } else {
+                Log.w(TAG, "Navigation title view not found");
             }
 
-            // Setup logout button if it exists
-            logoutButton = findViewById(R.id.logoutButton);
-            if (logoutButton != null) {
-                logoutButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        logout();
-                    }
-                });
-            }
+            // Setup logout buttons
+            setupLogoutButtons();
 
-            // Validate that the navigation panel is properly inflated
-            validateNavigationPanelInflation();
+            // Validate the navigation panel inflation
+            if (!validateNavigationPanelInflation()) {
+                Log.e(TAG, "Navigation panel validation failed");
+                return;
+            }
 
             // Setup all navigation buttons
             setupAllNavigationButtons();
 
-            // Make all buttons visible (based on user role)
-            makeAllButtonsVisible();
+            // Make all buttons visible based on user role
+            setupButtonVisibilityByRole();
 
             // Highlight the current activity's button
             highlightCurrentActivityButton();
 
+            // Mark navigation as setup
+            isNavigationSetup = true;
+
         } catch (Exception e) {
             Log.e(TAG, "Error in setupNavigationPanel", e);
+            Toast.makeText(this, "Navigation setup error", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setupLogoutButtons() {
+        // Setup primary logout button
+        logoutButton = findViewById(R.id.logoutButton);
+        if (logoutButton != null) {
+            Log.d(TAG, "Found logout button, setting up click listener");
+            logoutButton.setOnClickListener(v -> {
+                Log.d(TAG, "Logout button clicked");
+                logout();
+            });
+            logoutButton.setVisibility(View.VISIBLE);
+        } else {
+            Log.w(TAG, "Logout button not found in layout");
+        }
+
+        // Setup alternate logout button
+        logoutButtonAlt = findViewById(R.id.logoutButtonAlt);
+        if (logoutButtonAlt != null) {
+            Log.d(TAG, "Found alternate logout button, setting up click listener");
+            logoutButtonAlt.setOnClickListener(v -> {
+                Log.d(TAG, "Alternate logout button clicked");
+                Toast.makeText(this, "Logging out...", Toast.LENGTH_SHORT).show();
+                logout();
+            });
+            logoutButtonAlt.setVisibility(View.VISIBLE);
         }
     }
 
     /**
      * Validates that the navigation panel and its key elements are properly inflated
+     * @return true if panel is valid, false otherwise
      */
-    private void validateNavigationPanelInflation() {
+    private boolean validateNavigationPanelInflation() {
         View navPanel = findViewById(R.id.navigation_panel);
         if (navPanel == null) {
             Log.e(TAG, "CRITICAL: Navigation panel not found in layout!");
-        } else {
-            Log.d(TAG, "Navigation panel found in layout");
-
-            // Check for critical buttons
-            if (findViewById(R.id.nav_inventory) == null) {
-                Log.e(TAG, "Inventory button missing from navigation panel");
-            }
-
-            if (findViewById(R.id.nav_menu) == null) {
-                Log.e(TAG, "Menu button missing from navigation panel");
-            }
-
-            if (findViewById(R.id.nav_reservations) == null) {
-                Log.e(TAG, "Reservations button missing from navigation panel");
-            }
-
-            if (findViewById(R.id.nav_orders) == null) {
-                Log.e(TAG, "Orders button missing from navigation panel");
-            }
+            return false;
         }
+
+        Log.d(TAG, "Navigation panel found in layout");
+
+        boolean valid = true;
+
+        // Check for critical buttons and log issues
+        if (findViewById(R.id.nav_inventory) == null) {
+            Log.e(TAG, "Inventory button missing from navigation panel");
+            valid = false;
+        }
+
+        if (findViewById(R.id.nav_menu) == null) {
+            Log.e(TAG, "Menu button missing from navigation panel");
+            valid = false;
+        }
+
+        if (findViewById(R.id.nav_reservations) == null) {
+            Log.e(TAG, "Reservations button missing from navigation panel");
+            valid = false;
+        }
+
+        if (findViewById(R.id.nav_orders) == null) {
+            Log.e(TAG, "Orders button missing from navigation panel");
+            valid = false;
+        }
+
+        return valid;
     }
 
     private void setupAllNavigationButtons() {
         try {
-            // Setup all navigation buttons
+            // Setup standard navigation buttons using a common pattern
             setupNavButton(R.id.nav_orders, OrderActivity.class);
             setupNavButton(R.id.nav_kitchen, KitchenActivity.class);
             setupNavButton(R.id.nav_reservations, ReservationActivity.class);
-
-            // Ensure these specific buttons are properly set up
-            setupInventoryButton();
-            setupMenuButton();
-
             setupNavButton(R.id.nav_staff, StaffManagementActivity.class);
             setupNavButton(R.id.nav_dashboard, ManagerDashboardActivity.class);
+
+            // Setup special case buttons
+            setupInventoryButton();
+            setupMenuButton();
 
             Log.d(TAG, "All navigation buttons have been set up");
         } catch (Exception e) {
@@ -120,38 +254,33 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     /**
-     * Specifically set up the inventory navigation button with extra logging
+     * Specifically set up the inventory navigation button with robust error handling
      */
     private void setupInventoryButton() {
         try {
             // First verify the activity class exists
+            Class<?> inventoryClass = null;
             try {
-                Class<?> activityClass = Class.forName("com.finedine.rms.InventoryActivity");
-                if (!isActivityRegisteredInManifest(activityClass)) {
+                inventoryClass = Class.forName("com.finedine.rms.InventoryActivity");
+                if (!isActivityRegisteredInManifest(inventoryClass)) {
                     Log.e(TAG, "InventoryActivity not registered in manifest - button will not work");
                 }
             } catch (ClassNotFoundException e) {
-                Log.e(TAG, "InventoryActivity class not found - buttons will not work", e);
+                Log.e(TAG, "InventoryActivity class not found - button will not work", e);
             }
+
+            // Final class reference for lambda
+            final Class<?> finalInventoryClass = inventoryClass;
 
             View inventoryBtn = findViewById(R.id.nav_inventory);
             if (inventoryBtn != null) {
-                Log.d(TAG, "Setting up inventory button with special attention");
                 inventoryBtn.setOnClickListener(v -> {
-                    Log.d(TAG, "Inventory button clicked! Navigating to InventoryActivity");
+                    Log.d(TAG, "Inventory button clicked");
                     Toast.makeText(this, "Opening Inventory...", Toast.LENGTH_SHORT).show();
-                    try {
-                        Class<?> activityClass = Class.forName("com.finedine.rms.InventoryActivity");
-                        if (isActivityRegisteredInManifest(activityClass)) {
-                            Intent intent = new Intent(this, activityClass);
-                            intent.putExtra("user_role", prefsManager != null ? prefsManager.getUserRole() : "customer");
-                            startActivity(intent);
-                        } else {
-                            Toast.makeText(this, "Error: InventoryActivity not registered in manifest", Toast.LENGTH_LONG).show();
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Failed to start InventoryActivity", e);
-                        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    if (finalInventoryClass != null) {
+                        navigateToActivitySafely(finalInventoryClass);
+                    } else {
+                        Toast.makeText(this, "Error: Inventory activity not available", Toast.LENGTH_SHORT).show();
                     }
                 });
             } else {
@@ -163,49 +292,46 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     /**
-     * Specifically set up the menu navigation button with extra logging
+     * Specifically set up the menu navigation button with role-based behavior
      */
     private void setupMenuButton() {
         try {
-            // First verify the activity class exists
-            try {
-                Class<?> activityClass = Class.forName("com.finedine.rms.MenuManagementActivity");
-                if (!isActivityRegisteredInManifest(activityClass)) {
-                    Log.e(TAG, "MenuManagementActivity not registered in manifest - button will not work");
-                }
-            } catch (ClassNotFoundException e) {
-                Log.e(TAG, "MenuManagementActivity class not found - buttons will not work", e);
-            }
-
             View menuBtn = findViewById(R.id.nav_menu);
             if (menuBtn != null) {
-                Log.d(TAG, "Setting up menu button with special attention");
                 menuBtn.setOnClickListener(v -> {
-                    Log.d(TAG, "Menu button clicked!");
+                    Log.d(TAG, "Menu button clicked");
                     Toast.makeText(this, "Opening Menu...", Toast.LENGTH_SHORT).show();
                     try {
                         // Determine which activity to open based on user role
-                        String role = prefsManager != null ? prefsManager.getUserRole() : "customer";
-                        Class<?> targetClass;
+                        String role = (prefsManager != null) ? prefsManager.getUserRole() : userRole;
+
+                        // Check if we're already on MenuItemDetailActivity
+                        if (this instanceof MenuItemDetailActivity) {
+                            // Go back to appropriate menu listing activity instead of trying to navigate to itself
+                            if ("customer".equalsIgnoreCase(role)) {
+                                navigateToActivitySafely(OrderActivity.class);
+                            } else {
+                                navigateToActivitySafely(MenuManagementActivity.class);
+                            }
+                            return;
+                        }
 
                         if ("customer".equalsIgnoreCase(role)) {
                             // Customers see the menu via OrderActivity
-                            targetClass = Class.forName("com.finedine.rms.OrderActivity");
+                            navigateToActivitySafely(OrderActivity.class);
                         } else {
                             // Staff use MenuManagementActivity
-                            targetClass = Class.forName("com.finedine.rms.MenuManagementActivity");
-                        }
-
-                        if (isActivityRegisteredInManifest(targetClass)) {
-                            Intent intent = new Intent(this, targetClass);
-                            intent.putExtra("user_role", role);
-                            startActivity(intent);
-                        } else {
-                            Toast.makeText(this, "Error: Activity not registered in manifest", Toast.LENGTH_LONG).show();
+                            try {
+                                Class<?> menuClass = Class.forName("com.finedine.rms.MenuManagementActivity");
+                                navigateToActivitySafely(menuClass);
+                            } catch (ClassNotFoundException e) {
+                                Log.e(TAG, "MenuManagementActivity class not found", e);
+                                Toast.makeText(this, "Menu management not available", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     } catch (Exception e) {
                         Log.e(TAG, "Failed to start menu activity", e);
-                        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
             } else {
@@ -224,8 +350,7 @@ public class BaseActivity extends AppCompatActivity {
             ComponentName componentName = new ComponentName(this, activityClass);
             PackageManager packageManager = getPackageManager();
             packageManager.getActivityInfo(componentName, PackageManager.GET_META_DATA);
-            // If we get here, the activity info was found
-            Log.d(TAG, activityClass.getSimpleName() + " is properly registered in manifest");
+            Log.d(TAG, activityClass.getSimpleName() + " is registered in manifest");
             return true;
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, activityClass.getSimpleName() + " is NOT registered in the manifest", e);
@@ -240,77 +365,102 @@ public class BaseActivity extends AppCompatActivity {
         try {
             // Show confirmation toast
             Toast.makeText(this, "Logging out...", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Logout method called");
 
+            // First try the clean logout via LogoutActivity
+            try {
+                Intent logoutIntent = new Intent(this, LogoutActivity.class);
+                logoutIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(logoutIntent);
+                finish();
+                return; // If successful, we're done
+            } catch (Exception e) {
+                Log.e(TAG, "Error starting LogoutActivity, falling back to manual logout", e);
+            }
+
+            // Manual logout as fallback
+            performManualLogout();
+
+        } catch (Exception e) {
+            Log.e(TAG, "Critical failure during logout", e);
+            // Last resort - try to force app restart
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finishAffinity();
+        }
+    }
+
+    private void performManualLogout() {
+        try {
             // Clear user session
             if (prefsManager != null) {
+                Log.d(TAG, "Clearing user session");
+                prefsManager.clearUserSession();
+                prefsManager.setUserLoggedIn(false);
+            } else {
+                Log.e(TAG, "prefsManager is null, creating new instance");
+                prefsManager = new SharedPrefsManager(getApplicationContext());
                 prefsManager.clearUserSession();
                 prefsManager.setUserLoggedIn(false);
             }
 
-            // Navigate to login screen
+            // Double check the session was cleared
+            if (prefsManager != null && prefsManager.isUserLoggedIn()) {
+                Log.e(TAG, "Failed to clear user session, forcing manual clear");
+                // Force clear using SharedPreferences directly
+                getSharedPreferences("FineDinePrefs", MODE_PRIVATE)
+                        .edit()
+                        .clear()
+                        .commit();
+            }
+
+            // Navigate to login screen directly
             Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
-
         } catch (Exception e) {
-            Log.e(TAG, "Error during logout", e);
-            Toast.makeText(this, "Error logging out. Please try again.", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Manual logout failed", e);
+            finishAffinity(); // Last resort - close the app
+        }
+    }
+
+    private void setupButtonVisibilityByRole() {
+        try {
+            // Make all buttons visible by default
+            makeAllButtonsVisible();
+
+            // Then adjust visibility based on user role
+            adjustButtonVisibilityByRole();
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting up button visibility", e);
         }
     }
 
     private void makeAllButtonsVisible() {
-        try {
-            // Find all navigation buttons
-            View ordersBtn = findViewById(R.id.nav_orders);
-            View reservationsBtn = findViewById(R.id.nav_reservations);
-            View dashboardBtn = findViewById(R.id.nav_dashboard);
-            View staffBtn = findViewById(R.id.nav_staff);
-            View menuBtn = findViewById(R.id.nav_menu);
-            View inventoryBtn = findViewById(R.id.nav_inventory);
-            View kitchenBtn = findViewById(R.id.nav_kitchen);
+        Log.d(TAG, "Making all navigation buttons visible");
+        setNavigationButtonVisibility(R.id.nav_orders, View.VISIBLE);
+        setNavigationButtonVisibility(R.id.nav_reservations, View.VISIBLE);
+        setNavigationButtonVisibility(R.id.nav_dashboard, View.VISIBLE);
+        setNavigationButtonVisibility(R.id.nav_staff, View.VISIBLE);
+        setNavigationButtonVisibility(R.id.nav_menu, View.VISIBLE);
+        setNavigationButtonVisibility(R.id.nav_inventory, View.VISIBLE);
+        setNavigationButtonVisibility(R.id.nav_kitchen, View.VISIBLE);
+    }
 
-            // Make all buttons visible
-            if (ordersBtn != null) ordersBtn.setVisibility(View.VISIBLE);
-            if (reservationsBtn != null) reservationsBtn.setVisibility(View.VISIBLE);
-            if (dashboardBtn != null) dashboardBtn.setVisibility(View.VISIBLE);
-            if (staffBtn != null) staffBtn.setVisibility(View.VISIBLE);
-            if (menuBtn != null) menuBtn.setVisibility(View.VISIBLE);
-            if (inventoryBtn != null) inventoryBtn.setVisibility(View.VISIBLE);
-            if (kitchenBtn != null) kitchenBtn.setVisibility(View.VISIBLE);
-
-            // Adjust button visibility based on user role
-            adjustButtonVisibilityByRole();
-        } catch (Exception e) {
-            Log.e(TAG, "Error making all buttons visible", e);
+    private void setNavigationButtonVisibility(int buttonId, int visibility) {
+        View button = findViewById(buttonId);
+        if (button != null) {
+            button.setVisibility(visibility);
         }
     }
 
     private void adjustButtonVisibilityByRole() {
         try {
             // Get current user role
-            if (prefsManager == null) {
-                prefsManager = new SharedPrefsManager(this);
-            }
-            String role = prefsManager.getUserRole();
-            if (role == null || role.isEmpty()) {
-                // Try to get role from intent
-                role = getIntent().getStringExtra("user_role");
-                if (role == null || role.isEmpty()) {
-                    role = "customer"; // Default to customer if no role is found
-                }
-            }
-
+            String role = userRole;
             Log.d(TAG, "Adjusting button visibility for role: " + role);
-
-            // Find all navigation buttons
-            View ordersBtn = findViewById(R.id.nav_orders);
-            View reservationsBtn = findViewById(R.id.nav_reservations);
-            View dashboardBtn = findViewById(R.id.nav_dashboard);
-            View staffBtn = findViewById(R.id.nav_staff);
-            View menuBtn = findViewById(R.id.nav_menu);
-            View inventoryBtn = findViewById(R.id.nav_inventory);
-            View kitchenBtn = findViewById(R.id.nav_kitchen);
 
             // Set visibility based on role
             switch (role.toLowerCase()) {
@@ -324,28 +474,26 @@ public class BaseActivity extends AppCompatActivity {
 
                 case "chef":
                     // Chef can only access kitchen, orders, inventory and menu
-                    if (dashboardBtn != null) dashboardBtn.setVisibility(View.GONE);
-                    if (staffBtn != null) staffBtn.setVisibility(View.GONE);
+                    setNavigationButtonVisibility(R.id.nav_dashboard, View.GONE);
+                    setNavigationButtonVisibility(R.id.nav_staff, View.GONE);
                     break;
 
                 case "waiter":
                     // Waiter can access orders and reservations
-                    if (dashboardBtn != null) dashboardBtn.setVisibility(View.GONE);
-                    if (staffBtn != null) staffBtn.setVisibility(View.GONE);
-                    if (menuBtn != null) menuBtn.setVisibility(View.GONE);
-                    if (inventoryBtn != null) inventoryBtn.setVisibility(View.GONE);
-                    if (kitchenBtn != null) kitchenBtn.setVisibility(View.GONE);
+                    setNavigationButtonVisibility(R.id.nav_dashboard, View.GONE);
+                    setNavigationButtonVisibility(R.id.nav_staff, View.GONE);
+                    setNavigationButtonVisibility(R.id.nav_inventory, View.GONE);
+                    setNavigationButtonVisibility(R.id.nav_kitchen, View.GONE);
                     break;
 
                 case "customer":
                 default:
                     // Customer can only access reservations and menu
-                    if (ordersBtn != null) ordersBtn.setVisibility(View.GONE);
-                    if (dashboardBtn != null) dashboardBtn.setVisibility(View.GONE);
-                    if (staffBtn != null) staffBtn.setVisibility(View.GONE);
-                    if (menuBtn != null) menuBtn.setVisibility(View.VISIBLE);
-                    if (inventoryBtn != null) inventoryBtn.setVisibility(View.GONE);
-                    if (kitchenBtn != null) kitchenBtn.setVisibility(View.GONE);
+                    setNavigationButtonVisibility(R.id.nav_orders, View.GONE);
+                    setNavigationButtonVisibility(R.id.nav_dashboard, View.GONE);
+                    setNavigationButtonVisibility(R.id.nav_staff, View.GONE);
+                    setNavigationButtonVisibility(R.id.nav_inventory, View.GONE);
+                    setNavigationButtonVisibility(R.id.nav_kitchen, View.GONE);
                     break;
             }
         } catch (Exception e) {
@@ -353,12 +501,25 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Refresh the navigation panel when role changes
+     */
+    protected void refreshNavigationBasedOnRole() {
+        if (isNavigationSetup) {
+            setupButtonVisibilityByRole();
+            highlightCurrentActivityButton();
+        }
+    }
+
     private void highlightCurrentActivityButton() {
         try {
             int buttonId = -1;
-
             Class<?> currentClass = this.getClass();
 
+            // Reset all button styles first
+            resetAllButtonStyles();
+
+            // Determine which button to highlight
             if (OrderActivity.class.isAssignableFrom(currentClass)) {
                 buttonId = R.id.nav_orders;
             } else if (KitchenActivity.class.isAssignableFrom(currentClass)) {
@@ -367,7 +528,8 @@ public class BaseActivity extends AppCompatActivity {
                 buttonId = R.id.nav_reservations;
             } else if (InventoryActivity.class.isAssignableFrom(currentClass)) {
                 buttonId = R.id.nav_inventory;
-            } else if (MenuManagementActivity.class.isAssignableFrom(currentClass)) {
+            } else if (MenuManagementActivity.class.isAssignableFrom(currentClass) ||
+                    (OrderActivity.class.isAssignableFrom(currentClass) && "customer".equals(userRole))) {
                 buttonId = R.id.nav_menu;
             } else if (StaffManagementActivity.class.isAssignableFrom(currentClass)) {
                 buttonId = R.id.nav_staff;
@@ -375,20 +537,45 @@ public class BaseActivity extends AppCompatActivity {
                 buttonId = R.id.nav_dashboard;
             }
 
+            // Highlight the selected button
             if (buttonId != -1) {
-                View button = findViewById(buttonId);
-                if (button != null) {
-                    button.setBackgroundTintList(getResources().getColorStateList(R.color.primary_green));
-
-                    // If it's a MaterialButton, add extra styling
-                    if (button instanceof MaterialButton) {
-                        ((MaterialButton) button).setStrokeColorResource(R.color.white);
-                        ((MaterialButton) button).setStrokeWidth(2);
-                    }
-                }
+                highlightButton(buttonId);
             }
         } catch (Exception e) {
             Log.e(TAG, "Error highlighting current button", e);
+        }
+    }
+
+    private void resetAllButtonStyles() {
+        resetButtonStyle(R.id.nav_orders);
+        resetButtonStyle(R.id.nav_kitchen);
+        resetButtonStyle(R.id.nav_reservations);
+        resetButtonStyle(R.id.nav_inventory);
+        resetButtonStyle(R.id.nav_menu);
+        resetButtonStyle(R.id.nav_staff);
+        resetButtonStyle(R.id.nav_dashboard);
+    }
+
+    private void resetButtonStyle(int buttonId) {
+        View button = findViewById(buttonId);
+        if (button != null && button instanceof MaterialButton) {
+            ((MaterialButton) button).setBackgroundTintList(
+                    getResources().getColorStateList(R.color.med_blue_dark));
+            ((MaterialButton) button).setStrokeColorResource(R.color.text_white);
+            ((MaterialButton) button).setStrokeWidth(1);
+        }
+    }
+
+    private void highlightButton(int buttonId) {
+        View button = findViewById(buttonId);
+        if (button != null) {
+            button.setBackgroundTintList(getResources().getColorStateList(R.color.primary_green));
+
+            // If it's a MaterialButton, add extra styling
+            if (button instanceof MaterialButton) {
+                ((MaterialButton) button).setStrokeColorResource(R.color.white);
+                ((MaterialButton) button).setStrokeWidth(2);
+            }
         }
     }
 
@@ -396,32 +583,36 @@ public class BaseActivity extends AppCompatActivity {
         try {
             View view = findViewById(buttonId);
             if (view != null) {
-                Log.d(TAG, "Setting up navigation button for " + destinationClass.getSimpleName() + " with ID " + getResourceName(buttonId));
-                view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+                Log.d(TAG, "Setting up navigation button for " + destinationClass.getSimpleName());
+
+                // Use a weak reference to avoid memory leaks
+                WeakReference<BaseActivity> weakActivity = new WeakReference<>(this);
+
+                view.setOnClickListener(v -> {
+                    BaseActivity activity = weakActivity.get();
+                    if (activity != null && !activity.isFinishing() &&
+                            activity.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) {
                         Log.d(TAG, "Navigation button clicked for " + destinationClass.getSimpleName());
-                        navigateToActivitySafely(destinationClass);
+                        activity.navigateToActivitySafely(destinationClass);
                     }
                 });
             } else {
-                Log.w(TAG, "Button with ID " + getResourceName(buttonId) + " not found in the layout");
+                Log.w(TAG, "Button with ID " + getResourceName(buttonId) + " not found in layout");
             }
         } catch (Exception e) {
             Log.e(TAG, "Error setting up navigation button for " + destinationClass.getSimpleName(), e);
         }
     }
 
-    private void navigateBasedOnRole(String role) {
+    /**
+     * Navigate to a specific activity based on user role
+     */
+    protected void navigateBasedOnRole() {
         try {
-            Log.d(TAG, "Navigating to role: " + role);
+            Log.d(TAG, "Navigating based on role: " + userRole);
             Intent intent;
 
-            if (role == null || role.isEmpty()) {
-                role = "customer";
-            }
-
-            switch (role.toLowerCase()) {
+            switch (userRole.toLowerCase()) {
                 case "admin":
                     intent = new Intent(this, AdminActivity.class);
                     break;
@@ -436,21 +627,20 @@ public class BaseActivity extends AppCompatActivity {
                     break;
                 case "customer":
                 default:
-                    // Change to OrderActivity (menu) for customers
                     intent = new Intent(this, OrderActivity.class);
                     break;
             }
 
             // Pass role in intent
-            intent.putExtra("user_role", role);
+            intent.putExtra("user_role", userRole);
+            Log.d(TAG, "Role-based navigation to " + intent.getComponent().getClassName());
 
-            Log.d(TAG, "Role-based navigation: " + role + " → " + intent.getComponent().getClassName());
             // Start activity
             startActivity(intent);
             finish();
-
         } catch (Exception e) {
             Log.e(TAG, "Error navigating based on role", e);
+            Toast.makeText(this, "Navigation error", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -464,7 +654,7 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     /**
-     * Safe navigation helper that works around potential issues
+     * Safe navigation helper with comprehensive error handling
      */
     protected void navigateToActivitySafely(Class<?> destinationClass) {
         try {
@@ -474,59 +664,33 @@ public class BaseActivity extends AppCompatActivity {
                 return;
             }
 
-            // Verify the destination class exists and is accessible
-            try {
-                Class.forName(destinationClass.getName());
-            } catch (ClassNotFoundException e) {
-                Log.e(TAG, "Destination class not found: " + destinationClass.getName(), e);
-                Toast.makeText(this, "Navigation error: Activity not found. Check manifest registration.", Toast.LENGTH_SHORT).show();
+            // Check if activity is declared in manifest
+            if (!isActivityRegisteredInManifest(destinationClass)) {
+                Log.e(TAG, "Activity not registered in manifest: " + destinationClass.getName());
+                Toast.makeText(this,
+                        "Navigation error: " + destinationClass.getSimpleName() + " not registered",
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Check if the activity is declared in the manifest
-            try {
-                // Try creating an intent to verify the activity is properly declared
-                Intent intentCheck = new Intent(this, destinationClass);
-                if (intentCheck.resolveActivity(getPackageManager()) == null) {
-                    Log.e(TAG, "Activity not declared in AndroidManifest.xml: " + destinationClass.getName());
-                    Toast.makeText(this,
-                            "Activity " + destinationClass.getSimpleName() + " not registered in manifest",
-                            Toast.LENGTH_LONG).show();
-                    return;
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error checking activity registration: " + destinationClass.getName(), e);
-            }
-
-            Log.d(TAG, "Navigating to " + destinationClass.getSimpleName());
+            // Create intent and add user role
             Intent intent = new Intent(this, destinationClass);
-
-            // Pass along user role
-            if (prefsManager != null) {
-                String role = prefsManager.getUserRole();
-                if (role != null && !role.isEmpty()) {
-                    intent.putExtra("user_role", role);
-                    Log.d(TAG, "Added user_role to intent: " + role);
-                }
-            }
+            intent.putExtra("user_role", userRole);
 
             // Start the activity
+            Log.d(TAG, "Navigating to " + destinationClass.getSimpleName());
             startActivity(intent);
 
-            // Show toast to indicate navigation
+            // Show brief toast confirmation
             String destinationName = destinationClass.getSimpleName().replace("Activity", "");
             Toast.makeText(this, "Opening " + destinationName, Toast.LENGTH_SHORT).show();
 
         } catch (ActivityNotFoundException e) {
             Log.e(TAG, "Activity not found: " + destinationClass.getSimpleName(), e);
-            Toast.makeText(this,
-                    "Error: Activity " + destinationClass.getSimpleName() + " not found. Check manifest registration.",
-                    Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Error: Activity not found", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Log.e(TAG, "Error navigating to " + destinationClass.getSimpleName(), e);
-            Toast.makeText(this,
-                    "Navigation error: " + e.getMessage(),
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Navigation error", Toast.LENGTH_SHORT).show();
         }
     }
 }

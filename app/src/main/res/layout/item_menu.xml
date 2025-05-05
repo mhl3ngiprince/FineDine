@@ -2,13 +2,15 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardMenuItem"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="8dp"
-    android:layout_marginHorizontal="6dp"
+    android:layout_margin="4dp"
+    android:clickable="true"
+    android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    app:cardCornerRadius="10dp"
-    app:cardElevation="6dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
     android:stateListAnimator="@animator/card_raise">
 
     <LinearLayout
@@ -19,13 +21,13 @@
         <!-- Food Image Container -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="170dp">
+            android:layout_height="140dp">
 
-            <!-- Gold trim at top -->
+            <!-- Blue trim at top -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="3dp"
-                android:background="@color/luxe_gold" />
+                android:background="@color/blue" />
 
             <!-- Main Image -->
             <ImageView
@@ -42,12 +44,12 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/gradient_menu_image" />
 
-            <!-- Gold Corner Accent -->
+            <!-- Blue Corner Accent -->
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_gravity="end"
-                android:src="@drawable/corner_gold"
+                android:src="@drawable/corner_blue"
                 android:alpha="0.7" />
 
             <!-- Available Badge -->
@@ -56,20 +58,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|start"
-                android:layout_margin="16dp"
+                android:layout_margin="8dp"
                 android:background="@drawable/bg_badge"
                 android:paddingVertical="4dp"
-                android:paddingHorizontal="12dp"
+                android:paddingHorizontal="8dp"
                 android:text="AVAILABLE"
                 android:textSize="9sp"
                 android:textColor="@color/text_dark"
                 android:textStyle="bold"
                 android:letterSpacing="0.05"
-                android:shadowColor="#40000000"
-                android:shadowDx="1"
-                android:shadowDy="1"
-                android:shadowRadius="2"
-                tools:ignore="SmallSp" />
+                android:visibility="visible" />
 
             <!-- Price Badge -->
             <LinearLayout
@@ -77,18 +75,17 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_gravity="bottom|end"
-                android:layout_margin="16dp"
-                android:background="@drawable/bg_price_tag"
-                android:paddingVertical="6dp"
-                android:paddingHorizontal="12dp"
+                android:layout_margin="8dp"
+                android:background="@drawable/bg_price_tag_blue"
+                android:paddingVertical="4dp"
+                android:paddingHorizontal="10dp"
                 android:gravity="center_vertical">
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="R"
-                    android:textColor="@color/luxe_gold"
-                    android:textSize="12sp"
+                    android:textColor="@color/blue"
+                    android:textSize="10sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -97,20 +94,19 @@
                     android:layout_height="wrap_content"
                     android:text="189"
                     android:textColor="@color/text_white"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.05" />
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
             </LinearLayout>
         </FrameLayout>
 
-        <!-- Content Area with Dark Background -->
+        <!-- Content Area with White Background -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@color/luxe_charcoal"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="20dp">
+            android:background="@color/white"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="12dp">
 
             <!-- Item Name with Elegant Divider -->
             <LinearLayout
@@ -124,18 +120,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="SIGNATURE DISH"
-                    android:textColor="@color/luxe_gold"
-                    android:textSize="10sp"
+                    android:textColor="@color/blue"
+                    android:textSize="9sp"
                     android:textStyle="bold"
-                    android:letterSpacing="0.15"
-                    android:layout_marginBottom="6dp" />
+                    android:letterSpacing="0.1"
+                    android:layout_marginBottom="4dp" />
 
                 <TextView
                     android:id="@+id/tvMenuItemName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Grilled Salmon Wellington"
-                    android:textColor="@color/text_white"
+                    android:textColor="@color/blue"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:fontFamily="serif"
@@ -145,9 +141,10 @@
 
                 <!-- Elegant Divider -->
                 <View
+                    android:id="@+id/menuItemDivider"
                     android:layout_width="40dp"
                     android:layout_height="2dp"
-                    android:background="@color/luxe_gold"
+                    android:background="@color/blue"
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="12dp" />
             </LinearLayout>
@@ -158,7 +155,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Fresh Atlantic salmon fillet wrapped in a delicate puff pastry with wild mushroom duxelles and prosciutto, served with a champagne beurre blanc sauce and seasonal vegetables."
-                android:textColor="@color/text_light"
+                android:textColor="@color/blue"
                 android:textSize="12sp"
                 android:lineSpacingExtra="4dp"
                 android:gravity="center"
@@ -185,13 +182,13 @@
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_chef_hat"
-                        app:tint="@color/luxe_gold" />
+                        app:tint="@color/blue" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Chef's Special"
-                        android:textColor="@color/text_gray"
+                        android:textColor="@color/text_dark"
                         android:textSize="10sp"
                         android:layout_marginTop="4dp" />
                 </LinearLayout>
@@ -208,98 +205,98 @@
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_time"
-                        app:tint="@color/luxe_gold" />
+                        app:tint="@color/blue" />
 
                     <TextView
                         android:id="@+id/tvPrepTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="25 min"
-                        android:textColor="@color/text_gray"
+                        android:text="25m"
+                        android:textColor="@color/text_dark"
                         android:textSize="10sp"
-                        android:layout_marginTop="4dp" />
+                        android:layout_marginStart="4dp" />
                 </LinearLayout>
 
                 <!-- Calories -->
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:layout_margin="8dp">
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
                         android:src="@drawable/ic_calories"
-                        app:tint="@color/luxe_gold" />
+                        app:tint="@color/blue" />
 
                     <TextView
                         android:id="@+id/tvCalories"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="320 cal"
-                        android:textColor="@color/text_gray"
+                        android:text="320cal"
+                        android:textColor="@color/text_dark"
                         android:textSize="10sp"
-                        android:layout_marginTop="4dp" />
+                        android:layout_marginStart="4dp" />
                 </LinearLayout>
 
                 <!-- Spice Level -->
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:layout_margin="8dp">
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
                         android:src="@drawable/ic_spicy"
-                        app:tint="@color/luxe_gold" />
+                        app:tint="@color/blue" />
 
                     <TextView
                         android:id="@+id/tvSpiceLevel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Mild"
-                        android:textColor="@color/text_gray"
+                        android:textColor="@color/text_dark"
                         android:textSize="10sp"
-                        android:layout_marginTop="4dp" />
+                        android:layout_marginStart="4dp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Action Buttons -->
+            <!-- Action Buttons Row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="20dp">
+                android:orientation="horizontal">
 
                 <!-- Add to Order Button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnAddToOrder"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
-                    android:text="ADD TO ORDER"
-                    android:textSize="12sp"
-                    android:textColor="@color/luxe_charcoal"
-                    android:paddingVertical="12dp"
-                    android:backgroundTint="@color/luxe_gold"
+                    android:text="ADD"
+                    android:textSize="11sp"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/blue"
                     app:cornerRadius="4dp"
                     android:letterSpacing="0.1"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp" />
 
                 <!-- Add to Favorites Button -->
                 <ImageButton
                     android:id="@+id/btnFavorite"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
                     android:layout_marginStart="8dp"
                     android:src="@drawable/ic_favorite_border"
                     android:backgroundTint="@android:color/transparent"
-                    app:tint="@color/luxe_gold"
+                    app:tint="@color/blue"
                     android:contentDescription="Add to favorites" />
             </LinearLayout>
         </LinearLayout>

@@ -5,6 +5,7 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+import androidx.room.Ignore;
 
 @Entity(tableName = "order_items", indices = {@Index("orderId")},
         foreignKeys = {
@@ -26,7 +27,7 @@ public class OrderItem {
     public long item_id;
     private String name;
     private int quantity;
-    private String orderId;
+    private long orderId;
     private String notes;
     private double price;
 
@@ -34,7 +35,8 @@ public class OrderItem {
         // Default constructor required for Room
     }
 
-    public OrderItem(String name, int quantity, String orderId) {
+    @Ignore
+    public OrderItem(String name, int quantity, long orderId) {
         this.name = name;
         this.quantity = quantity;
         this.orderId = orderId;
@@ -48,8 +50,14 @@ public class OrderItem {
     public void setName(String name) { this.name = name; }
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
-    public String getOrderId() { return orderId; }
-    public void setOrderId(String orderId) { this.orderId = orderId; }
+
+    public long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(long orderId) {
+        this.orderId = orderId;
+    }
 
     public String getNotes() {
         return notes;

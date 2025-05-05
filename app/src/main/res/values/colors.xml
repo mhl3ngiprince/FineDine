@@ -9,53 +9,81 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFF</color>
 
-    <!-- LUXURY RESTAURANT THEME -->
+    <!-- MEDITERRANEAN RESTAURANT THEME -->
 
     <!-- Primary Brand Colors -->
-    <color name="luxe_burgundy">#6B0F1A</color>      <!-- Deep burgundy red -->
-    <color name="luxe_burgundy_light">#AB1B27</color>
-    <color name="luxe_burgundy_dark">#4A0912</color>
+    <color name="med_blue">#1A6B96</color>           <!-- Mediterranean blue -->
+    <color name="med_blue_light">#4E92B8</color>     <!-- Light Mediterranean blue -->
+    <color name="med_blue_dark">#0E4E70</color>      <!-- Dark Mediterranean blue -->
 
     <!-- Accent Colors -->
-    <color name="luxe_gold">#D4AF37</color>          <!-- Elegant gold -->
-    <color name="luxe_gold_light">#F4CE70</color>
-    <color name="luxe_gold_dark">#A38728</color>
+    <color name="med_coral">#3F88C5</color>          <!-- Changed from pink to a cool blue -->
+    <color name="med_coral_light">#71A5D4</color>    <!-- Lighter cool blue -->
+    <color name="med_coral_dark">#2A6DA9</color>     <!-- Darker cool blue -->
+
+    <!-- Menu & Food Colors -->
+    <color name="med_olive">#9BC53D</color>          <!-- Fresh olive green -->
+    <color name="med_cream">#FDFAF1</color>          <!-- Light cream -->
+    <color name="med_sand">#F5E8C4</color>           <!-- Warm sand -->
+    <color name="med_white">#FFFFFF</color>          <!-- Pure white -->
+    <color name="med_seafoam">#B4DFE5</color>        <!-- Seafoam -->
 
     <!-- Background Colors -->
-    <color name="luxe_charcoal">#1D1D1D</color>      <!-- Near-black charcoal -->
-    <color name="luxe_dark">#2A2A2A</color>          <!-- Dark background -->
-    <color name="luxe_gray">#333333</color>          <!-- Dark gray -->
-    <color name="luxe_light_bg">#F9F4E8</color>      <!-- Cream background -->
+    <color name="med_bg_white">#FFFFFF</color>       <!-- Pure white -->
+    <color name="med_bg_cream">#FDFAF1</color>       <!-- Very light cream -->
+    <color name="med_bg_blue">#EDF6FB</color>        <!-- Very light blue -->
+    <color name="med_bg_tan">#F5ECD5</color>         <!-- Light tan -->
+    <color name="med_navy">#123752</color>           <!-- Dark navy -->
 
     <!-- Text Colors -->
     <color name="text_white">#FFFFFF</color>
-    <color name="text_gold">#D4AF37</color>
-    <color name="text_light">#EEEEEE</color>
-    <color name="text_cream">#F9F4E8</color>
-    <color name="text_gray">#999999</color>
-    <color name="text_dark">#333333</color>
+    <color name="text_dark">#2C3E50</color>          <!-- Dark blue-gray text -->
+    <color name="text_medium">#5D6D7E</color>        <!-- Medium blue-gray text -->
+    <color name="text_light">#AEB6BF</color>         <!-- Light blue-gray text -->
+    <color name="text_blue">#1A6B96</color>          <!-- Blue text -->
+    <color name="text_accent">#3F88C5</color>        <!-- Accent text -->
+    <color name="text_gray">@color/text_medium</color><!-- Compatibility -->
+    <color name="text_gold">#3F88C5</color>        <!-- Compatibility -->
+    <color name="text_cream">@color/med_cream</color><!-- Compatibility -->
+    <color name="primary_blue">#1A6B96</color>      <!-- For newer layouts -->
+    <color name="light_grey">#EEEEEE</color>        <!-- For newer layouts -->
+    <color name="med_grey">#999999</color>          <!-- For newer layouts -->
 
     <!-- Status Colors -->
-    <color name="status_available">#2E7D32</color>   <!-- Deep green -->
-    <color name="status_busy">#E53935</color>        <!-- Rich red -->
-    <color name="status_reserved">#7B1FA2</color>    <!-- Deep purple -->
-    <color name="status_pending">#FF8F00</color>     <!-- Amber -->
+    <color name="status_available">#9BC53D</color>   <!-- Green -->
+    <color name="status_busy">#E74C3C</color>        <!-- Changed from pink-red to deep red -->
+    <color name="status_reserved">#1A6B96</color>    <!-- Blue -->
+    <color name="status_pending">#FFB74D</color>     <!-- Orange -->
 
     <!-- Transparent Colors -->
-    <color name="transparent_black">#B3000000</color> <!-- 70% black -->
-    <color name="transparent_burgundy">#B36B0F1A</color> <!-- 70% burgundy -->
-    <color name="transparent_gold">#80D4AF37</color> <!-- 50% gold -->
+    <color name="transparent_black">#33000000</color> <!-- 20% black -->
+    <color name="transparent_blue">#331A6B96</color>  <!-- 20% blue -->
+    <color name="transparent_white">#B3FFFFFF</color> <!-- 70% white -->
+    <color name="transparent_brown">@color/transparent_blue</color> <!-- Compatibility -->
+    <color name="transparent_teal">@color/transparent_blue</color> <!-- Compatibility -->
+    <color name="transparent_burgundy">@color/transparent_blue</color> <!-- Compatibility -->
+    <color name="transparent_gold">@color/transparent_blue</color> <!-- Compatibility -->
 
     <!-- Gradient Colors -->
-    <color name="gradient_dark_start">#000000</color>
-    <color name="gradient_dark_center">#1A0000</color>
-    <color name="gradient_dark_end">#330D0D</color>
+    <color name="gradient_white_start">#FFFFFF</color>
+    <color name="gradient_white_end">#F5F5F5</color>
+    <color name="gradient_blue_start">#1A6B96</color>
+    <color name="gradient_blue_end">#4E92B8</color>
+    <color name="gradient_cream_start">#FDFAF1</color>
+    <color name="gradient_cream_end">#F5ECD5</color>
+
+    <!-- Legacy gradient colors -->
+    <color name="gradient_dark_start">#123752</color>  <!-- For compatibility -->
+    <color name="gradient_dark_center">#1A6B96</color> <!-- For compatibility -->
+    <color name="gradient_dark_end">#4E92B8</color>    <!-- For compatibility -->
+    <color name="gradient_brown_start">@color/gradient_blue_start</color>
+    <color name="gradient_brown_end">@color/gradient_blue_end</color>
+    <color name="gradient_gold_start">@color/gradient_blue_start</color>
+    <color name="gradient_gold_end">@color/gradient_blue_end</color>
 
     <!-- Legacy colors kept for compatibility -->
     <color name="red">#FF0000</color>
     <color name="green">#4CAF50</color>
-    <color name="primary_green_20">#332D9C44</color>
-    <color name="primary_green_dark">#1E7328</color>
     <color name="yellow">#FFC107</color>
     <color name="gray">#808080</color>
     <color name="gray_light">#F5F5F5</color>
@@ -68,13 +96,92 @@
     <color name="ripple_green">#4433CC33</color>
 
     <!-- Theme remapping for easy updates -->
-    <color name="primary">@color/luxe_burgundy</color>
-    <color name="primary_dark">@color/luxe_burgundy_dark</color>
-    <color name="primary_light">@color/luxe_burgundy_light</color>
-    <color name="accent">@color/luxe_gold</color>
-    <color name="accent_light">@color/luxe_gold_light</color>
-    <color name="accent_dark">@color/luxe_gold_dark</color>
-    <color name="background_dark">@color/luxe_charcoal</color>
-    <color name="background_medium">@color/luxe_dark</color>
-    <color name="background_light">@color/luxe_light_bg</color>
+    <color name="primary">@color/med_blue</color>
+    <color name="primary_dark">@color/med_blue_dark</color>
+    <color name="primary_light">@color/med_blue_light</color>
+    <color name="accent">@color/med_coral</color>
+    <color name="accent_light">@color/med_coral_light</color>
+    <color name="accent_dark">@color/med_coral_dark</color>
+    <color name="background_dark">@color/med_navy</color>
+    <color name="background_medium">@color/med_bg_blue</color>
+    <color name="background_light">@color/med_bg_white</color>
+
+    <!-- Required colors for backward compatibility -->
+    <color name="luxe_burgundy">@color/med_blue</color>
+    <color name="luxe_burgundy_light">@color/med_blue_light</color>
+    <color name="luxe_burgundy_dark">@color/med_blue_dark</color>
+    <color name="luxe_gold">#3F88C5</color>
+    <color name="luxe_gold_light">#71A5D4</color>
+    <color name="luxe_gold_dark">#2A6DA9</color>
+    <color name="luxe_charcoal">@color/med_navy</color>
+    <color name="luxe_dark">@color/med_navy</color>
+    <color name="luxe_gray">@color/text_medium</color>
+    <color name="luxe_light_bg">@color/med_bg_cream</color>
+
+    <!-- Fresh scheme compatibility -->
+    <color name="fresh_teal">@color/med_blue</color>
+    <color name="fresh_teal_light">@color/med_blue_light</color>
+    <color name="fresh_teal_dark">@color/med_blue_dark</color>
+    <color name="fresh_orange">#3F88C5</color>
+    <color name="fresh_orange_light">#71A5D4</color>
+    <color name="fresh_orange_dark">#2A6DA9</color>
+    <color name="fresh_beige">@color/med_bg_cream</color>
+    <color name="fresh_cream">@color/med_cream</color>
+
+    <!-- Wood scheme compatibility -->
+    <color name="warm_brown">@color/med_blue</color>
+    <color name="warm_brown_light">@color/med_blue_light</color>
+    <color name="warm_brown_dark">@color/med_blue_dark</color>
+    <color name="soft_green">@color/med_olive</color>
+    <color name="soft_green_light">@color/med_seafoam</color>
+    <color name="soft_green_dark">#3F88C5</color>
+    <color name="terracotta">#3F88C5</color>
+    <color name="cream">@color/med_cream</color>
+    <color name="wheat">@color/med_sand</color>
+    <color name="parchment">@color/med_bg_cream</color>
+    <color name="linen">@color/med_bg_white</color>
+    <color name="ivory">@color/med_bg_white</color>
+    <color name="walnut">@color/med_navy</color>
+    <color name="cedar">@color/med_navy</color>
+
+    <!-- Gold scheme compatibility -->
+    <color name="resto_white">@color/med_white</color>
+    <color name="resto_offwhite">@color/med_bg_cream</color>
+    <color name="resto_gray_light">@color/med_bg_blue</color>
+    <color name="resto_gold">#3F88C5</color>
+    <color name="resto_gold_light">#71A5D4</color>
+    <color name="resto_gold_dark">#2A6DA9</color>
+    <color name="resto_tomato">#3F88C5</color>
+    <color name="resto_sage">@color/med_olive</color>
+    <color name="resto_cream">@color/med_cream</color>
+    <color name="resto_tan">@color/med_sand</color>
+    <color name="resto_butter">@color/med_sand</color>
+    <color name="resto_bg_white">@color/med_white</color>
+    <color name="resto_bg_cream">@color/med_bg_cream</color>
+    <color name="resto_bg_gray">@color/med_bg_blue</color>
+    <color name="resto_bg_tan">@color/med_bg_tan</color>
+    <color name="resto_charcoal">@color/med_navy</color>
+
+    <!-- Modern Restaurant Theme Colors -->
+    <color name="restaurant_primary">#1E3A5F</color>
+    <color name="restaurant_primary_dark">#152C48</color>
+    <color name="restaurant_accent">#E08D3C</color>
+    <color name="restaurant_bg">#F5F5F7</color>
+    <color name="restaurant_card_bg">#FFFFFF</color>
+    <color name="restaurant_text_primary">#2B2B2B</color>
+    <color name="restaurant_text_secondary">#767676</color>
+    <color name="restaurant_text_light">#FFFFFF</color>
+    <color name="restaurant_success">#4CAF50</color>
+    <color name="restaurant_error">#F44336</color>
+    <color name="restaurant_warning">#FF9800</color>
+    <color name="restaurant_status_active">#E3F2FD</color>
+    <color name="restaurant_status_pending">#FFF3E0</color>
+    <color name="restaurant_status_alert">#FFEBEE</color>
+    <color name="restaurant_secondary">#5B92E5</color>
+    <color name="restaurant_tertiary">#8BC34A</color>
+    <color name="restaurant_card_bg_secondary">#F5F7FA</color>
+    <color name="restaurant_divider">#E0E0E0</color>
+    <color name="restaurant_accent_transparent">#40E08D3C</color>
+    <!-- Blue and White Theme -->
+    <color name="blue">#1A6B96</color>
 </resources>

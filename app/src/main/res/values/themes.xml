@@ -2,26 +2,138 @@
 <resources>
     <!-- Base application theme -->
     <style name="Theme.MaterialComponents" parent="Theme.MaterialComponents.Light.DarkActionBar">
-        <item name="colorPrimary">@color/luxe_burgundy</item>
-        <item name="colorPrimaryVariant">@color/luxe_burgundy_dark</item>
+        <item name="colorPrimary">@color/restaurant_primary</item>
+        <item name="colorPrimaryVariant">@color/restaurant_primary_dark</item>
         <item name="colorOnPrimary">@color/text_white</item>
-        <item name="colorSecondary">@color/luxe_gold</item>
-        <item name="colorSecondaryVariant">@color/luxe_gold_dark</item>
-        <item name="colorOnSecondary">@color/text_dark</item>
-        <item name="android:statusBarColor">@color/luxe_burgundy_dark</item>
-        <item name="android:windowBackground">@color/luxe_light_bg</item>
+        <item name="colorSecondary">@color/restaurant_accent</item>
+        <item name="colorSecondaryVariant">@color/restaurant_secondary</item>
+        <item name="colorOnSecondary">@color/text_white</item>
+        <item name="android:statusBarColor">@color/restaurant_primary_dark</item>
+        <item name="android:windowBackground">@color/restaurant_bg</item>
+        <!-- Adding new attributes for improved UI -->
+        <item name="actionBarStyle">@style/FineDineActionBar</item>
+        <item name="buttonStyle">@style/FineDineButton</item>
+        <item name="materialButtonStyle">@style/FineDineButton</item>
+        <item name="cardViewStyle">@style/FineDineCardView</item>
+        <item name="android:textViewStyle">@style/FineDineTextView</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <!-- Global text color overrides -->
+        <item name="android:textColor">@color/restaurant_text_primary</item>
+        <item name="colorOnBackground">@color/restaurant_text_primary</item>
+        <item name="colorOnSurface">@color/restaurant_text_primary</item>
+        <item name="android:textColorPrimary">@color/restaurant_text_primary</item>
+        <item name="android:textColorSecondary">@color/restaurant_text_secondary</item>
+        <!-- Additional style references -->
+        <item name="textInputStyle">@style/FineDineTextInputLayout</item>
+        <item name="editTextStyle">@style/FineDineEditText</item>
+        <!-- Restaurant theme elements -->
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:navigationBarColor">@color/restaurant_primary_dark</item>
+        <!-- Material Design 3 Attributes -->
+        <item name="elevationOverlayEnabled">true</item>
+        <item name="cornerSize">8dp</item>
     </style>
 
     <!-- No action bar theme used by splash and login screens -->
     <style name="Theme.MaterialComponents.NoActionBar" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">@color/luxe_burgundy</item>
-        <item name="colorPrimaryVariant">@color/luxe_burgundy_dark</item>
+        <item name="colorPrimary">@color/restaurant_primary</item>
+        <item name="colorPrimaryVariant">@color/restaurant_primary_dark</item>
         <item name="colorOnPrimary">@color/text_white</item>
-        <item name="colorSecondary">@color/luxe_gold</item>
-        <item name="colorSecondaryVariant">@color/luxe_gold_dark</item>
-        <item name="colorOnSecondary">@color/text_dark</item>
-        <item name="android:statusBarColor">@color/luxe_burgundy_dark</item>
-        <item name="android:windowBackground">@color/luxe_charcoal</item>
+        <item name="colorSecondary">@color/restaurant_accent</item>
+        <item name="colorSecondaryVariant">@color/restaurant_secondary</item>
+        <item name="colorOnSecondary">@color/text_white</item>
+        <item name="android:statusBarColor">@color/restaurant_primary_dark</item>
+        <item name="android:windowBackground">@color/restaurant_bg</item>
+        <!-- Adding new attributes for improved UI -->
+        <item name="buttonStyle">@style/FineDineButton</item>
+        <item name="materialButtonStyle">@style/FineDineButton</item>
+        <item name="cardViewStyle">@style/FineDineCardView</item>
+        <item name="android:textViewStyle">@style/FineDineTextView</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <!-- Global text color overrides -->
+        <item name="android:textColor">@color/restaurant_text_primary</item>
+        <item name="colorOnBackground">@color/restaurant_text_primary</item>
+        <item name="colorOnSurface">@color/restaurant_text_primary</item>
+        <item name="android:textColorPrimary">@color/restaurant_text_primary</item>
+        <item name="android:textColorSecondary">@color/restaurant_text_secondary</item>
+        <!-- Additional style references -->
+        <item name="textInputStyle">@style/FineDineTextInputLayout</item>
+        <item name="editTextStyle">@style/FineDineEditText</item>
+        <!-- Material Design 3 Attributes -->
+        <item name="elevationOverlayEnabled">true</item>
+        <item name="cornerSize">8dp</item>
+        <!-- Apply elegant animation on window transitions -->
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
+    </style>
+
+    <!-- Custom component styles -->
+    <style name="FineDineActionBar" parent="Widget.MaterialComponents.ActionBar.Primary">
+        <item name="background">@color/restaurant_primary</item>
+        <item name="titleTextStyle">@style/FineDineActionBarTitle</item>
+        <item name="elevation">4dp</item>
+    </style>
+
+    <style name="FineDineActionBarTitle" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:textColor">@color/text_white</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style>
+
+    <style name="FineDineButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:textColor">@color/text_white</item>
+        <item name="backgroundTint">@color/restaurant_accent</item>
+        <item name="strokeColor">@color/restaurant_accent_transparent</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.05</item>
+        <item name="android:stateListAnimator">@animator/button_press_animator</item>
+        <item name="elevation">2dp</item>
+    </style>
+
+    <style name="FineDineCardView" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/restaurant_card_bg</item>
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardElevation">3dp</item>
+        <item name="contentPadding">16dp</item>
+        <item name="rippleColor">@color/restaurant_accent_transparent</item>
+        <item name="cardPreventCornerOverlap">true</item>
+    </style>
+
+    <style name="FineDineTextView" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textColor">@color/restaurant_text_primary</item>
+    </style>
+
+    <!-- Text input styles -->
+    <style name="FineDineTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:textColor">@color/restaurant_text_primary</item>
+        <item name="android:textColorHint">@color/restaurant_text_secondary</item>
+        <item name="hintTextColor">@color/restaurant_accent</item>
+        <item name="boxStrokeColor">@color/restaurant_accent</item>
+        <item name="boxBackgroundColor">@color/restaurant_card_bg_secondary</item>
+        <item name="errorTextColor">@color/restaurant_error</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+    </style>
+
+    <style name="FineDineEditText" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="android:textColor">@color/restaurant_text_primary</item>
+        <item name="android:textColorHint">@color/restaurant_text_secondary</item>
+        <item name="android:padding">12dp</item>
+    </style>
+
+    <!-- RecyclerView item text style -->
+    <style name="RecyclerViewItemText">
+        <item name="android:textColor">@color/restaurant_text_primary</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <!-- Window animation transition -->
+    <style name="WindowAnimationTransition">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
     </style>
 
     <!-- Legacy theme for compatibility -->

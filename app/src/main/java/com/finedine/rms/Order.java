@@ -4,16 +4,13 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+import androidx.room.Ignore;
 
 @Entity(tableName = "orders",indices = {@Index(value = {"orderId"}, unique = true)})
 public class Order {
 
-
-@PrimaryKey(autoGenerate = true)
-@ColumnInfo(name = "orderId")
-
-
-
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "orderId")
     private long orderId;
     private int tableNumber;
     private String status;
@@ -25,17 +22,22 @@ public class Order {
     @ColumnInfo(name = "customerPhone")
     private String customerPhone;
 
+    @ColumnInfo(name = "customerEmail")
+    private String customerEmail;
+
     @ColumnInfo(name = "customerNotes")
     private String customerNotes;
 
-    private long order_time;
+    private long orderTime;
     public int waiterId;
     private double total;
 
+    @Ignore
     public Order(int tableNumber, String status) {
         this.tableNumber = tableNumber;
         this.status = status;
         this.timestamp = System.currentTimeMillis();
+        this.orderTime = System.currentTimeMillis();
     }
 
     public Order() {
@@ -67,12 +69,28 @@ public class Order {
         this.customerPhone = customerPhone;
     }
 
+    public String getCustomerEmail() {
+        return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+        this.customerEmail = customerEmail;
+    }
+
     public String getCustomerNotes() {
         return customerNotes;
     }
 
     public void setCustomerNotes(String customerNotes) {
         this.customerNotes = customerNotes;
+    }
+
+    public long getOrderTime() {
+        return orderTime;
+    }
+
+    public void setOrderTime(long orderTime) {
+        this.orderTime = orderTime;
     }
 
     public int getWaiterId() {
@@ -89,5 +107,9 @@ public class Order {
 
     public void setTotal(double total) {
         this.total = total;
+    }
+
+    public void notifyCustomer() {
+        // Add notification logic here
     }
 }

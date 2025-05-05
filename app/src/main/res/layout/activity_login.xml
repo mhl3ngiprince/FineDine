@@ -7,56 +7,76 @@
     android:orientation="vertical"
     android:padding="24dp"
     android:gravity="center"
-    android:background="@drawable/bg_luxury_pattern"
+    android:background="@color/restaurant_bg"
     tools:context="com.finedine.rms.LoginActivity">
 
-    <!-- Logo in CardView with gold corner accent, matching register style -->
+    <!-- Logo in CardView with modern styling -->
     <androidx.cardview.widget.CardView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
         android:layout_gravity="center"
         android:layout_marginBottom="24dp"
-        app:cardCornerRadius="100dp"
-        app:cardElevation="8dp"
-        app:cardBackgroundColor="@color/luxe_burgundy">
+        app:cardCornerRadius="70dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="@color/restaurant_card_bg">
 
         <ImageView
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:padding="16dp"
-            android:src="@drawable/logoj"
-            android:contentDescription="@string/app_name" />
+            android:id="@+id/logoImage"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/logoj" />
 
-        <!-- Gold corner accent -->
         <View
             android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="end|bottom"
-            android:background="@drawable/corner_gold" />
+            android:layout_height="2dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:background="@color/restaurant_accent" />
+
     </androidx.cardview.widget.CardView>
 
     <!-- Title -->
     <TextView
-        android:layout_width="match_parent"
+        android:id="@+id/titleText"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/app_name"
-        android:textColor="@color/luxe_gold"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:letterSpacing="0.1"
+        android:layout_marginTop="32dp"
         android:gravity="center"
-        android:fontFamily="serif"
-        android:layout_marginBottom="24dp" />
+        android:text="@string/app_name"
+        android:textColor="@color/restaurant_text_primary"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/logoImage" />
 
-    <!-- Email Field - Using Material TextInputLayout like register -->
+    <TextView
+        android:id="@+id/subtitleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/login_subtitle"
+        android:textColor="@color/restaurant_text_secondary"
+        android:fontFamily="sans-serif"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/titleText" />
+
+    <!-- Email Field -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:boxStrokeColor="@color/luxe_gold"
-        app:hintTextColor="@color/luxe_gold"
-        app:boxBackgroundColor="@color/transparent_black"
-        android:textColorHint="@color/text_gray"
+        app:boxStrokeColor="@color/restaurant_primary"
+        app:hintTextColor="@color/restaurant_primary"
+        app:boxBackgroundColor="@color/restaurant_card_bg"
+        android:textColorHint="@color/restaurant_text_secondary"
+        app:startIconDrawable="@android:drawable/ic_dialog_email"
+        app:startIconTint="@color/restaurant_text_secondary"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -65,21 +85,22 @@
             android:layout_height="wrap_content"
             android:hint="@string/Email"
             android:inputType="textEmailAddress"
-            android:textColor="@color/text_white"
-            android:textColorHint="@color/text_gray" />
+            android:textColor="@color/restaurant_text_primary"
+            android:textColorHint="@color/restaurant_text_secondary" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Password Field - Using Material TextInputLayout with toggle -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
-        app:boxStrokeColor="@color/luxe_gold"
-        app:hintTextColor="@color/luxe_gold"
-        app:boxBackgroundColor="@color/transparent_black"
-        android:textColorHint="@color/text_gray"
+        app:boxStrokeColor="@color/restaurant_primary"
+        app:hintTextColor="@color/restaurant_primary"
+        app:boxBackgroundColor="@color/restaurant_card_bg"
+        android:textColorHint="@color/restaurant_text_secondary"
         app:passwordToggleEnabled="true"
-        app:passwordToggleTint="@color/luxe_gold"
+        app:passwordToggleTint="@color/restaurant_text_secondary"
+        app:startIconDrawable="@android:drawable/ic_lock_idle_lock"
+        app:startIconTint="@color/restaurant_text_secondary"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -88,24 +109,21 @@
             android:layout_height="wrap_content"
             android:hint="@string/password"
             android:inputType="textPassword"
-            android:textColor="@color/text_white"
-            android:textColorHint="@color/text_gray" />
+            android:textColor="@color/restaurant_text_primary"
+            android:textColorHint="@color/restaurant_text_secondary" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Login Button - Styled like register -->
-    <Button
+    <!-- Login Button -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/loginButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/login"
-        android:backgroundTint="@color/luxe_burgundy"
-        android:textColor="@color/luxe_gold"
+        android:textColor="@color/restaurant_text_light"
         app:cornerRadius="8dp"
-        android:textStyle="bold"
-        android:paddingVertical="12dp"
-        android:letterSpacing="0.05"
-        app:strokeColor="@color/luxe_gold"
-        app:strokeWidth="1dp" />
+        android:paddingVertical="14dp"
+        android:backgroundTint="@color/restaurant_primary"
+        android:stateListAnimator="@animator/button_press_animator" />
 
     <!-- Progress Bar -->
     <ProgressBar
@@ -115,22 +133,43 @@
         android:layout_gravity="center"
         android:visibility="gone"
         android:layout_marginTop="16dp"
-        android:indeterminateTint="@color/luxe_gold" />
+        android:indeterminateTint="@color/restaurant_primary" />
 
-    <!-- Forgot Password - Styled to match register's link text -->
+    <!-- Demo credentials section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="For demo: admin/admin, customer/customer"
+        android:textColor="@color/restaurant_text_secondary"
+        android:textSize="12sp"
+        android:layout_marginTop="8dp"
+        android:alpha="0.7" />
+
+    <!-- Firebase login info -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Firebase authentication enabled"
+        android:textColor="@color/restaurant_primary"
+        android:textSize="12sp"
+        android:layout_marginTop="4dp"
+        android:alpha="0.8" />
+
+    <!-- Forgot Password -->
     <TextView
         android:id="@+id/forgotPasswordText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="Forgot Password?"
-        android:textColor="@color/luxe_gold"
-        android:textSize="14sp"
-        android:layout_marginTop="16dp"
-        android:textStyle="bold"
+        android:textColor="@color/restaurant_accent"
+        android:textSize="16sp"
+        android:layout_marginTop="24dp"
         android:padding="8dp" />
 
-    <!-- Create Account Button - Styled like text button in register -->
+    <!-- Create Account Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/registerText"
         style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -138,9 +177,27 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="CREATE ACCOUNT"
-        android:textColor="@color/luxe_gold"
+        android:textColor="@color/restaurant_primary"
         android:textStyle="bold"
         android:letterSpacing="0.05"
         android:layout_marginTop="8dp" />
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp">
+
+        <Button
+            android:id="@+id/restoreMenuButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="Restore Menu"
+            android:textSize="12sp"
+            android:layout_margin="8dp"
+            android:backgroundTint="@color/med_navy"
+            android:textColor="@color/med_coral"
+            android:padding="8dp"
+            android:visibility="gone" />
+    </FrameLayout>
 </LinearLayout>

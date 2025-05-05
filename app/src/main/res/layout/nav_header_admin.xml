@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="176dp"
-    android:background="@color/luxe_burgundy"
+    android:background="@color/restaurant_primary"
     android:gravity="bottom"
     android:orientation="vertical"
     android:padding="16dp"
@@ -12,7 +13,7 @@
     <View
         android:layout_width="80dp"
         android:layout_height="2dp"
-        android:background="@color/luxe_gold"
+        android:background="@color/restaurant_accent"
         android:layout_marginBottom="16dp" />
 
     <ImageView
@@ -28,25 +29,27 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="Admin User"
-        android:textColor="@color/luxe_gold"
+        android:textColor="@color/restaurant_text_light"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textStyle="bold"
-        android:fontFamily="serif" />
+        android:fontFamily="sans-serif" />
 
     <TextView
         android:id="@+id/nav_header_email"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="admin@finedine.com"
-        android:textColor="@color/text_light"
+        android:textColor="@color/restaurant_text_light"
         android:alpha="0.8" />
 
-    <!-- Gold corner accent -->
+    <!-- Corner accent -->
     <ImageView
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_gravity="end"
         android:src="@drawable/corner_gold"
+        app:tint="@color/restaurant_accent"
+        android:alpha="0.7"
         android:layout_marginTop="8dp" />
 
 </LinearLayout>

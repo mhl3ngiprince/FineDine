@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/bg_luxury_pattern"
+    android:background="@drawable/mediterranean_bg"
     android:padding="24dp">
 
     <!-- Title -->
@@ -16,7 +16,7 @@
         android:text="Edit Staff Information"
         android:textSize="28sp"
         android:textStyle="bold"
-        android:textColor="@color/luxe_gold"
+        android:textColor="@color/med_blue_dark"
         android:fontFamily="serif"
         android:layout_marginBottom="24dp" />
 
@@ -27,7 +27,7 @@
         android:layout_marginBottom="24dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="4dp"
-        app:cardBackgroundColor="@color/luxe_dark"
+        app:cardBackgroundColor="@color/med_blue"
         app:contentPadding="16dp">
 
         <LinearLayout
@@ -35,11 +35,11 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Gold trim at top -->
+            <!-- Divider at top -->
             <View
                 android:layout_width="40dp"
                 android:layout_height="2dp"
-                android:background="@color/luxe_gold"
+                android:background="@color/text_white"
                 android:layout_marginBottom="16dp" />
 
             <!-- Name Field -->
@@ -47,9 +47,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:boxStrokeColor="@color/luxe_gold"
-                app:hintTextColor="@color/luxe_gold"
-                app:boxBackgroundColor="@color/transparent_black"
+                app:boxStrokeColor="@color/text_white"
+                app:hintTextColor="@color/text_white"
+                app:boxBackgroundColor="@color/transparent_blue"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -60,7 +60,7 @@
                     android:inputType="textPersonName"
                     android:textColor="@color/text_white"
                     android:drawableStart="@drawable/ic_person"
-                    android:drawableTint="@color/luxe_gold"
+                    android:drawableTint="@color/text_white"
                     android:drawablePadding="8dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -69,9 +69,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:boxStrokeColor="@color/luxe_gold"
-                app:hintTextColor="@color/luxe_gold"
-                app:boxBackgroundColor="@color/transparent_black"
+                app:boxStrokeColor="@color/text_white"
+                app:hintTextColor="@color/text_white"
+                app:boxBackgroundColor="@color/transparent_blue"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -82,7 +82,7 @@
                     android:inputType="textEmailAddress"
                     android:textColor="@color/text_white"
                     android:drawableStart="@drawable/ic_email"
-                    android:drawableTint="@color/luxe_gold"
+                    android:drawableTint="@color/text_white"
                     android:drawablePadding="8dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -91,9 +91,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:boxStrokeColor="@color/luxe_gold"
-                app:hintTextColor="@color/luxe_gold"
-                app:boxBackgroundColor="@color/transparent_black"
+                app:boxStrokeColor="@color/text_white"
+                app:hintTextColor="@color/text_white"
+                app:boxBackgroundColor="@color/transparent_blue"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -103,7 +103,7 @@
                     android:hint="Phone Number"
                     android:inputType="phone"
                     android:textColor="@color/text_white"
-                    android:drawableTint="@color/luxe_gold"
+                    android:drawableTint="@color/text_white"
                     android:drawablePadding="8dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -112,9 +112,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:boxStrokeColor="@color/luxe_gold"
-                app:hintTextColor="@color/luxe_gold"
-                app:boxBackgroundColor="@color/transparent_black"
+                app:boxStrokeColor="@color/text_white"
+                app:hintTextColor="@color/text_white"
+                app:boxBackgroundColor="@color/transparent_blue"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
                 <AutoCompleteTextView
@@ -125,7 +125,7 @@
                     android:inputType="none"
                     android:textColor="@color/text_white"
                     android:drawableStart="@drawable/ic_role"
-                    android:drawableTint="@color/luxe_gold"
+                    android:drawableTint="@color/text_white"
                     android:drawablePadding="8dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -134,9 +134,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:boxStrokeColor="@color/luxe_gold"
-                app:hintTextColor="@color/luxe_gold"
-                app:boxBackgroundColor="@color/transparent_black"
+                app:boxStrokeColor="@color/text_white"
+                app:hintTextColor="@color/text_white"
+                app:boxBackgroundColor="@color/transparent_blue"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -148,7 +148,7 @@
                     android:focusable="false"
                     android:textColor="@color/text_white"
                     android:drawableStart="@drawable/ic_calendar"
-                    android:drawableTint="@color/luxe_gold"
+                    android:drawableTint="@color/text_white"
                     android:drawablePadding="8dp"
                     android:onClick="showDatePicker" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -157,9 +157,9 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:boxStrokeColor="@color/luxe_gold"
-                app:hintTextColor="@color/luxe_gold"
-                app:boxBackgroundColor="@color/transparent_black"
+                app:boxStrokeColor="@color/text_white"
+                app:hintTextColor="@color/text_white"
+                app:boxBackgroundColor="@color/transparent_blue"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -173,12 +173,12 @@
                     android:gravity="top" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Gold corner accent -->
+            <!-- Blue corner accent -->
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="end"
-                android:src="@drawable/corner_gold"
+                android:src="@drawable/corner_blue"
                 android:layout_marginTop="16dp"
                 android:alpha="0.7" />
         </LinearLayout>
@@ -197,8 +197,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Cancel"
-            android:textColor="@color/luxe_gold"
-            app:strokeColor="@color/luxe_gold"
+            android:textColor="@color/med_blue_dark"
+            app:strokeColor="@color/med_blue_dark"
             app:cornerRadius="12dp"
             android:layout_marginEnd="8dp"
             android:paddingVertical="14dp" />
@@ -209,9 +209,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Save"
-            android:backgroundTint="@color/luxe_burgundy"
-            android:textColor="@color/luxe_gold"
-            app:strokeColor="@color/luxe_gold"
+            android:backgroundTint="@color/med_blue"
+            android:textColor="@color/text_white"
+            app:strokeColor="@color/med_blue_dark"
             app:strokeWidth="1dp"
             app:cornerRadius="12dp"
             android:paddingVertical="14dp" />

@@ -28,6 +28,18 @@
             </intent-filter>
         </activity>
 
+        <!-- Emergency Launcher Activity - kept as backup but not used -->
+        <activity
+            android:name=".EmergencyLauncherActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"></activity>
+
+        <!-- Logout Activity -->
+        <activity
+            android:name=".LogoutActivity"
+            android:theme="@style/Theme.MaterialComponents.NoActionBar"
+            android:noHistory="true" />
+
         <!-- Login Activity -->
         <activity
             android:name=".LoginActivity"
@@ -48,47 +60,53 @@
         <activity
             android:name=".AdminActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents" />
+            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
 
         <activity
             android:name=".ManagerDashboardActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents" />
+            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
 
         <activity
             android:name=".KitchenActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents" />
+            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
 
         <activity
             android:name=".OrderActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents" />
+            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
 
         <activity
             android:name=".ReservationActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents" />
+            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
 
         <activity
             android:name=".InventoryActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents" />
+            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
 
         <activity
             android:name=".MenuManagementActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents" />
+            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
 
         <activity
             android:name=".StaffManagementActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents" />
+            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MaterialComponents.NoActionBar"
+            android:label="Settings" />
 
         <activity
             android:name=".MenuItemDetailActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents" />
+            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
 
         <!-- Firebase Messaging Service -->
         <service

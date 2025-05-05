@@ -277,6 +277,7 @@ public class RegisterActivity extends AppCompatActivity {
 
             // Start the activity
             startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
             finish();
         } catch (Exception e) {
             Log.e(TAG, "Navigation error", e);
@@ -287,6 +288,29 @@ public class RegisterActivity extends AppCompatActivity {
     private void goToLogin() {
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
         finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Show dialog confirming navigation to login screen
+        DialogUtils.showConfirmationDialog(
+                this,
+                "Back to Login",
+                "Go back to the login screen?",
+                (dialog, which) -> {
+                    super.onBackPressed();
+                    goToLogin();
+                }
+        );
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Release any resources if needed
+        mAuth = null;
+        db = null;
     }
 }

@@ -4,60 +4,123 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_margin="8dp"
+    android:layout_marginVertical="6dp"
+    android:layout_marginHorizontal="4dp"
     android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="@color/luxe_dark"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp"
-    app:strokeColor="@color/luxe_gold"
-    app:strokeWidth="1dp">
+    app:cardBackgroundColor="@color/transparent_black"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp"
-        android:gravity="center_vertical">
+        android:orientation="vertical"
+        android:background="@drawable/bg_card_gradient">
 
-        <!-- Item Name -->
-        <TextView
-            android:id="@+id/tvOrderItemName"
-            android:layout_width="0dp"
+        <!-- Gold accent at top -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/luxe_gold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="16sp"
-            android:textColor="@color/text_white"
-            android:text="Item Name" />
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:gravity="center_vertical">
 
-        <!-- Quantity -->
-        <TextView
-            android:id="@+id/tvOrderItemQuantity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:textSize="16sp"
-            android:textColor="@color/luxe_gold"
-            android:textStyle="bold"
-            android:text="x1" />
+            <!-- Item Details -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-        <!-- Delete Button -->
-        <ImageButton
-            android:id="@+id/ibDeleteOrderItem"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_delete"
-            app:tint="@color/luxe_gold" />
+                <!-- Item Name -->
+                <TextView
+                    android:id="@+id/tvOrderItemName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:fontFamily="serif"
+                    android:textColor="@color/text_white"
+                    android:text="Item Name"
+                    android:ellipsize="end"
+                    android:maxLines="1" />
 
+                <!-- Item Notes if any -->
+                <TextView
+                    android:id="@+id/tvOrderItemNotes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Special instructions: No onions"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_gray"
+                    android:textStyle="italic"
+                    android:layout_marginTop="2dp"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+            </LinearLayout>
+
+            <!-- Price -->
+            <TextView
+                android:id="@+id/tvOrderItemPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="R150.00"
+                android:textColor="@color/luxe_gold"
+                android:textSize="14sp"
+                android:layout_marginEnd="12dp" />
+
+            <!-- Quantity with +/- controls -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_quantity_control"
+                android:padding="2dp">
+
+                <!-- Decrease quantity button -->
+                <ImageButton
+                    android:id="@+id/btnDecreaseQuantity"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                    android:background="@android:color/transparent"
+                    app:tint="@color/luxe_gold"
+                    android:contentDescription="Decrease quantity" />
+
+                <!-- Quantity display -->
+                <TextView
+                    android:id="@+id/tvOrderItemQuantity"
+                    android:layout_width="30dp"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@color/luxe_gold"
+                    android:textStyle="bold"
+                    android:text="x2"
+                    android:gravity="center" />
+
+                <!-- Delete Button -->
+                <ImageButton
+                    android:id="@+id/ibDeleteOrderItem"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_delete"
+                    app:tint="@color/luxe_gold"
+                    android:contentDescription="Remove item" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Gold corner accent -->
     <ImageView
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
         android:layout_gravity="end"
         android:src="@drawable/corner_gold"
         android:alpha="0.7" />
-
 </androidx.cardview.widget.CardView>

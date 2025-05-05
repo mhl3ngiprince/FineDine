@@ -1,8 +1,10 @@
 package com.finedine.rms;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -45,14 +47,14 @@ public class MenuItem {
 
     // Sample Menu Items
     public static MenuItem[] premiumMenu() {
-        return new MenuItem[]{
+        MenuItem[] menuItems = new MenuItem[]{
                 // Starters
                 new MenuItem(
                         "Seared Scallops",
                         "Day boat scallops with cauliflower purée, truffle foam, and micro herbs",
                         80.00,
                         true,
-                        IMG_SCALLOPS,
+                        getValidResourceId(IMG_SCALLOPS),
                         CATEGORY_STARTERS,
                         15,
                         210,
@@ -63,11 +65,33 @@ public class MenuItem {
                         "Sous-vide duck liver terrine with spiced pear chutney and brioche toast",
                         140.00,
                         true,
-                        IMG_FOIE_GRAS,
+                        getValidResourceId(IMG_FOIE_GRAS),
                         CATEGORY_STARTERS,
                         20,
                         380,
                         "Mild"
+                ),
+                new MenuItem(
+                        "Oyster Selection",
+                        "Fresh seasonal oysters with champagne mignonette",
+                        110.00,
+                        true,
+                        getValidResourceId(IMG_PLACEHOLDER),
+                        CATEGORY_STARTERS,
+                        10,
+                        190,
+                        "None"
+                ),
+                new MenuItem(
+                        "King Crab Legs",
+                        "Alaskan king crab legs with citrus butter and sea salt",
+                        180.00,
+                        true,
+                        getValidResourceId(IMG_PLACEHOLDER),
+                        CATEGORY_STARTERS,
+                        15,
+                        220,
+                        "None"
                 ),
 
                 // Main Courses
@@ -76,7 +100,7 @@ public class MenuItem {
                         "A5 Japanese wagyu with smoked potato purée, heirloom carrots, and red wine jus",
                         200.00,
                         true,
-                        IMG_WAGYU,
+                        getValidResourceId(IMG_WAGYU),
                         CATEGORY_MAIN,
                         35,
                         620,
@@ -87,11 +111,33 @@ public class MenuItem {
                         "Atlantic lobster with cognac cream sauce, gruyère gratin, and asparagus tips",
                         275.00,
                         true,
-                        IMG_LOBSTER,
+                        getValidResourceId(IMG_LOBSTER),
                         CATEGORY_MAIN,
                         40,
                         580,
                         "Mild"
+                ),
+                new MenuItem(
+                        "Dry-Aged Prime Ribeye",
+                        "45-day dry-aged prime ribeye with bone marrow crust and bordelaise sauce",
+                        190.00,
+                        true,
+                        getValidResourceId(IMG_PLACEHOLDER),
+                        CATEGORY_MAIN,
+                        35,
+                        680,
+                        "Medium"
+                ),
+                new MenuItem(
+                        "Chilean Sea Bass",
+                        "Miso-glazed Chilean sea bass with yuzu beurre blanc",
+                        210.00,
+                        true,
+                        getValidResourceId(IMG_PLACEHOLDER),
+                        CATEGORY_MAIN,
+                        25,
+                        420,
+                        "None"
                 ),
 
                 // Chef's Specials
@@ -100,7 +146,7 @@ public class MenuItem {
                         "Carnaroli rice with white Alba truffle shavings and Parmigiano-Reggiano",
                         234.00,
                         true,
-                        IMG_TRUFFLE_RISOTTO,
+                        getValidResourceId(IMG_TRUFFLE_RISOTTO),
                         CATEGORY_MAIN,
                         30,
                         450,
@@ -111,7 +157,7 @@ public class MenuItem {
                         "New Zealand red deer with juniper berry reduction and root vegetable pave",
                         260.00,
                         true,
-                        IMG_VENISON,
+                        getValidResourceId(IMG_VENISON),
                         CATEGORY_MAIN,
                         25,
                         520,
@@ -124,7 +170,7 @@ public class MenuItem {
                         "Freshly baked orange-liqueur soufflé with crème anglaise",
                         90.00,
                         true,
-                        IMG_SOUFFLE,
+                        getValidResourceId(IMG_SOUFFLE),
                         CATEGORY_DESSERTS,
                         20,
                         320,
@@ -135,10 +181,32 @@ public class MenuItem {
                         "70% Valrhona chocolate trio: mousse, ganache, and flourless cake",
                         100.00,
                         true,
-                        IMG_CHOCOLATE,
+                        getValidResourceId(IMG_CHOCOLATE),
                         CATEGORY_DESSERTS,
                         15,
                         410,
+                        "None"
+                ),
+                new MenuItem(
+                        "Baked Alaska",
+                        "Vanilla bean, chocolate, and raspberry ice cream with meringue flambé",
+                        85.00,
+                        true,
+                        getValidResourceId(IMG_PLACEHOLDER),
+                        CATEGORY_DESSERTS,
+                        25,
+                        450,
+                        "None"
+                ),
+                new MenuItem(
+                        "Chocolate Soufflé",
+                        "Valrhona dark chocolate soufflé with vanilla crème anglaise",
+                        75.00,
+                        true,
+                        getValidResourceId(IMG_PLACEHOLDER),
+                        CATEGORY_DESSERTS,
+                        20,
+                        380,
                         "None"
                 ),
 
@@ -148,7 +216,7 @@ public class MenuItem {
                         "Three 2oz pours of Krug Grande Cuvée, Dom Pérignon, and Bollinger RD",
                         150.00,
                         true,
-                        IMG_CHAMPAGNE,
+                        getValidResourceId(IMG_CHAMPAGNE),
                         CATEGORY_BEVERAGES,
                         5,
                         120,
@@ -159,18 +227,66 @@ public class MenuItem {
                         "French press of rare Ethiopian Yirgacheffe with handmade chocolates",
                         40.00,
                         true,
-                        IMG_COFFEE,
+                        getValidResourceId(IMG_COFFEE),
                         CATEGORY_BEVERAGES,
                         10,
                         85,
                         "None"
+                ),
+                new MenuItem(
+                        "Rare Whiskey Flight",
+                        "Three 1oz pours of rare Japanese, Scotch, and American whiskeys",
+                        160.00,
+                        true,
+                        getValidResourceId(IMG_PLACEHOLDER),
+                        CATEGORY_BEVERAGES,
+                        5,
+                        135,
+                        "None"
+                ),
+                new MenuItem(
+                        "Signature Cocktail Selection",
+                        "Choose three cocktails from our award-winning mixology menu",
+                        95.00,
+                        true,
+                        getValidResourceId(IMG_PLACEHOLDER),
+                        CATEGORY_BEVERAGES,
+                        10,
+                        180,
+                        "None"
                 )
         };
+
+        // Log all created menu items for debugging
+        Log.d("MenuItem", "Created " + menuItems.length + " menu items");
+        for (MenuItem item : menuItems) {
+            Log.d("MenuItem", "Item: " + item.name + ", Image Resource: " + item.imageResourceId);
+        }
+
+        return menuItems;
+    }
+
+    /**
+     * Ensures valid image resource ID or falls back to placeholder
+     */
+    private static int getValidResourceId(int resourceId) {
+        try {
+            // Basic validation - if resource ID is 0 or negative, use placeholder
+            if (resourceId <= 0) {
+                Log.w("MenuItem", "Invalid resource ID: " + resourceId + ", using placeholder");
+                return IMG_PLACEHOLDER;
+            }
+            return resourceId;
+        } catch (Exception e) {
+            Log.e("MenuItem", "Error validating resource ID", e);
+            return IMG_PLACEHOLDER;
+        }
     }
 
     public MenuItem() {
     }
 
+    @Ignore
     public MenuItem(String name, String description, double price, boolean availability, String imageUrl, String category, int prepTimeMinutes, int calories, String spiceLevel) {
         this.name = name;
         this.description = description;
@@ -184,6 +300,7 @@ public class MenuItem {
         this.spiceLevel = spiceLevel;
     }
 
+    @Ignore
     public MenuItem(String name, String description, double price, boolean availability, int imageResourceId, String category, int prepTimeMinutes, int calories, String spiceLevel) {
         this.name = name;
         this.description = description;

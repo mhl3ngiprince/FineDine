@@ -2,12 +2,14 @@ package com.finedine.rms;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -29,6 +31,7 @@ public class EditStaffActivity extends AppCompatActivity {
     private User currentUser;
     private final List<String> roles = Arrays.asList("manager", "chef", "waiter");
     private Calendar hireDate = Calendar.getInstance();
+    private TextView tvTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +39,28 @@ public class EditStaffActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit_staff);
 
         initializeViews();
-        loadStaffData();
+
+        // Check if this is for creating a new staff member
+        boolean isNewStaff = getIntent().getBooleanExtra("is_new_staff", false);
+        if (isNewStaff) {
+            // Create a new user instance for adding a staff member
+            currentUser = new User();
+            currentUser.name = "New Staff Member";
+            currentUser.role = "waiter";
+            currentUser.email = "";
+            currentUser.password_hash = "";
+            currentUser.phone = "";
+            currentUser.hireDate = "";
+            currentUser.notes = "";
+
+            // Update UI for new staff
+            tvTitle.setText("Add New Staff Member");
+            populateFields();
+        } else {
+            // Load existing staff data
+            loadStaffData();
+        }
+
         setupRoleDropdown();
 
         btnCancel.setOnClickListener(v -> finish());
@@ -51,6 +75,7 @@ public class EditStaffActivity extends AppCompatActivity {
         etAdditionalNotes = findViewById(R.id.etAdditionalNotes);
         btnSave = findViewById(R.id.btnSave);
         btnCancel = findViewById(R.id.btnCancel);
+        tvTitle = findViewById(R.id.tvTitle);
 
         btnSave.setOnClickListener(this::saveChanges);
         etHireDate.setOnClickListener(this::showDatePicker);
@@ -79,8 +104,12 @@ public class EditStaffActivity extends AppCompatActivity {
     private void loadStaffData() {
         int userId = getIntent().getIntExtra("staff_id", -1);
         if(userId == -1) {
-            Toast.makeText(this, "Invalid staff member", Toast.LENGTH_SHORT).show();
-            finish();
+            // If no staff ID was provided, create a new user
+            currentUser = new User();
+            currentUser.name = "";
+            currentUser.role = "waiter";
+            tvTitle.setText("Add New Staff Member");
+            populateFields();
             return;
         }
 
@@ -88,8 +117,18 @@ public class EditStaffActivity extends AppCompatActivity {
             currentUser = AppDatabase.getDatabase(this).userDao().getUserById(userId);
             runOnUiThread(() -> {
                 if(currentUser == null) {
-                    Toast.makeText(this, "Staff member not found", Toast.LENGTH_SHORT).show();
-                    finish();
+                    // This could be a new user being created
+                    // Create an empty user to work with
+                    currentUser = new User();
+                    currentUser.name = "New Staff Member";
+                    currentUser.role = "waiter";
+                    currentUser.email = "";
+                    currentUser.password_hash = "";
+                    currentUser.phone = "";
+                    currentUser.hireDate = "";
+                    currentUser.notes = "";
+                    tvTitle.setText("Add New Staff Member");
+                    populateFields();
                     return;
                 }
                 populateFields();
@@ -156,21 +195,52 @@ public class EditStaffActivity extends AppCompatActivity {
             return;
         }
 
-        // Update user data
-        currentUser.name = name;
-        currentUser.email = email;
-        currentUser.role = role.toLowerCase();
-        currentUser.phone = phone;
-        currentUser.hireDate = hireDateStr;
-        currentUser.notes = additionalNotes;
+        try {
+            // If this is a new user, initialize it
+            if (currentUser == null) {
+                currentUser = new User();
+            }
 
-        new Thread(() -> {
-            AppDatabase.getDatabase(this).userDao().update(currentUser);
-            runOnUiThread(() -> {
-                Toast.makeText(this, "Changes saved", Toast.LENGTH_SHORT).show();
-                setResult(RESULT_OK);
-                finish();
-            });
-        }).start();
+            // Update user data
+            currentUser.name = name;
+            currentUser.email = email;
+            currentUser.role = role.toLowerCase();
+            currentUser.phone = phone;
+            currentUser.hireDate = hireDateStr;
+            currentUser.notes = additionalNotes;
+
+            // Set a default password for new users
+            if (currentUser.password_hash == null || currentUser.password_hash.isEmpty()) {
+                currentUser.password_hash = "default123";
+            }
+
+            new Thread(() -> {
+                try {
+                    AppDatabase db = AppDatabase.getDatabase(this);
+                    if (currentUser.user_id > 0) {
+                        // Update existing user
+                        db.userDao().update(currentUser);
+                    } else {
+                        // Insert new user
+                        long newId = db.userDao().insert(currentUser);
+                        currentUser.user_id = (int) newId;
+                    }
+
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "Changes saved", Toast.LENGTH_SHORT).show();
+                        setResult(RESULT_OK);
+                        finish();
+                    });
+                } catch (Exception e) {
+                    Log.e("EditStaffActivity", "Database error: " + e.getMessage(), e);
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "Error saving: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }).start();
+        } catch (Exception e) {
+            Log.e("EditStaffActivity", "Error saving staff data", e);
+            Toast.makeText(this, "Error updating staff: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 }

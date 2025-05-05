@@ -1,234 +1,489 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@drawable/bg_luxury_pattern">
+    android:fitsSystemWindows="true">
 
-    <!-- Include Navigation Panel -->
-    <include
-        android:id="@+id/navigation_panel"
-        layout="@layout/navigation_panel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <LinearLayout
+    <!-- Main Content -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:background="@color/restaurant_bg">
 
-        <!-- Section Title -->
-        <TextView
-            android:id="@+id/activityTitle"
+        <!-- App Bar -->
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="OUR MENU"
-            android:textColor="@color/luxe_gold"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.1"
-            android:fontFamily="serif"
-            android:layout_marginBottom="16dp" />
+            android:background="@color/restaurant_primary">
 
-        <!-- Gold divider -->
-        <View
-            android:layout_width="40dp"
-            android:layout_height="2dp"
-            android:background="@color/luxe_gold"
-            android:layout_marginBottom="16dp" />
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/restaurant_primary"
+                app:contentInsetStart="0dp">
 
-        <!-- Table Header -->
-        <LinearLayout
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/menuButton"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_centerVertical="true"
+                        android:padding="12dp"
+                        android:src="@drawable/ic_menu"
+                        app:tint="@color/restaurant_text_light" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toEndOf="@id/menuButton"
+                        android:text="Create Order"
+                        android:textColor="@color/restaurant_text_light"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/profileButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="16dp"
+                        android:background="@drawable/circle_avatar_bg"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_person" />
+                </RelativeLayout>
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <!-- Main Content Area -->
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="16dp">
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Table #"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/luxe_gold" />
+                android:orientation="vertical"
+                android:padding="16dp">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                app:boxStrokeColor="@color/luxe_gold"
-                app:hintTextColor="@color/luxe_gold"
-                app:boxBackgroundColor="@color/transparent_black"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etTableNumber"
+                <!-- Section Title -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="number"
-                    android:hint="Enter table number"
-                    android:textSize="20sp"
-                    android:textColor="@color/text_white" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
 
-        <!-- Customer Info Section -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="16dp">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Customer Information"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/luxe_gold"
-                android:layout_marginBottom="8dp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="New Order"
+                            android:textColor="@color/restaurant_text_primary"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                app:boxStrokeColor="@color/luxe_gold"
-                app:hintTextColor="@color/luxe_gold"
-                app:boxBackgroundColor="@color/transparent_black"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        <TextView
+                            android:id="@+id/tvOrderDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Today, May 4, 2025"
+                            android:textColor="@color/restaurant_text_secondary"
+                            android:textSize="14sp" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etCustomerName"
+                        <!-- Hidden field for backward compatibility -->
+                        <TextView
+                            android:id="@+id/activityTitle"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Customer Information Card -->
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Full Name"
-                    android:textColor="@color/text_white"
-                    android:inputType="textPersonName" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/restaurant_card_bg">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                app:boxStrokeColor="@color/luxe_gold"
-                app:hintTextColor="@color/luxe_gold"
-                app:boxBackgroundColor="@color/transparent_black"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etCustomerPhone"
+                        <!-- Customer Info Section Title -->
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="16dp"
+                            android:text="Customer Information"
+                            android:textColor="@color/restaurant_text_primary"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <!-- Table Number -->
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            app:boxBackgroundColor="@color/restaurant_card_bg"
+                            app:boxStrokeColor="@color/restaurant_primary"
+                            app:hintTextColor="@color/restaurant_primary"
+                            app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+                            app:startIconTint="@color/restaurant_text_secondary">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etTableNumber"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Table Number"
+                                android:inputType="number"
+                                android:textColor="@color/restaurant_text_primary" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <!-- Customer Name -->
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            app:boxBackgroundColor="@color/restaurant_card_bg"
+                            app:boxStrokeColor="@color/restaurant_primary"
+                            app:hintTextColor="@color/restaurant_primary"
+                            app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+                            app:startIconTint="@color/restaurant_text_secondary">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etCustomerName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Customer Name"
+                                android:inputType="textPersonName"
+                                android:textColor="@color/restaurant_text_primary" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <!-- Phone Number -->
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            app:boxBackgroundColor="@color/restaurant_card_bg"
+                            app:boxStrokeColor="@color/restaurant_primary"
+                            app:hintTextColor="@color/restaurant_primary"
+                            app:startIconDrawable="@android:drawable/ic_menu_call"
+                            app:startIconTint="@color/restaurant_text_secondary">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etCustomerPhone"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Phone Number"
+                                android:inputType="phone"
+                                android:textColor="@color/restaurant_text_primary" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <!-- Email Address -->
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:boxBackgroundColor="@color/restaurant_card_bg"
+                            app:boxStrokeColor="@color/restaurant_primary"
+                            app:hintTextColor="@color/restaurant_primary"
+                            app:startIconDrawable="@android:drawable/ic_dialog_email"
+                            app:startIconTint="@color/restaurant_text_secondary">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etCustomerEmail"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Email Address"
+                                android:inputType="textEmailAddress"
+                                android:textColor="@color/restaurant_text_primary" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Menu Selection Card -->
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Phone Number"
-                    android:textColor="@color/text_white"
-                    android:inputType="phone" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/restaurant_card_bg">
 
-        <!-- Menu Selection Header -->
-        <TextView
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <!-- Menu Items Section Title -->
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="16dp"
+                            android:text="Menu Selection"
+                            android:textColor="@color/restaurant_text_primary"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <!-- Search and Reset Row -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="12dp">
+
+                            <!-- Search Bar -->
+                            <com.google.android.material.textfield.TextInputLayout
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginEnd="8dp"
+                                app:boxBackgroundColor="@color/restaurant_card_bg"
+                                app:boxStrokeColor="@color/restaurant_primary"
+                                app:hintTextColor="@color/restaurant_primary"
+                                app:startIconDrawable="@android:drawable/ic_menu_search"
+                                app:startIconTint="@color/restaurant_text_secondary">
+
+                                <EditText
+                                    android:id="@+id/etSearchMenu"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:hint="Search menu..."
+                                    android:inputType="text"
+                                    android:textColor="@color/restaurant_text_primary"
+                                    android:textSize="14sp" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <!-- Reset Menu Button -->
+                            <Button
+                                android:id="@+id/btnResetMenu"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:backgroundTint="@color/restaurant_secondary"
+                                android:padding="8dp"
+                                android:text="Reset"
+                                android:textColor="@color/restaurant_text_light"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <!-- Menu Category Tabs -->
+                        <com.google.android.material.tabs.TabLayout
+                            android:id="@+id/menuTabLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            app:tabMode="scrollable"
+                            app:tabSelectedTextColor="@color/restaurant_primary"
+                            app:tabIndicatorColor="@color/restaurant_accent"
+                            app:tabRippleColor="@color/restaurant_accent_transparent" />
+
+                        <!-- Menu Items Grid -->
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/menuRecyclerView"
+                            android:layout_width="match_parent"
+                            android:layout_height="280dp"
+                            android:clipToPadding="false"
+                            android:padding="4dp"
+                            android:scrollbars="vertical"
+                            tools:listitem="@layout/item_menu" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Current Order Card -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/restaurant_card_bg">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <!-- Current Order Section Title -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="16dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Current Order"
+                                android:textColor="@color/restaurant_text_primary"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tvOrderCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0 items"
+                                android:textColor="@color/restaurant_text_secondary"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+                        <!-- Current Order Items List -->
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/currentOrderRecyclerView"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:clipToPadding="false"
+                            android:padding="4dp"
+                            android:scrollbars="vertical"
+                            tools:listitem="@layout/item_order_item" />
+
+                        <!-- Order Totals -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginTop="16dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="Subtotal"
+                                    android:textColor="@color/restaurant_text_secondary"
+                                    android:textSize="14sp" />
+
+                                <TextView
+                                    android:id="@+id/tvOrderSubtotal"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="R0.00"
+                                    android:textColor="@color/restaurant_text_primary"
+                                    android:textSize="14sp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginTop="4dp">
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="Tax (15%)"
+                                    android:textColor="@color/restaurant_text_secondary"
+                                    android:textSize="14sp" />
+
+                                <TextView
+                                    android:id="@+id/tvOrderTax"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="R0.00"
+                                    android:textColor="@color/restaurant_text_primary"
+                                    android:textSize="14sp" />
+                            </LinearLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@color/restaurant_divider"
+                                android:layout_marginVertical="8dp" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="Total"
+                                    android:textColor="@color/restaurant_text_primary"
+                                    android:textStyle="bold"
+                                    android:textSize="16sp" />
+
+                                <TextView
+                                    android:id="@+id/tvOrderTotal"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="R0.00"
+                                    android:textColor="@color/restaurant_accent"
+                                    android:textSize="18sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Submit Order Button -->
+                <Button
+                    android:id="@+id/btnSubmitOrder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/restaurant_primary"
+                    android:elevation="4dp"
+                    android:onClick="submitOrder"
+                    android:paddingVertical="14dp"
+                    android:text="Submit Order"
+                    android:textColor="@color/restaurant_text_light"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- Bottom Navigation -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNavigation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Menu Items"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/luxe_gold"
-            android:layout_marginBottom="8dp" />
+            android:layout_gravity="bottom"
+            app:menu="@menu/bottom_nav_menu"
+            app:labelVisibilityMode="labeled"
+            android:background="@color/restaurant_card_bg" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-        <!-- Search Bar -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            app:boxStrokeColor="@color/luxe_gold"
-            app:hintTextColor="@color/luxe_gold"
-            app:boxBackgroundColor="@color/transparent_black"
-            app:startIconDrawable="@android:drawable/ic_menu_search"
-            app:startIconTint="@color/luxe_gold"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-            <EditText
-                android:id="@+id/etSearchMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Search menu items..."
-                android:textColor="@color/text_white"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Menu Items Grid -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/menuRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.6"
-            android:background="@color/transparent_black"
-            android:clipToPadding="false"
-            android:padding="12dp"
-            android:scrollbars="vertical"
-            tools:listitem="@layout/item_menu" />
-
-        <!-- Current Order Section -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Your Current Order"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/luxe_gold"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/currentOrderRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.4"
-            android:background="@color/transparent_black"
-            android:clipToPadding="false"
-            android:padding="12dp"
-            android:scrollbars="vertical"
-            tools:listitem="@layout/item_order_item" />
-
-        <!-- Order Total -->
-        <TextView
-            android:id="@+id/tvOrderTotal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Total: R0.00"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/luxe_gold"
-            android:gravity="end"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"
-            android:paddingEnd="16dp" />
-
-        <!-- Action Button -->
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Submit Order"
-            android:onClick="submitOrder"
-            android:backgroundTint="@color/luxe_burgundy"
-            android:textColor="@color/luxe_gold"
-            app:cornerRadius="12dp"
-            app:strokeColor="@color/luxe_gold"
-            app:strokeWidth="1dp"
-            android:paddingVertical="14dp"
-            android:layout_marginTop="16dp"
-            android:elevation="2dp" />
-
-        <!-- Bottom Shadow Overlay -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="8dp"
-            android:background="@drawable/shadow_gradient"
-            android:layout_gravity="bottom" />
-    </LinearLayout>
-</LinearLayout>
+    <!-- Navigation Drawer -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/drawer_menu" />
+</androidx.drawerlayout.widget.DrawerLayout>

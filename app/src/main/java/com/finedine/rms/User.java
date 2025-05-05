@@ -2,6 +2,7 @@ package com.finedine.rms;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.Ignore;
 
 @Entity(tableName = "users")
 public class User {
@@ -15,6 +16,7 @@ public class User {
     public String hireDate;
     public String notes;
 
+    @Ignore
     public User(String name, String email, String password_hash, String role) {
         this.name = name;
         this.email = email;

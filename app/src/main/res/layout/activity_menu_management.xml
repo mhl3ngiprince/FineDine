@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/bg_luxury_pattern">
+    android:background="@color/white">
 
     <!-- Include Navigation Panel -->
     <include
@@ -25,18 +25,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="MENU MANAGEMENT"
-            android:textColor="@color/luxe_gold"
+            android:textColor="@color/blue"
             android:textSize="24sp"
             android:textStyle="bold"
             android:letterSpacing="0.1"
             android:fontFamily="serif"
             android:layout_marginBottom="16dp" />
 
-        <!-- Gold divider -->
+        <!-- Blue divider -->
         <View
             android:layout_width="40dp"
             android:layout_height="2dp"
-            android:background="@color/luxe_gold"
+            android:background="@color/blue"
             android:layout_marginBottom="16dp" />
 
         <!-- Toolbar Container -->
@@ -50,9 +50,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:boxStrokeColor="@color/luxe_gold"
-                app:hintTextColor="@color/luxe_gold"
-                app:boxBackgroundColor="@color/transparent_black"
+                app:boxStrokeColor="@color/blue"
+                app:hintTextColor="@color/blue"
+                app:boxBackgroundColor="@color/white"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -60,9 +60,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="search_menu_items"
-                    android:textColor="@color/text_white"
+                    android:textColor="@color/blue"
                     android:drawableStart="@drawable/ic_search"
-                    android:drawableTint="@color/luxe_gold"
+                    android:drawableTint="@color/blue"
                     android:drawablePadding="8dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -72,8 +72,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:src="@drawable/ic_add"
-                app:backgroundTint="@color/luxe_gold"
-                android:tint="@color/luxe_charcoal"
+                app:backgroundTint="@color/blue"
+                android:tint="@color/white"
                 app:borderWidth="0dp" />
         </LinearLayout>
 
@@ -83,7 +83,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/background_dark"
+            android:background="@color/white"
             android:clipToPadding="false"
             android:padding="8dp"
             android:scrollbars="vertical"

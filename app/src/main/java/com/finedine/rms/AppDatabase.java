@@ -4,11 +4,18 @@ import android.content.Context;
 import android.util.Log;
 
 /**
- * Simple stub implementation of AppDatabase to avoid crashes
+ * Database facade that delegates to RoomAppDatabase for actual operations
  */
 public class AppDatabase {
     private static final String TAG = "AppDatabase";
     private static AppDatabase INSTANCE;
+    private final RoomAppDatabase roomDatabase;
+
+    private AppDatabase(Context context) {
+        // Get Room database instance
+        roomDatabase = RoomAppDatabase.getDatabase(context);
+        Log.d(TAG, "Created new AppDatabase instance with RoomAppDatabase");
+    }
 
     public static AppDatabase getDatabase(Context context) {
         if (INSTANCE == null) {
@@ -16,7 +23,7 @@ public class AppDatabase {
                 if (INSTANCE == null) {
                     try {
                         Log.d(TAG, "Creating new database instance");
-                        INSTANCE = new AppDatabase();
+                        INSTANCE = new AppDatabase(context);
                     } catch (Exception e) {
                         Log.e(TAG, "Error creating database", e);
                     }
@@ -28,146 +35,43 @@ public class AppDatabase {
 
     // DAO getters
     public OrderDao orderDao() {
-        return new OrderDao();
+        return roomDatabase.orderDao();
     }
 
     public InventoryDao inventoryDao() {
-        return new InventoryDao();
+        return roomDatabase.inventoryDao();
     }
 
     public ReservationDao reservationDao() {
-        return new ReservationDao();
+        return roomDatabase.reservationDao();
     }
 
     public UserDao userDao() {
-        return new UserDao();
+        return roomDatabase.userDao();
     }
 
     public MenuItemDao menuItemDao() {
-        return new MenuItemDao();
+        return roomDatabase.menuItemDao();
     }
 
     public OrderItemDao orderItemDao() {
-        return new OrderItemDao();
+        return roomDatabase.orderItemDao();
     }
 
-    // Stub DAO classes to avoid crashes
-    public static class OrderDao {
-        public double getTodayOrderCount() {
-            return 0.0;
-        }
-
-        public java.util.List<com.finedine.rms.Order> getOrdersByStatus(String status) {
-            return new java.util.ArrayList<>();
-        }
-
-        public long insert(com.finedine.rms.Order order) {
-            return 1L;
-        }
+    public TableDao tableDao() {
+        return roomDatabase.tableDao();
     }
 
-    public static class OrderItemDao {
-        public long insert(com.finedine.rms.OrderItem item) {
-            try {
-                // Print debug information
-                Log.d("AppDatabase", "Inserting OrderItem: " + item.getName() +
-                        ", quantity=" + item.getQuantity() +
-                        ", orderId=" + item.getOrderId());
-
-                // Check if orderId is set
-                if (item.getOrderId() == null || item.getOrderId().isEmpty()) {
-                    Log.e("AppDatabase", "OrderItem has no orderId set!");
-                    throw new IllegalArgumentException("OrderItem must have orderId set");
-                }
-
-                // This is a stub implementation, so just return a dummy ID
-                return 1L;
-            } catch (Exception e) {
-                Log.e("AppDatabase", "Error in OrderItemDao.insert: " + e.getMessage(), e);
-                throw e;
-            }
-        }
+    public ReviewDao reviewDao() {
+        return roomDatabase.reviewDao();
     }
 
-    public static class MenuItemDao {
-        public java.util.List<com.finedine.rms.MenuItem> getAllAvailable() {
-            return new java.util.ArrayList<>();
-        }
-
-        public void insertAll(com.finedine.rms.MenuItem[] items) {
-            // Do nothing
-        }
-
-        public long insert(com.finedine.rms.MenuItem item) {
-            // Return a dummy ID
-            return 1L;
-        }
-
-        public com.finedine.rms.MenuItem getById(int id) {
-            return null;
-        }
-
-        public com.finedine.rms.MenuItem getByName(String name) {
-            return null;
-        }
-    }
-
-    public static class InventoryDao {
-        public java.util.List<com.finedine.rms.Inventory> getLowStockItems() {
-            return new java.util.ArrayList<>();
-        }
-
-        public java.util.List<com.finedine.rms.Inventory> getAll() {
-            return new java.util.ArrayList<>();
-        }
-
-        public void update(com.finedine.rms.Inventory item) {
-            // Do nothing
-        }
-
-        public void insert(com.finedine.rms.Inventory item) {
-            // Do nothing
-        }
-    }
-
-    public static class UserDao {
-        public java.util.List<com.finedine.rms.User> getAllStaff() {
-            return new java.util.ArrayList<>();
-        }
-
-        public void delete(com.finedine.rms.User user) {
-            // Do nothing
-        }
-
-        public com.finedine.rms.User getUserById(int id) {
-            return null;
-        }
-
-        public void update(com.finedine.rms.User user) {
-            // Do nothing
-        }
-
-        public com.finedine.rms.User login(String email, String password) {
-            return null;
-        }
-    }
-
-    public static class ReservationDao {
-        public java.util.List<com.finedine.rms.Reservation> getTodayReservations() {
-            return new java.util.ArrayList<>();
-        }
-
-        public long insert(com.finedine.rms.Reservation reservation) {
-            // Return a dummy ID
-            return 1L;
-        }
-
-        public java.util.List<com.finedine.rms.Reservation> getUserReservations(int userId) {
-            return new java.util.ArrayList<>();
-        }
-
-        public int getTodayReservationCount() {
-            return 0;
+    /**
+     * Close the database connection
+     */
+    public void close() {
+        if (roomDatabase != null) {
+            roomDatabase.close();
         }
     }
 }

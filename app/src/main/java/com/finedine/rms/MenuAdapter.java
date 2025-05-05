@@ -31,7 +31,6 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
         this.listener = listener;
     }
 
-
     @NonNull
     @Override
     public MenuViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -52,11 +51,29 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
     }
 
     public void updateItems(List<MenuItem> newItems) {
-        this.menuItems.clear();
-        if (newItems != null) {
-            this.menuItems.addAll(newItems);
+        try {
+            android.util.Log.d("MenuAdapter", "Updating menu items: " + (newItems != null ? newItems.size() : 0) + " items");
+            this.menuItems.clear();
+            if (newItems != null && !newItems.isEmpty()) {
+                this.menuItems.addAll(newItems);
+                android.util.Log.d("MenuAdapter", "Added items to adapter, new count: " + this.menuItems.size());
+            } else {
+                android.util.Log.w("MenuAdapter", "No items to add or null list provided");
+            }
+            notifyDataSetChanged();
+            android.util.Log.d("MenuAdapter", "NotifyDataSetChanged called");
+        } catch (Exception e) {
+            android.util.Log.e("MenuAdapter", "Error updating items: " + e.getMessage());
         }
-        notifyDataSetChanged();
+    }
+
+    /**
+     * Get the current list of menu items
+     *
+     * @return The list of menu items
+     */
+    public List<MenuItem> getItems() {
+        return menuItems;
     }
 
     static class MenuViewHolder extends RecyclerView.ViewHolder {
@@ -70,9 +87,11 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
         private final TextView spiceLevel;
         private final Button btnAddToOrder;
         private final ImageButton btnFavorite;
+        private final View itemView;
 
         public MenuViewHolder(View itemView) {
             super(itemView);
+            this.itemView = itemView;
             itemName = itemView.findViewById(R.id.tvMenuItemName);
             itemDescription = itemView.findViewById(R.id.tvMenuItemDescription);
             itemPrice = itemView.findViewById(R.id.tvMenuItemPrice);
@@ -90,8 +109,8 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
             itemDescription.setText(item.description);
             itemPrice.setText(String.format("%.2f", item.price));
             itemCategory.setText(item.category.toUpperCase());
-            prepTime.setText(String.format("%d min", item.prepTimeMinutes));
-            calories.setText(String.format("%d cal", item.calories));
+            prepTime.setText(String.format("%dm", item.prepTimeMinutes));
+            calories.setText(String.format("%dcal", item.calories));
             spiceLevel.setText(item.spiceLevel);
 
             RequestOptions requestOptions = new RequestOptions();
@@ -102,18 +121,70 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
                 imageResource = R.drawable.placeholder_food;
             }
 
-            Glide.with(itemView.getContext())
-                    .load(imageResource)
-                    .apply(requestOptions)
-                    .transition(DrawableTransitionOptions.withCrossFade())
-                    .placeholder(R.drawable.placeholder_food)
-                    .error(R.drawable.placeholder_food)
-                    .into(itemImage);
+            // Debug logging to help diagnose image issues
+            android.util.Log.d("MenuAdapter", "Loading image for " + item.name +
+                    ", Resource ID: " + imageResource +
+                    ", Image URL: " + (item.imageUrl != null ? item.imageUrl : "null"));
 
-            // Set click listeners for all interactive elements
+            // Try loading from resource first, fallback to URL if available
+            try {
+                // Use direct image resource setting instead of Glide for reliability
+                if (imageResource > 0) {
+                    try {
+                        // Try to set the image directly
+                        itemImage.setImageResource(imageResource);
+                        android.util.Log.d("MenuAdapter", "Set image directly for: " + item.name);
+                    } catch (Exception e) {
+                        android.util.Log.e("MenuAdapter", "Error setting image resource directly: " + e.getMessage());
+                        loadWithGlide(imageResource, item);
+                    }
+                } else if (item.imageUrl != null && !item.imageUrl.isEmpty()) {
+                    loadWithGlide(item.imageUrl, item);
+                } else {
+                    itemImage.setImageResource(R.drawable.placeholder_food);
+                }
+            } catch (Exception e) {
+                android.util.Log.e("MenuAdapter", "Error loading image: " + e.getMessage());
+                itemImage.setImageResource(R.drawable.placeholder_food);
+            }
+
+            itemImage.setVisibility(View.VISIBLE);
+
+            if (item.name.contains("Scallop")) {
+                itemImage.setImageResource(R.drawable.scallops);
+            } else if (item.name.contains("Foie") || item.name.contains("Torchon")) {
+                itemImage.setImageResource(R.drawable.torchon);
+            } else if (item.name.contains("Wagyu") || item.name.contains("Tenderloin")) {
+                itemImage.setImageResource(R.drawable.tenderloin);
+            } else if (item.name.contains("Lobster")) {
+                itemImage.setImageResource(R.drawable.lobster);
+            } else if (item.name.contains("Truffle") || item.name.contains("Risotto")) {
+                itemImage.setImageResource(R.drawable.black_truffle_risotto_recipe);
+            } else if (item.name.contains("Soufflé")) {
+                itemImage.setImageResource(R.drawable.marniersuffle);
+            } else if (item.name.contains("Chocolate")) {
+                itemImage.setImageResource(R.drawable.chocolate_symphony);
+            } else if (item.name.contains("Champagne")) {
+                itemImage.setImageResource(R.drawable.dom_perigon);
+            } else if (item.name.contains("Coffee")) {
+                itemImage.setImageResource(R.drawable.greek_coffee_demitasse_cup);
+            }
+
+            // Set double click behavior to show details
+            itemView.setOnLongClickListener(v -> {
+                // Launch detail view instead of just callback
+                try {
+                    MenuItemDetailActivity.launch(itemView.getContext(), item);
+                    return true;
+                } catch (Exception e) {
+                    android.util.Log.e("MenuAdapter", "Error launching detail view", e);
+                    return false;
+                }
+            });
+
+            // Single click uses the regular callback (for order dialogs etc)
             itemView.setOnClickListener(v -> listener.onItemClick(item));
 
-            // Add to order button
             btnAddToOrder.setOnClickListener(v -> {
                 listener.onItemClick(item);
                 Toast.makeText(itemView.getContext(),
@@ -136,6 +207,25 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
                                 : item.name + " removed from favorites",
                         Toast.LENGTH_SHORT).show();
             });
+        }
+
+        /**
+         * Helper method to load image with Glide
+         */
+        private void loadWithGlide(Object imageSource, MenuItem item) {
+            try {
+                Glide.with(itemView.getContext())
+                        .load(imageSource)
+                        .apply(new RequestOptions().centerCrop())
+                        .transition(DrawableTransitionOptions.withCrossFade())
+                        .placeholder(R.drawable.placeholder_food)
+                        .error(R.drawable.placeholder_food)
+                        .into(itemImage);
+                android.util.Log.d("MenuAdapter", "Loaded image with Glide for: " + item.name);
+            } catch (Exception e) {
+                android.util.Log.e("MenuAdapter", "Glide error for " + item.name + ": " + e.getMessage());
+                itemImage.setImageResource(R.drawable.placeholder_food);
+            }
         }
     }
 }

@@ -4,14 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/luxe_burgundy"
+    android:background="@color/restaurant_primary"
     android:padding="8dp">
 
-    <!-- Gold trim at top -->
+    <!-- Top trim accent -->
     <View
         android:layout_width="40dp"
         android:layout_height="2dp"
-        android:background="@color/luxe_gold"
+        android:background="@color/restaurant_accent"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="8dp" />
 
@@ -22,9 +22,9 @@
         android:text="FINE DINE"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:fontFamily="serif"
-        android:letterSpacing="0.1"
-        android:textColor="@color/luxe_gold"
+        android:fontFamily="sans-serif"
+        android:letterSpacing="0.05"
+        android:textColor="@color/restaurant_text_light"
         android:gravity="center"
         android:padding="8dp" />
 
@@ -36,16 +36,19 @@
         android:layout_gravity="end"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="-48dp"
-        android:backgroundTint="@color/luxe_burgundy_dark"
+        android:backgroundTint="@color/restaurant_primary_dark"
         android:text="Logout"
-        android:textColor="@color/luxe_gold"
+        android:textColor="@color/restaurant_text_light"
         android:textSize="12sp"
         app:cornerRadius="16dp"
-        app:strokeColor="@color/luxe_gold"
+        app:strokeColor="@color/restaurant_accent"
         app:strokeWidth="1dp"
         android:paddingHorizontal="12dp"
         android:paddingVertical="4dp"
-        android:stateListAnimator="@null" />
+        android:stateListAnimator="@null"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="4dp" />
 
     <HorizontalScrollView
         android:layout_width="match_parent"
@@ -53,149 +56,112 @@
         android:scrollbars="none"
         android:paddingVertical="4dp">
 
-        <LinearLayout
+        <com.google.android.material.chip.ChipGroup
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            app:singleSelection="true"
+            app:chipSpacingHorizontal="8dp">
 
-            <com.google.android.material.button.MaterialButton
+            <com.google.android.material.chip.Chip
                 android:id="@+id/nav_orders"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
-                android:backgroundTint="@color/luxe_burgundy_dark"
+                android:layout_height="wrap_content"
                 android:text="Orders"
-                android:textColor="@color/luxe_gold"
-                android:minWidth="100dp"
-                app:cornerRadius="8dp"
-                app:icon="@drawable/ic_food"
-                app:iconGravity="textStart"
-                app:iconTint="@color/luxe_gold"
-                app:strokeColor="@color/luxe_gold"
-                app:strokeWidth="1dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:rippleColor="@color/transparent_gold" />
+                android:textColor="@color/restaurant_text_light"
+                app:chipBackgroundColor="@color/restaurant_primary_dark"
+                app:chipIcon="@drawable/ic_food"
+                app:chipIconTint="@color/restaurant_accent"
+                android:clickable="true" />
 
-            <com.google.android.material.button.MaterialButton
+            <com.google.android.material.chip.Chip
                 android:id="@+id/nav_kitchen"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
-                android:backgroundTint="@color/luxe_burgundy_dark"
+                android:layout_height="wrap_content"
                 android:text="Kitchen"
-                android:textColor="@color/luxe_gold"
-                android:minWidth="100dp"
-                app:cornerRadius="8dp"
-                app:icon="@drawable/ic_food"
-                app:iconGravity="textStart"
-                app:iconTint="@color/luxe_gold"
-                app:strokeColor="@color/luxe_gold"
-                app:strokeWidth="1dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:rippleColor="@color/transparent_gold" />
+                android:textColor="@color/restaurant_text_light"
+                app:chipBackgroundColor="@color/restaurant_primary_dark"
+                app:chipIcon="@drawable/ic_food"
+                app:chipIconTint="@color/restaurant_accent"
+                android:clickable="true" />
 
-            <com.google.android.material.button.MaterialButton
+            <com.google.android.material.chip.Chip
                 android:id="@+id/nav_reservations"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
-                android:backgroundTint="@color/luxe_burgundy_dark"
+                android:layout_height="wrap_content"
                 android:text="Reservations"
-                android:textColor="@color/luxe_gold"
-                android:minWidth="100dp"
-                app:cornerRadius="8dp"
-                app:icon="@drawable/ic_calendar"
-                app:iconGravity="textStart"
-                app:iconTint="@color/luxe_gold"
-                app:strokeColor="@color/luxe_gold"
-                app:strokeWidth="1dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:rippleColor="@color/transparent_gold" />
+                android:textColor="@color/restaurant_text_light"
+                app:chipBackgroundColor="@color/restaurant_primary_dark"
+                app:chipIcon="@drawable/ic_calendar"
+                app:chipIconTint="@color/restaurant_accent"
+                android:clickable="true" />
 
-            <com.google.android.material.button.MaterialButton
+            <com.google.android.material.chip.Chip
                 android:id="@+id/nav_inventory"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
-                android:backgroundTint="@color/luxe_burgundy_dark"
+                android:layout_height="wrap_content"
                 android:text="Inventory"
-                android:textColor="@color/luxe_gold"
-                android:minWidth="100dp"
-                app:cornerRadius="8dp"
-                app:icon="@drawable/ic_inventory"
-                app:iconGravity="textStart"
-                app:iconTint="@color/luxe_gold"
-                app:strokeColor="@color/luxe_gold"
-                app:strokeWidth="1dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:rippleColor="@color/transparent_gold" />
+                android:textColor="@color/restaurant_text_light"
+                app:chipBackgroundColor="@color/restaurant_primary_dark"
+                app:chipIcon="@drawable/ic_inventory"
+                app:chipIconTint="@color/restaurant_accent"
+                android:clickable="true" />
 
-            <com.google.android.material.button.MaterialButton
+            <com.google.android.material.chip.Chip
                 android:id="@+id/nav_menu"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
-                android:backgroundTint="@color/luxe_burgundy_dark"
+                android:layout_height="wrap_content"
                 android:text="Menu"
-                android:textColor="@color/luxe_gold"
-                android:minWidth="100dp"
-                app:cornerRadius="8dp"
-                app:icon="@drawable/ic_menu_item"
-                app:iconGravity="textStart"
-                app:iconTint="@color/luxe_gold"
-                app:strokeColor="@color/luxe_gold"
-                app:strokeWidth="1dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:rippleColor="@color/transparent_gold" />
+                android:textColor="@color/restaurant_text_light"
+                app:chipBackgroundColor="@color/restaurant_primary_dark"
+                app:chipIcon="@drawable/ic_menu_item"
+                app:chipIconTint="@color/restaurant_accent"
+                android:clickable="true" />
 
-            <com.google.android.material.button.MaterialButton
+            <com.google.android.material.chip.Chip
                 android:id="@+id/nav_staff"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
-                android:backgroundTint="@color/luxe_burgundy_dark"
+                android:layout_height="wrap_content"
                 android:text="Staff"
-                android:textColor="@color/luxe_gold"
-                android:minWidth="100dp"
-                app:cornerRadius="8dp"
-                app:icon="@drawable/ic_people"
-                app:iconGravity="textStart"
-                app:iconTint="@color/luxe_gold"
-                app:strokeColor="@color/luxe_gold"
-                app:strokeWidth="1dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:rippleColor="@color/transparent_gold" />
+                android:textColor="@color/restaurant_text_light"
+                app:chipBackgroundColor="@color/restaurant_primary_dark"
+                app:chipIcon="@drawable/ic_people"
+                app:chipIconTint="@color/restaurant_accent"
+                android:clickable="true" />
 
-            <com.google.android.material.button.MaterialButton
+            <com.google.android.material.chip.Chip
                 android:id="@+id/nav_dashboard"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:backgroundTint="@color/luxe_burgundy_dark"
+                android:layout_height="wrap_content"
                 android:text="Dashboard"
-                android:textColor="@color/luxe_gold"
-                android:minWidth="100dp"
-                app:cornerRadius="8dp"
-                app:icon="@drawable/ic_menu_item"
-                app:iconGravity="textStart"
-                app:iconTint="@color/luxe_gold"
-                app:strokeColor="@color/luxe_gold"
-                app:strokeWidth="1dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:rippleColor="@color/transparent_gold" />
-        </LinearLayout>
+                android:textColor="@color/restaurant_text_light"
+                app:chipBackgroundColor="@color/restaurant_primary_dark"
+                app:chipIcon="@drawable/ic_menu_item"
+                app:chipIconTint="@color/restaurant_accent"
+                android:clickable="true" />
+        </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/restaurant_accent"
+        android:alpha="0.3"
+        android:layout_marginVertical="8dp" />
+
+    <!-- Alternate logout button (more visible) -->
+    <Button
+        android:id="@+id/logoutButtonAlt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="LOGOUT"
+        android:backgroundTint="@color/restaurant_accent"
+        android:textColor="@color/restaurant_primary_dark"
+        android:textStyle="bold"
+        android:paddingVertical="12dp"
+        app:cornerRadius="8dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp" />
 </LinearLayout>

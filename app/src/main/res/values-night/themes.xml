@@ -1,7 +1,121 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
     <!-- Base application theme. -->
-    <style name="Base.Theme.Qqqqq" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    <style name="Theme.MaterialComponents" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/restaurant_primary</item>
+        <item name="colorPrimaryVariant">@color/restaurant_primary_dark</item>
+        <item name="colorOnPrimary">@color/text_white</item>
+        <item name="colorSecondary">@color/restaurant_accent</item>
+        <item name="colorSecondaryVariant">@color/restaurant_secondary</item>
+        <item name="colorOnSecondary">@color/text_white</item>
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:windowBackground">@color/dark_gray</item>
+        <!-- Adding new attributes for improved UI -->
+        <item name="actionBarStyle">@style/FineDineActionBar</item>
+        <item name="buttonStyle">@style/FineDineButton</item>
+        <item name="materialButtonStyle">@style/FineDineButton</item>
+        <item name="cardViewStyle">@style/FineDineCardView</item>
+        <item name="android:textViewStyle">@style/FineDineTextView</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <!-- Global text color overrides -->
+        <item name="android:textColor">@color/text_white</item>
+        <item name="colorOnBackground">@color/text_white</item>
+        <item name="colorOnSurface">@color/text_white</item>
+        <item name="android:textColorPrimary">@color/text_white</item>
+        <item name="android:textColorSecondary">@color/text_white</item>
+        <!-- Additional style references -->
+        <item name="textInputStyle">@style/FineDineTextInputLayout</item>
+        <item name="editTextStyle">@style/FineDineEditText</item>
+        <!-- Material Design 3 Attributes -->
+        <item name="elevationOverlayEnabled">true</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <style name="FineDineActionBar" parent="Widget.MaterialComponents.ActionBar.Primary">
+        <item name="background">@color/black</item>
+        <item name="titleTextStyle">@style/FineDineActionBarTitle</item>
+        <item name="elevation">4dp</item>
+    </style>
+
+    <style name="FineDineActionBarTitle" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:textColor">@color/text_white</item>
+        <item name="android:fontFamily">@font/open_sans_semibold</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style>
+
+    <style name="FineDineButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:textColor">@color/text_white</item>
+        <item name="backgroundTint">@color/restaurant_accent</item>
+        <item name="strokeColor">@color/restaurant_accent_transparent</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.05</item>
+        <item name="android:stateListAnimator">@animator/button_press_animator</item>
+        <item name="elevation">2dp</item>
+    </style>
+
+    <style name="FineDineCardView" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/dark_gray</item>
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardElevation">3dp</item>
+        <item name="contentPadding">16dp</item>
+        <item name="rippleColor">@color/restaurant_accent_transparent</item>
+    </style>
+
+    <style name="FineDineTextView" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textColor">@color/text_white</item>
+    </style>
+
+    <style name="FineDineTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:textColor">@color/text_white</item>
+        <item name="android:textColorHint">@color/text_medium</item>
+        <item name="hintTextColor">@color/restaurant_accent</item>
+        <item name="boxStrokeColor">@color/restaurant_accent</item>
+        <item name="boxBackgroundColor">@color/transparent_white</item>
+        <item name="errorTextColor">@color/restaurant_error</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+    </style>
+
+    <style name="FineDineEditText" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="android:textColor">@color/text_white</item>
+        <item name="android:textColorHint">@color/text_medium</item>
+        <item name="android:padding">12dp</item>
+    </style>
+
+    <!-- No action bar theme used by splash and login screens -->
+    <style name="Theme.MaterialComponents.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/restaurant_primary</item>
+        <item name="colorPrimaryVariant">@color/restaurant_primary_dark</item>
+        <item name="colorOnPrimary">@color/text_white</item>
+        <item name="colorSecondary">@color/restaurant_accent</item>
+        <item name="colorSecondaryVariant">@color/restaurant_secondary</item>
+        <item name="colorOnSecondary">@color/text_white</item>
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:windowBackground">@color/dark_gray</item>
+        <!-- Adding new attributes for improved UI -->
+        <item name="buttonStyle">@style/FineDineButton</item>
+        <item name="materialButtonStyle">@style/FineDineButton</item>
+        <item name="cardViewStyle">@style/FineDineCardView</item>
+        <item name="android:textViewStyle">@style/FineDineTextView</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <!-- Global text color overrides -->
+        <item name="android:textColor">@color/text_white</item>
+        <item name="colorOnBackground">@color/text_white</item>
+        <item name="colorOnSurface">@color/text_white</item>
+        <item name="android:textColorPrimary">@color/text_white</item>
+        <item name="android:textColorSecondary">@color/text_white</item>
+        <!-- Additional style references -->
+        <item name="textInputStyle">@style/FineDineTextInputLayout</item>
+        <item name="editTextStyle">@style/FineDineEditText</item>
+        <!-- Material Design 3 Attributes -->
+        <item name="elevationOverlayEnabled">true</item>
+        <item name="cornerSize">8dp</item>
+        <!-- Apply elegant animation on window transitions -->
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
     </style>
 </resources>

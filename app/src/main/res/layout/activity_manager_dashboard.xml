@@ -1,491 +1,1183 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="0dp"
-    android:background="@drawable/bg_luxury_pattern">
+    android:fitsSystemWindows="true">
 
-    <!-- Include Navigation Panel -->
-    <include
-        android:id="@+id/navigation_panel"
-        layout="@layout/navigation_panel"
+    <!-- Main Content -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        android:background="@color/restaurant_bg">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <LinearLayout
+        <!-- App Bar -->
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:background="@color/restaurant_primary">
 
-            <!-- Dashboard Header -->
-            <TextView
-                android:id="@+id/titleTextView"
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/restaurant_primary"
+                app:contentInsetStart="0dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/menuButton"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_centerVertical="true"
+                        android:padding="12dp"
+                        android:src="@drawable/ic_menu"
+                        app:tint="@color/restaurant_text_light" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toEndOf="@id/menuButton"
+                        android:text="FINE DINE"
+                        android:textColor="@color/restaurant_text_light"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/profileButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="16dp"
+                        android:background="@drawable/circle_avatar_bg"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_person" />
+
+                    <ImageView
+                        android:id="@+id/notificationButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="8dp"
+                        android:layout_toStartOf="@id/profileButton"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_notifications"
+                        app:tint="@color/restaurant_text_light" />
+                </RelativeLayout>
+            </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <!-- Main Content Area -->
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Manager Dashboard"
-                android:textSize="24sp"
-                android:textColor="@color/luxe_gold"
-                android:textStyle="bold"
-                android:letterSpacing="0.05"
-                android:gravity="center"
-                android:layout_marginBottom="16dp" />
+                android:orientation="vertical"
+                android:padding="16dp">
 
-            <!-- Welcome Message -->
-            <TextView
-                android:id="@+id/welcomeTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Welcome, Manager!"
-                android:textSize="18sp"
-                android:textColor="@color/white"
-                android:gravity="center"
-                android:layout_marginBottom="24dp" />
-
-            <!-- Quick Stats Card -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardBackgroundColor="@color/luxe_dark"
-                app:cardElevation="4dp">
-
+                <!-- Welcome Bar -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="TODAY'S OVERVIEW"
-                        android:textSize="16sp"
-                        android:textColor="@color/luxe_gold"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.05"
-                        android:layout_marginBottom="16dp" />
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                    <!-- Stats Grid -->
-                    <GridLayout
-                        android:layout_width="match_parent"
+                        <TextView
+                            android:id="@+id/welcomeText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Welcome back,"
+                            android:textColor="@color/restaurant_text_secondary"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/managerNameText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Michael Johnson"
+                            android:textColor="@color/restaurant_text_primary"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:columnCount="2"
-                        android:rowCount="3"
-                        android:alignmentMode="alignMargins"
-                        android:columnOrderPreserved="false"
-                        android:useDefaultMargins="true">
+                        android:orientation="vertical"
+                        android:gravity="end">
 
-                        <!-- Revenue -->
-                        <LinearLayout
-                            android:layout_width="0dp"
+                        <TextView
+                            android:id="@+id/currentTimeText"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_columnWeight="1"
-                            android:orientation="vertical">
+                            android:text="12:00 PM"
+                            android:textColor="@color/restaurant_text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="REVENUE"
-                                android:textSize="12sp"
-                                android:textColor="@color/luxe_gold"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvRevenue"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="R3,750.00"
-                                android:textSize="18sp"
-                                android:textColor="@color/white"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <!-- Orders -->
-                        <LinearLayout
-                            android:layout_width="0dp"
+                        <Button
+                            android:id="@+id/btnDate"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_columnWeight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="ORDERS"
-                                android:textSize="12sp"
-                                android:textColor="@color/luxe_gold"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvOrderCount"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="42"
-                                android:textSize="18sp"
-                                android:textColor="@color/white"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <!-- Reservations -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="RESERVATIONS"
-                                android:textSize="12sp"
-                                android:textColor="@color/luxe_gold"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvReservationCount"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="27"
-                                android:textSize="18sp"
-                                android:textColor="@color/white"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <!-- Staff On Duty -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="STAFF"
-                                android:textSize="12sp"
-                                android:textColor="@color/luxe_gold"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvStaffCount"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="12"
-                                android:textSize="18sp"
-                                android:textColor="@color/white"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <!-- Inventory Alerts -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="LOW STOCK ITEMS"
-                                android:textSize="12sp"
-                                android:textColor="@color/luxe_gold"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvLowStockItems"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="3"
-                                android:textSize="18sp"
-                                android:textColor="#FF5252"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <!-- Feedback Rating -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="CUSTOMER RATING"
-                                android:textSize="12sp"
-                                android:textColor="@color/luxe_gold"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvCustomerRating"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="4.8/5.0"
-                                android:textSize="18sp"
-                                android:textColor="@color/white"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </GridLayout>
+                            android:text="Today ▼"
+                            android:drawableStart="@drawable/ic_calendar"
+                            android:drawablePadding="8dp"
+                            android:backgroundTint="@color/restaurant_card_bg"
+                            android:textColor="@color/restaurant_text_primary"
+                            app:cornerRadius="24dp"
+                            android:paddingHorizontal="16dp" />
+                    </LinearLayout>
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
 
-            <!-- Quick Actions Section -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="MANAGEMENT ACTIONS"
-                android:textSize="16sp"
-                android:textColor="@color/luxe_gold"
-                android:textStyle="bold"
-                android:letterSpacing="0.05"
-                android:layout_marginBottom="16dp" />
-
-            <!-- Management Actions Grid -->
-            <GridLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:columnCount="2"
-                android:rowCount="3"
-                android:alignmentMode="alignMargins"
-                android:columnOrderPreserved="false"
-                android:useDefaultMargins="true"
-                android:layout_marginBottom="16dp">
-
-                <!-- Staff Management Card -->
+                <!-- Sales Overview Section -->
                 <androidx.cardview.widget.CardView
-                    android:id="@+id/cardStaffManagement"
-                    android:layout_width="0dp"
-                    android:layout_height="120dp"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    app:cardCornerRadius="8dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="16dp"
                     app:cardElevation="4dp"
-                    app:cardBackgroundColor="@color/luxe_dark"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground">
+                    app:cardBackgroundColor="@color/restaurant_card_bg">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:gravity="center"
                         android:padding="16dp">
 
+                        <!-- Header with View More option -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="16dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Sales Overview"
+                                android:textColor="@color/restaurant_text_primary"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/btnViewMoreSales"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="View Details"
+                                android:textColor="@color/restaurant_accent"
+                                android:textSize="14sp"
+                                android:padding="4dp"
+                                android:clickable="true"
+                                android:focusable="true" />
+                        </LinearLayout>
+
+                        <!-- Period Selection -->
+                        <HorizontalScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:scrollbars="none"
+                            android:layout_marginBottom="16dp">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/periodToday"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Today"
+                                    android:paddingHorizontal="16dp"
+                                    android:paddingVertical="8dp"
+                                    android:textSize="14sp"
+                                    android:textColor="@android:color/white"
+                                    android:background="@drawable/bg_period_selected"
+                                    android:layout_marginEnd="8dp" />
+
+                                <TextView
+                                    android:id="@+id/periodWeek"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="This Week"
+                                    android:paddingHorizontal="16dp"
+                                    android:paddingVertical="8dp"
+                                    android:textSize="14sp"
+                                    android:textColor="@color/restaurant_text_secondary"
+                                    android:background="@drawable/bg_period_normal"
+                                    android:layout_marginEnd="8dp" />
+
+                                <TextView
+                                    android:id="@+id/periodMonth"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="This Month"
+                                    android:paddingHorizontal="16dp"
+                                    android:paddingVertical="8dp"
+                                    android:textSize="14sp"
+                                    android:textColor="@color/restaurant_text_secondary"
+                                    android:background="@drawable/bg_period_normal"
+                                    android:layout_marginEnd="8dp" />
+
+                                <TextView
+                                    android:id="@+id/periodQuarter"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Q2 2025"
+                                    android:paddingHorizontal="16dp"
+                                    android:paddingVertical="8dp"
+                                    android:textSize="14sp"
+                                    android:textColor="@color/restaurant_text_secondary"
+                                    android:background="@drawable/bg_period_normal"
+                                    android:layout_marginEnd="8dp" />
+
+                                <TextView
+                                    android:id="@+id/periodYear"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="2025"
+                                    android:paddingHorizontal="16dp"
+                                    android:paddingVertical="8dp"
+                                    android:textSize="14sp"
+                                    android:textColor="@color/restaurant_text_secondary"
+                                    android:background="@drawable/bg_period_normal" />
+                            </LinearLayout>
+                        </HorizontalScrollView>
+
+                        <!-- Main Sales Figure -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="16dp">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Total Sales"
+                                    android:textColor="@color/restaurant_text_secondary"
+                                    android:textSize="14sp" />
+
+                                <TextView
+                                    android:id="@+id/tvTotalSales"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="R 12,586.50"
+                                    android:textColor="@color/restaurant_text_primary"
+                                    android:textSize="28sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:gravity="end">
+
+                                <TextView
+                                    android:id="@+id/tvSalesChange"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="+8.5%"
+                                    android:textColor="@color/restaurant_success"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    android:background="@drawable/bg_stats_pill"
+                                    android:paddingHorizontal="12dp"
+                                    android:paddingVertical="6dp" />
+
+                                <TextView
+                                    android:id="@+id/tvComparisonPeriod"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="vs previous day"
+                                    android:textColor="@color/restaurant_text_secondary"
+                                    android:textSize="12sp"
+                                    android:layout_marginTop="4dp" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Key Metrics -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:baselineAligned="false"
+                            android:layout_marginBottom="16dp">
+
+                            <!-- Average Order Value -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:padding="8dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Avg. Order"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_text_secondary" />
+
+                                <TextView
+                                    android:id="@+id/tvAvgOrderValue"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="R 436.50"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/restaurant_text_primary" />
+
+                                <TextView
+                                    android:id="@+id/tvAvgOrderChange"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="+5.2%"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_success" />
+                            </LinearLayout>
+
+                            <!-- Order Count -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:padding="8dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Orders"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_text_secondary" />
+
+                                <TextView
+                                    android:id="@+id/tvOrderCount"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="29"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/restaurant_text_primary" />
+
+                                <TextView
+                                    android:id="@+id/tvOrderCountChange"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="+3.6%"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_success" />
+                            </LinearLayout>
+
+                            <!-- Table Turnover -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:padding="8dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Table Turnover"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_text_secondary" />
+
+                                <TextView
+                                    android:id="@+id/tvTableTurnover"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="1.5x"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/restaurant_text_primary" />
+
+                                <TextView
+                                    android:id="@+id/tvTableTurnoverChange"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="-0.2%"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_error" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Sales Chart -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sales Trend"
+                            android:textColor="@color/restaurant_text_secondary"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="8dp" />
+
+                        <View
+                            android:id="@+id/salesChartView"
+                            android:layout_width="match_parent"
+                            android:layout_height="180dp"
+                            android:background="@drawable/placeholder_chart"
+                            android:layout_marginBottom="16dp" />
+
+                        <!-- Sales Distribution -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sales by Service Type"
+                            android:textColor="@color/restaurant_text_secondary"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="8dp" />
+
+                        <View
+                            android:id="@+id/salesDistributionChart"
+                            android:layout_width="match_parent"
+                            android:layout_height="150dp"
+                            android:background="@drawable/placeholder_pie_chart"
+                            android:layout_marginBottom="16dp" />
+
+                        <!-- Sales Breakdown -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:baselineAligned="false">
+
+                            <!-- Dine-In Sales -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="8dp"
+                                android:background="@drawable/bg_sales_breakdown_item">
+
+                                <ImageView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:src="@drawable/ic_dine_in"
+                                    app:tint="@color/restaurant_accent"
+                                    android:layout_marginBottom="4dp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Dine-In"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_text_secondary" />
+
+                                <TextView
+                                    android:id="@+id/tvDineInSales"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="R 8,422.75"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/restaurant_text_primary" />
+
+                                <TextView
+                                    android:id="@+id/tvDineInPercentage"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="67%"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_accent" />
+                            </LinearLayout>
+
+                            <!-- Takeaway Sales -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="8dp"
+                                android:layout_marginHorizontal="8dp"
+                                android:background="@drawable/bg_sales_breakdown_item">
+
+                                <ImageView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:src="@drawable/ic_takeaway"
+                                    app:tint="@color/restaurant_accent"
+                                    android:layout_marginBottom="4dp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Takeaway"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_text_secondary" />
+
+                                <TextView
+                                    android:id="@+id/tvTakeawaySales"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="R 3,098.50"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/restaurant_text_primary" />
+
+                                <TextView
+                                    android:id="@+id/tvTakeawayPercentage"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="25%"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_accent" />
+                            </LinearLayout>
+
+                            <!-- Delivery Sales -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="8dp"
+                                android:background="@drawable/bg_sales_breakdown_item">
+
+                                <ImageView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:src="@drawable/ic_delivery"
+                                    app:tint="@color/restaurant_accent"
+                                    android:layout_marginBottom="4dp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Delivery"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_text_secondary" />
+
+                                <TextView
+                                    android:id="@+id/tvDeliverySales"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="R 1,065.25"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/restaurant_text_primary" />
+
+                                <TextView
+                                    android:id="@+id/tvDeliveryPercentage"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="8%"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_accent" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Restaurant Status Section -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/restaurant_card_bg">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Restaurant Status"
+                            android:textColor="@color/restaurant_text_primary"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="16dp" />
+
+                        <!-- Status Grid -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:baselineAligned="false">
+
+                            <!-- Active Orders -->
+                            <LinearLayout
+                                android:id="@+id/activeOrdersContainer"
+                                android:layout_width="0dp"
+                                android:layout_height="80dp"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:background="@drawable/bg_status_item_active"
+                                android:layout_marginEnd="8dp">
+
+                                <TextView
+                                    android:id="@+id/tvActiveOrdersCount"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="18"
+                                    android:textSize="24sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/restaurant_text_primary" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Active Orders"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_text_secondary" />
+                            </LinearLayout>
+
+                            <!-- Tables Available -->
+                            <LinearLayout
+                                android:id="@+id/tablesContainer"
+                                android:layout_width="0dp"
+                                android:layout_height="80dp"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:background="@drawable/bg_status_item"
+                                android:layout_marginStart="8dp">
+
+                                <TextView
+                                    android:id="@+id/tvTablesAvailable"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="12/20"
+                                    android:textSize="24sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/restaurant_text_primary" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Tables Available"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_text_secondary" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="16dp"
+                            android:baselineAligned="false">
+
+                            <!-- Staff On Duty -->
+                            <LinearLayout
+                                android:id="@+id/staffContainer"
+                                android:layout_width="0dp"
+                                android:layout_height="80dp"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:background="@drawable/bg_status_item"
+                                android:layout_marginEnd="8dp">
+
+                                <TextView
+                                    android:id="@+id/tvStaffOnDuty"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="8"
+                                    android:textSize="24sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/restaurant_text_primary" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Staff On Duty"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_text_secondary" />
+                            </LinearLayout>
+
+                            <!-- Pending Reservations -->
+                            <LinearLayout
+                                android:id="@+id/reservationsContainer"
+                                android:layout_width="0dp"
+                                android:layout_height="80dp"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:background="@drawable/bg_status_item_alert"
+                                android:layout_marginStart="8dp">
+
+                                <TextView
+                                    android:id="@+id/tvReservationsCount"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="5"
+                                    android:textSize="24sp"
+                                    android:textStyle="bold"
+                                    android:textColor="@color/restaurant_text_primary" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Upcoming Reservations"
+                                    android:textSize="12sp"
+                                    android:textColor="@color/restaurant_text_secondary" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Quick Actions Section -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Quick Actions"
+                    android:textColor="@color/restaurant_text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Quick Action Buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
+
+                    <!-- New Order Button -->
+                    <LinearLayout
+                        android:id="@+id/btnNewOrder"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+
                         <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:src="@drawable/ic_people"
-                            app:tint="@color/luxe_gold" />
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/ic_new_order"
+                            android:background="@drawable/circle_accent_bg"
+                            android:padding="12dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Staff Management"
-                            android:textColor="@color/white"
-                            android:textStyle="bold"
-                            android:gravity="center"
-                            android:layout_marginTop="8dp" />
+                            android:text="New Order"
+                            android:textSize="12sp"
+                            android:textColor="@color/restaurant_text_primary"
+                            android:layout_marginTop="4dp" />
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
 
-                <!-- Menu Management Card -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardMenuManagement"
-                    android:layout_width="0dp"
-                    android:layout_height="120dp"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="4dp"
-                    app:cardBackgroundColor="@color/luxe_dark"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground">
-
+                    <!-- New Reservation Button -->
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:id="@+id/btnNewReservation"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:padding="16dp">
+                        android:padding="12dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
 
                         <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:src="@drawable/ic_menu_item"
-                            app:tint="@color/luxe_gold" />
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/ic_reservation"
+                            android:background="@drawable/circle_accent_bg"
+                            android:padding="12dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Menu Management"
-                            android:textColor="@color/white"
-                            android:textStyle="bold"
-                            android:gravity="center"
-                            android:layout_marginTop="8dp" />
+                            android:text="Reservation"
+                            android:textSize="12sp"
+                            android:textColor="@color/restaurant_text_primary"
+                            android:layout_marginTop="4dp" />
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
 
-                <!-- Inventory Management Card -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardInventoryManagement"
-                    android:layout_width="0dp"
-                    android:layout_height="120dp"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="4dp"
-                    app:cardBackgroundColor="@color/luxe_dark"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground">
-
+                    <!-- Inventory Check Button -->
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:id="@+id/btnInventory"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:padding="16dp">
+                        android:padding="12dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
 
                         <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
                             android:src="@drawable/ic_inventory"
-                            app:tint="@color/luxe_gold" />
+                            android:background="@drawable/circle_accent_bg"
+                            android:padding="12dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Inventory"
-                            android:textColor="@color/white"
-                            android:textStyle="bold"
-                            android:gravity="center"
-                            android:layout_marginTop="8dp" />
+                            android:textSize="12sp"
+                            android:textColor="@color/restaurant_text_primary"
+                            android:layout_marginTop="4dp" />
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
 
-                <!-- Reservations Card -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardReservations"
-                    android:layout_width="0dp"
-                    android:layout_height="120dp"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="4dp"
-                    app:cardBackgroundColor="@color/luxe_dark"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground">
-
+                    <!-- Menu Edit Button -->
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:id="@+id/btnMenu"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:padding="16dp">
+                        android:padding="12dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
 
                         <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:src="@drawable/ic_calendar"
-                            app:tint="@color/luxe_gold" />
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/ic_menu_item"
+                            android:background="@drawable/circle_accent_bg"
+                            android:padding="12dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Reservations"
-                            android:textColor="@color/white"
-                            android:textStyle="bold"
-                            android:gravity="center"
-                            android:layout_marginTop="8dp" />
+                            android:text="Menu"
+                            android:textSize="12sp"
+                            android:textColor="@color/restaurant_text_primary"
+                            android:layout_marginTop="4dp" />
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                </LinearLayout>
 
-                <!-- Orders Management Card -->
+                <!-- Popular Items Section -->
                 <androidx.cardview.widget.CardView
-                    android:id="@+id/cardOrders"
-                    android:layout_width="0dp"
-                    android:layout_height="120dp"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    app:cardCornerRadius="8dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="16dp"
                     app:cardElevation="4dp"
-                    app:cardBackgroundColor="@color/luxe_dark"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground">
+                    app:cardBackgroundColor="@color/restaurant_card_bg">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:gravity="center"
                         android:padding="16dp">
 
-                        <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:src="@drawable/ic_food"
-                            app:tint="@color/luxe_gold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <!-- Header with View All option -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Orders"
-                            android:textColor="@color/white"
-                            android:textStyle="bold"
-                            android:gravity="center"
-                            android:layout_marginTop="8dp" />
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="16dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Top Selling Items"
+                                android:textColor="@color/restaurant_text_primary"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/btnViewAllItems"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="View All"
+                                android:textColor="@color/restaurant_accent"
+                                android:padding="4dp"
+                                android:clickable="true"
+                                android:focusable="true" />
+                        </LinearLayout>
+
+                        <!-- Item 1 -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="12dp">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:src="@drawable/tenderloin"
+                                android:scaleType="centerCrop"
+                                android:layout_marginEnd="12dp" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:layout_gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Wagyu Beef Tenderloin"
+                                    android:textColor="@color/restaurant_text_primary"
+                                    android:textStyle="bold"
+                                    android:textSize="14sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="R 295.00 • 42 orders"
+                                    android:textColor="@color/restaurant_text_secondary"
+                                    android:textSize="12sp" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="+12%"
+                                android:textColor="@color/restaurant_success"
+                                android:textSize="14sp"
+                                android:layout_gravity="center_vertical" />
+                        </LinearLayout>
+
+                        <!-- Item 2 -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="12dp">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:src="@drawable/lobster"
+                                android:scaleType="centerCrop"
+                                android:layout_marginEnd="12dp" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:layout_gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Lobster Thermidor"
+                                    android:textColor="@color/restaurant_text_primary"
+                                    android:textStyle="bold"
+                                    android:textSize="14sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="R 380.00 • 36 orders"
+                                    android:textColor="@color/restaurant_text_secondary"
+                                    android:textSize="12sp" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="+8%"
+                                android:textColor="@color/restaurant_success"
+                                android:textSize="14sp"
+                                android:layout_gravity="center_vertical" />
+                        </LinearLayout>
+
+                        <!-- Item 3 -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:src="@drawable/chocolate_symphony"
+                                android:scaleType="centerCrop"
+                                android:layout_marginEnd="12dp" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:layout_gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Chocolate Symphony"
+                                    android:textColor="@color/restaurant_text_primary"
+                                    android:textStyle="bold"
+                                    android:textSize="14sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="R 120.00 • 28 orders"
+                                    android:textColor="@color/restaurant_text_secondary"
+                                    android:textSize="12sp" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="+5%"
+                                android:textColor="@color/restaurant_success"
+                                android:textSize="14sp"
+                                android:layout_gravity="center_vertical" />
+                        </LinearLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- Kitchen Status Card -->
+                <!-- Analytics Insights Section -->
                 <androidx.cardview.widget.CardView
-                    android:id="@+id/cardKitchenStatus"
-                    android:layout_width="0dp"
-                    android:layout_height="120dp"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    app:cardCornerRadius="8dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="16dp"
                     app:cardElevation="4dp"
-                    app:cardBackgroundColor="@color/luxe_dark"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground">
+                    app:cardBackgroundColor="@color/restaurant_card_bg">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:gravity="center"
                         android:padding="16dp">
 
-                        <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:src="@drawable/ic_food"
-                            app:tint="@color/luxe_gold" />
-
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Kitchen Status"
-                            android:textColor="@color/white"
+                            android:text="Business Insights"
+                            android:textColor="@color/restaurant_text_primary"
+                            android:textSize="18sp"
                             android:textStyle="bold"
-                            android:gravity="center"
-                            android:layout_marginTop="8dp" />
+                            android:layout_marginBottom="16dp" />
+
+                        <!-- Insight Items -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="12dp">
+
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_trending_up"
+                                app:tint="@color/restaurant_success"
+                                android:layout_marginEnd="12dp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Monday dinner has shown 15% growth compared to last week."
+                                android:textColor="@color/restaurant_text_primary"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="12dp">
+
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_trending_down"
+                                app:tint="@color/restaurant_error"
+                                android:layout_marginEnd="12dp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Wine sales have decreased by 8% this week."
+                                android:textColor="@color/restaurant_text_primary"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_lightbulb"
+                                app:tint="@color/restaurant_warning"
+                                android:layout_marginEnd="12dp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Consider running a promotion for weekday lunch to increase traffic."
+                                android:textColor="@color/restaurant_text_primary"
+                                android:textSize="14sp" />
+                        </LinearLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
-            </GridLayout>
-        </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- Bottom Navigation -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNavigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            app:menu="@menu/bottom_nav_menu"
+            app:labelVisibilityMode="labeled"
+            android:background="@color/restaurant_card_bg" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <!-- Navigation Drawer -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/drawer_menu" />
+</androidx.drawerlayout.widget.DrawerLayout>

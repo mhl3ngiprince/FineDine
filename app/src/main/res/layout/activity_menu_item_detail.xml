@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/bg_luxury_pattern"
+    android:background="@color/white"
     tools:context=".MenuItemDetailActivity">
 
     <!-- Include Navigation Panel -->
@@ -37,11 +37,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <!-- Gold trim at top -->
+                    <!-- Blue trim at top -->
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="3dp"
-                        android:background="@color/luxe_gold" />
+                        android:background="@color/blue" />
 
                     <!-- Main Image -->
                     <ImageView
@@ -58,12 +58,12 @@
                         android:layout_height="match_parent"
                         android:background="@drawable/gradient_menu_image" />
 
-                    <!-- Gold Corner Accent -->
+                    <!-- Blue Corner Accent -->
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_gravity="end"
-                        android:src="@drawable/corner_gold"
+                        android:src="@drawable/corner_blue"
                         android:alpha="0.7" />
 
                     <!-- Price Badge -->
@@ -73,7 +73,7 @@
                         android:orientation="horizontal"
                         android:layout_gravity="bottom|end"
                         android:layout_margin="16dp"
-                        android:background="@drawable/bg_price_tag"
+                        android:background="@drawable/bg_price_tag_blue"
                         android:paddingVertical="6dp"
                         android:paddingHorizontal="12dp"
                         android:gravity="center_vertical">
@@ -83,7 +83,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="R29.99"
-                            android:textColor="@color/text_white"
+                            android:textColor="@color/white"
                             android:textSize="22sp"
                             android:textStyle="bold"
                             android:letterSpacing="0.05" />
@@ -97,7 +97,7 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="6dp"
-                app:cardBackgroundColor="@color/luxe_charcoal"
+                app:cardBackgroundColor="@color/white"
                 android:layout_marginBottom="16dp">
 
                 <LinearLayout
@@ -118,7 +118,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="SIGNATURE DISH"
-                            android:textColor="@color/luxe_gold"
+                            android:textColor="@color/blue"
                             android:textSize="12sp"
                             android:textStyle="bold"
                             android:letterSpacing="0.15"
@@ -129,7 +129,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Wagyu Beef Tenderloin"
-                            android:textColor="@color/text_white"
+                            android:textColor="@color/blue"
                             android:textSize="26sp"
                             android:textStyle="bold"
                             android:fontFamily="serif"
@@ -139,7 +139,7 @@
                         <View
                             android:layout_width="60dp"
                             android:layout_height="2dp"
-                            android:background="@color/luxe_gold"
+                            android:background="@color/blue"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="16dp" />
                     </LinearLayout>
@@ -150,7 +150,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="A5 Japanese wagyu with smoked potato purée, heirloom carrots, and red wine jus"
-                        android:textColor="@color/text_light"
+                        android:textColor="@color/blue"
                         android:textSize="16sp"
                         android:lineSpacingExtra="6dp"
                         android:gravity="center"
@@ -179,14 +179,14 @@
                                 android:layout_width="30dp"
                                 android:layout_height="30dp"
                                 android:src="@drawable/ic_time"
-                                app:tint="@color/luxe_gold" />
+                                app:tint="@color/blue" />
 
                             <TextView
                                 android:id="@+id/tvMenuItemDetailPrepTime"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="35 min"
-                                android:textColor="@color/text_light"
+                                android:textColor="@color/blue"
                                 android:textSize="14sp"
                                 android:layout_marginTop="6dp" />
                         </LinearLayout>
@@ -204,14 +204,14 @@
                                 android:layout_width="30dp"
                                 android:layout_height="30dp"
                                 android:src="@drawable/ic_calories"
-                                app:tint="@color/luxe_gold" />
+                                app:tint="@color/blue" />
 
                             <TextView
                                 android:id="@+id/tvMenuItemDetailCalories"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="620 cal"
-                                android:textColor="@color/text_light"
+                                android:textColor="@color/blue"
                                 android:textSize="14sp"
                                 android:layout_marginTop="6dp" />
                         </LinearLayout>
@@ -229,13 +229,13 @@
                                 android:layout_width="30dp"
                                 android:layout_height="30dp"
                                 android:src="@drawable/ic_chef_hat"
-                                app:tint="@color/luxe_gold" />
+                                app:tint="@color/blue" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Chef's Special"
-                                android:textColor="@color/text_light"
+                                android:textColor="@color/blue"
                                 android:textSize="14sp"
                                 android:layout_marginTop="6dp" />
                         </LinearLayout>
@@ -253,14 +253,14 @@
                                 android:layout_width="30dp"
                                 android:layout_height="30dp"
                                 android:src="@drawable/ic_spicy"
-                                app:tint="@color/luxe_gold" />
+                                app:tint="@color/blue" />
 
                             <TextView
                                 android:id="@+id/tvMenuItemDetailSpiceLevel"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Medium"
-                                android:textColor="@color/text_light"
+                                android:textColor="@color/blue"
                                 android:textSize="14sp"
                                 android:layout_marginTop="6dp" />
                         </LinearLayout>
@@ -276,8 +276,8 @@
                 android:text="ORDER NOW"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@color/luxe_charcoal"
-                android:backgroundTint="@color/luxe_gold"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/blue"
                 app:cornerRadius="8dp"
                 android:letterSpacing="0.1" />
         </LinearLayout>

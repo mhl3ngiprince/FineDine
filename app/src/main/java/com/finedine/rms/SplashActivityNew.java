@@ -5,15 +5,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.finedine.rms.utils.ResourceChecker;
 import com.finedine.rms.utils.SharedPrefsManager;
 
 public class SplashActivityNew extends AppCompatActivity {
@@ -23,23 +23,30 @@ public class SplashActivityNew extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
-
         try {
-            Log.d(TAG, "SplashActivity onCreate called");
+            super.onCreate(savedInstanceState);
 
-            // Check critical resources first
-            if (!ResourceChecker.validateCriticalResources(this)) {
-                Log.e(TAG, "Critical resources missing, may cause crashes");
-                Toast.makeText(this, "Error loading app resources", Toast.LENGTH_LONG).show();
+            Log.d(TAG, "SplashActivity onCreate starting");
+
+            try {
+                setContentView(R.layout.activity_splash);
+                Log.d(TAG, "Splash layout loaded successfully");
+            } catch (Exception e) {
+                View view = new View(this);
+                view.setBackgroundColor(getResources().getColor(android.R.color.white, null));
+                setContentView(view);
+
+                Toast.makeText(this, "Welcome to Fine Dine", Toast.LENGTH_SHORT).show();
+                new Handler(Looper.getMainLooper()).postDelayed(this::navigateToLogin, 1500);
+
+                return;
             }
 
-            // Initialize SharedPrefsManager first to avoid null issues
+            Log.d(TAG, "SplashActivity onCreate called");
+
             try {
                 prefsManager = new SharedPrefsManager(this);
 
-                // Clear any previous login state to ensure we always go to login screen
                 if (prefsManager != null) {
                     prefsManager.clearUserSession();
                     prefsManager.setUserLoggedIn(false);
@@ -50,63 +57,90 @@ public class SplashActivityNew extends AppCompatActivity {
                 prefsManager = null;
             }
 
-            // Create animations
             createAndStartAnimations();
 
-            // Use a handler to delay the transition
+            Toast.makeText(this, "Welcome to Fine Dine", Toast.LENGTH_SHORT).show();
+
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 try {
-                    checkLoginStatusAndNavigate();
+                    navigateToLogin();
                 } catch (Exception e) {
                     Log.e(TAG, "Error in delayed navigation", e);
-                    navigateToLogin();
+                    fallbackNavigation();
                 }
             }, SPLASH_DELAY);
         } catch (Exception e) {
-            Log.e(TAG, "Error in SplashActivity onCreate", e);
-            // Try to navigate anyway after a short delay
-            new Handler(Looper.getMainLooper()).postDelayed(() -> navigateToLogin(), 1000);
+            Log.e(TAG, "Critical error in SplashActivity onCreate", e);
+            fallbackNavigation();
+        }
+    }
+
+    private void fallbackNavigation() {
+        try {
+            Toast.makeText(this, "Starting Fine Dine...", Toast.LENGTH_SHORT).show();
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                try {
+                    Intent intent = new Intent(this, LoginActivity.class);
+                    startActivity(intent);
+                    finish();
+                } catch (Exception e) {
+                    Log.e(TAG, "Critical failure in fallback navigation", e);
+                    finishAffinity(); // Last resort - exit the app
+                }
+            }, 1000);
+        } catch (Exception e) {
+            Log.e(TAG, "Fatal error in fallbackNavigation", e);
+            finishAffinity(); // Last resort - exit the app
         }
     }
 
     private void createAndStartAnimations() {
         try {
-            // Find views
-            ImageView logoView = findViewById(com.finedine.rms.R.id.imageView);
-            TextView textView = findViewById(com.finedine.rms.R.id.textView);
+            // Find views - with null checks
+            ImageView logoView = findViewById(R.id.ivLogo);
+            TextView appNameView = findViewById(R.id.tvAppName);
+            TextView taglineView = findViewById(R.id.tvTagline);
+            ProgressBar progressBar = findViewById(R.id.progressBar);
 
             // Create fade-in animation
             AlphaAnimation fadeIn = new AlphaAnimation(0.0f, 1.0f);
-            fadeIn.setDuration(1500);
+            fadeIn.setDuration(1000);
             fadeIn.setFillAfter(true);
 
-            // Apply to logo
+            // Apply animations with null checks
             if (logoView != null) {
                 logoView.startAnimation(fadeIn);
+                Log.d(TAG, "Applied animation to logo");
             }
 
-            // Delayed animation for title
-            if (textView != null) {
+            if (appNameView != null) {
+                // Delayed animation for title
                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    Animation titleFadeIn = new AlphaAnimation(0.0f, 1.0f);
-                    titleFadeIn.setDuration(1000);
-                    titleFadeIn.setFillAfter(true);
-                    textView.startAnimation(titleFadeIn);
+                    AlphaAnimation textFadeIn = new AlphaAnimation(0.0f, 1.0f);
+                    textFadeIn.setDuration(1000);
+                    textFadeIn.setFillAfter(true);
+                    appNameView.startAnimation(textFadeIn);
                 }, 500);
             }
+
+            if (taglineView != null) {
+                // Delayed animation for tagline
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    AlphaAnimation taglineFadeIn = new AlphaAnimation(0.0f, 1.0f);
+                    taglineFadeIn.setDuration(800);
+                    taglineFadeIn.setFillAfter(true);
+                    taglineView.startAnimation(taglineFadeIn);
+                }, 800);
+            }
+
+            // Ensure progress bar is showing
+            if (progressBar != null) {
+                progressBar.setVisibility(View.VISIBLE);
+                progressBar.setIndeterminate(true);
+            }
+
         } catch (Exception e) {
             Log.e(TAG, "Error applying animations", e);
-        }
-    }
-
-    private void checkLoginStatusAndNavigate() {
-        try {
-            // Always navigate to login screen regardless of login status
-            navigateToLogin();
-        } catch (Exception e) {
-            Log.e(TAG, "Error checking login status", e);
-            // Fallback to login screen if any error occurs
-            navigateToLogin();
         }
     }
 
@@ -114,61 +148,20 @@ public class SplashActivityNew extends AppCompatActivity {
         try {
             Log.d(TAG, "Navigating to LoginActivity");
             Intent intent = new Intent(this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-            finish(); // Close splash activity
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            finish();
         } catch (Exception e) {
             Log.e(TAG, "Error navigating to login", e);
             Toast.makeText(this, "Error starting application", Toast.LENGTH_LONG).show();
-            finish();
-        }
-    }
-
-    private void navigateBasedOnRole(String role) {
-        try {
-            Log.d(TAG, "Navigating based on role: " + role);
-            Intent intent;
-
-            // Default to customer role if role is invalid
-            if (role == null || role.trim().isEmpty()) {
-                role = "customer";
-                Log.w(TAG, "Role was null or empty, defaulting to: customer");
-            }
-
-            switch (role.toLowerCase()) {
-                case "manager":
-                    intent = new Intent(this, ManagerDashboardActivity.class);
-                    break;
-                case "chef":
-                    intent = new Intent(this, KitchenActivity.class);
-                    break;
-                case "waiter":
-                    intent = new Intent(this, OrderActivity.class);
-                    break;
-                case "admin":
-                    intent = new Intent(this, AdminActivity.class);
-                    break;
-                case "customer":
-                default:
-                    Log.d(TAG, "Navigating to Reservation Activity as customer");
-                    intent = new Intent(this, ReservationActivity.class);
-                    break;
-            }
-
-            // Pass role in intent
-            intent.putExtra("user_role", role);
-            startActivity(intent);
-            finish();
-        } catch (Exception e) {
-            Log.e(TAG, "Error navigating based on role", e);
-            // Fallback to login if navigation fails
-            navigateToLogin();
+            fallbackNavigation();
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // Don't finish in onPause to prevent premature destruction
         Log.d(TAG, "SplashActivity onPause called");
     }
 
