@@ -30,6 +30,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.finedine.rms.utils.SharedPrefsManager;
+import com.finedine.rms.utils.NavigationManager;
 
 public class FineDineApplication extends Application {
 
@@ -39,11 +40,12 @@ public class FineDineApplication extends Application {
 
     // Settings constants
     private static final String PREFS_NAME = "app_settings";
-    private static final String KEY_THEME = "theme_setting";
+    private static final String KEY_THEME = "app_theme";
     private static final String KEY_LANGUAGE = "language_setting";
     private static final String THEME_LIGHT = "light";
     private static final String THEME_DARK = "dark";
     private static final String THEME_SYSTEM = "system";
+    private static final String KEY_USE_FIREBASE = "use_firebase";
 
     // Database instance for the whole application
     private AppDatabase appDatabase;
@@ -96,12 +98,15 @@ public class FineDineApplication extends Application {
 
             Log.d(TAG, "Application onCreate - starting");
 
+            // Initialize the NavigationManager for app-wide consistent navigation
+            initializeNavigationManager();
+
             // Create a separate thread for non-critical initialization to avoid blocking the main thread
             Thread initializationThread = new Thread(() -> {
                 // Initialize non-critical components in background
                 try {
-                    initializeTheme();
-                    initializeLanguage();
+                    applyTheme();
+                    applyLanguage();
                     createNotificationChannel();
                     // Try Firebase last, since it's most likely to fail
                     safeInitializeFirebase();
@@ -141,6 +146,20 @@ public class FineDineApplication extends Application {
                     SystemClock.sleep(200);
                     appDatabase = AppDatabase.getDatabase(this);
                     Log.d(TAG, "Database initialized successfully");
+
+                    // Always enable Firebase persistence for offline functionality
+                    try {
+                        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+                        Log.d(TAG, "Firebase persistence enabled");
+                    } catch (Exception e) {
+                        Log.w(TAG, "Firebase persistence error (may already be enabled): " + e.getMessage());
+                    }
+
+                    // Always use Firebase data source
+                    setUseFirebase(true);
+
+                    // Initialize Firebase
+                    ensureFirebaseInitialized();
                 } catch (Exception e) {
                     Log.e(TAG, "Error initializing database", e);
                     showToastOnMainThread("Database initialization error");
@@ -244,44 +263,56 @@ public class FineDineApplication extends Application {
         }
     }
 
+    private void ensureFirebaseInitialized() {
+        try {
+            if (!isFirebaseInitialized()) {
+                Log.d(TAG, "Firebase not initialized, initializing now");
+                initializeFirebase();
+            } else {
+                Log.d(TAG, "Firebase already initialized");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error ensuring Firebase initialization", e);
+        }
+    }
+
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationUtils.createNotificationChannel(this);
         }
     }
 
-    private void initializeTheme() {
+    private void applyTheme() {
         try {
-            SharedPreferences settingsPrefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            String savedTheme = settingsPrefs.getString(KEY_THEME, THEME_SYSTEM);
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            String theme = prefs.getString(KEY_THEME, THEME_SYSTEM);
 
-            switch (savedTheme) {
-                case THEME_LIGHT:
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                    Log.d(TAG, "Theme set to light mode");
-                    break;
+            int nightMode;
+            switch (theme) {
                 case THEME_DARK:
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                    Log.d(TAG, "Theme set to dark mode");
+                    nightMode = AppCompatDelegate.MODE_NIGHT_YES;
                     break;
                 case THEME_SYSTEM:
+                    nightMode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+                    break;
+                case THEME_LIGHT:
                 default:
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                    Log.d(TAG, "Theme set to follow system");
+                    nightMode = AppCompatDelegate.MODE_NIGHT_NO;
                     break;
             }
+
+            AppCompatDelegate.setDefaultNightMode(nightMode);
+            Log.d(TAG, "Applied saved theme: " + theme);
         } catch (Exception e) {
-            Log.e(TAG, "Error initializing theme, using system default", e);
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+            Log.e(TAG, "Error applying theme", e);
         }
     }
 
-    private void initializeLanguage() {
+    private void applyLanguage() {
         try {
-            SharedPreferences settingsPrefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-            String languageCode = settingsPrefs.getString(KEY_LANGUAGE, "en");
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            String languageCode = prefs.getString(KEY_LANGUAGE, "en");
 
-            // Set locale based on saved language preference
             Locale locale = new Locale(languageCode);
             Locale.setDefault(locale);
 
@@ -289,10 +320,9 @@ public class FineDineApplication extends Application {
             config.setLocale(locale);
 
             getResources().updateConfiguration(config, getResources().getDisplayMetrics());
-
-            Log.d(TAG, "Language set to: " + languageCode);
+            Log.d(TAG, "Applied saved language: " + languageCode);
         } catch (Exception e) {
-            Log.e(TAG, "Error initializing language, using default", e);
+            Log.e(TAG, "Error applying language", e);
         }
     }
 
@@ -386,6 +416,49 @@ public class FineDineApplication extends Application {
         } catch (Exception e) {
             Log.e(TAG, "Error checking Firebase initialization", e);
             return false;
+        }
+    }
+
+    /**
+     * Check if Firebase should be used as the data source
+     */
+    public static boolean shouldUseFirebase() {
+        try {
+            if (applicationContext == null) {
+                return false;
+            }
+
+            boolean useFirebase = applicationContext.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                    .getBoolean(KEY_USE_FIREBASE, false);
+
+            // Only return true if Firebase is also initialized
+            return useFirebase && isFirebaseInitialized();
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking Firebase preference", e);
+            return false;
+        }
+    }
+
+    /**
+     * Set Firebase as the data source
+     *
+     * @param useFirebase Whether to use Firebase as the data source
+     */
+    public static void setUseFirebase(boolean useFirebase) {
+        try {
+            if (applicationContext == null) {
+                Log.e(TAG, "Cannot set Firebase preference, application context is null");
+                return;
+            }
+
+            applicationContext.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                    .edit()
+                    .putBoolean(KEY_USE_FIREBASE, useFirebase)
+                    .apply();
+
+            Log.d(TAG, "Firebase data source preference set to: " + useFirebase);
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting Firebase preference", e);
         }
     }
 
@@ -595,6 +668,19 @@ public class FineDineApplication extends Application {
             Log.e(TAG, "Some critical layouts are missing! App may crash when navigating");
         } else {
             Log.d(TAG, "All critical layouts are available");
+        }
+    }
+
+    /**
+     * Initialize the NavigationManager to ensure consistent navigation across the app
+     */
+    private void initializeNavigationManager() {
+        try {
+            // Initialize navigation manager
+            NavigationManager.initialize(this);
+            Log.d(TAG, "NavigationManager initialized successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Error initializing NavigationManager", e);
         }
     }
 }

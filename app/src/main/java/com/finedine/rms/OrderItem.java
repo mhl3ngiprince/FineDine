@@ -9,7 +9,7 @@ import androidx.room.Ignore;
 
 @Entity(tableName = "order_items", indices = {
         @Index("orderId"),
-        @Index("menu_item_id")
+        @Index(value = "menu_item_id", unique = false)
 },
         foreignKeys = {
                 @ForeignKey(entity = Order.class,
@@ -21,6 +21,7 @@ import androidx.room.Ignore;
                         parentColumns = "item_id",
                         childColumns = "menu_item_id",
                         onDelete = ForeignKey.NO_ACTION,
+                        onUpdate = ForeignKey.NO_ACTION,
                         deferred = true)
         })
 public class OrderItem {
@@ -38,10 +39,15 @@ public class OrderItem {
     private String specialInstructions;
 
     @ColumnInfo(name = "menu_item_id")
-    private Integer menuItemId;
+    private Long menuItemId;
+
+    @ColumnInfo(name = "externalId")
+    private String externalId;
 
     public OrderItem() {
         // Default constructor required for Room
+        this.notes = "";
+        this.specialInstructions = "";
     }
 
     @Ignore
@@ -85,11 +91,11 @@ public class OrderItem {
         this.price = price;
     }
 
-    public Integer getMenuItemId() {
+    public Long getMenuItemId() {
         return menuItemId;
     }
 
-    public void setMenuItemId(Integer menuItemId) {
+    public void setMenuItemId(Long menuItemId) {
         this.menuItemId = menuItemId;
     }
 
@@ -99,5 +105,13 @@ public class OrderItem {
 
     public void setSpecialInstructions(String specialInstructions) {
         this.specialInstructions = specialInstructions != null ? specialInstructions : "";
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
     }
 }

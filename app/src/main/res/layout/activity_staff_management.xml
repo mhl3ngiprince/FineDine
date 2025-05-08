@@ -146,6 +146,16 @@
                                 android:focusable="true" />
                         </LinearLayout>
 
+                        <!-- Staff count indicator -->
+                        <TextView
+                            android:id="@+id/tvStaffCount"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Staff Members: 0"
+                            android:textColor="@color/luxe_gold"
+                            android:textSize="12sp"
+                            android:layout_marginBottom="8dp" />
+
                         <!-- Staff RecyclerView -->
                         <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/rvStaff"
@@ -157,6 +167,18 @@
 
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
+
+                <!-- View Staff Directory Button -->
+                <Button
+                    android:id="@+id/btnViewStaffDirectory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="View Staff Directory"
+                    android:textColor="@color/luxe_charcoal"
+                    android:backgroundTint="@color/luxe_gold"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:padding="12dp" />
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>

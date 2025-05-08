@@ -39,11 +39,19 @@ public class MenuItem {
     public static final int IMG_WAGYU = R.drawable.tenderloin;
     public static final int IMG_LOBSTER = R.drawable.lobster;
     public static final int IMG_TRUFFLE_RISOTTO = R.drawable.black_truffle_risotto_recipe;
-    public static final int IMG_VENISON = R.drawable.tenderloin;
+    public static final int IMG_VENISON = R.drawable.tenderloin; // Using same image as wagyu
     public static final int IMG_SOUFFLE = R.drawable.marniersuffle;
     public static final int IMG_CHOCOLATE = R.drawable.chocolate_symphony;
+    public static final int IMG_BAKED_ALASKA = R.drawable.baked_alaska;
+    public static final int IMG_CHOCOLATE_SOUFFLE = R.drawable.chocolate_souffle;
     public static final int IMG_CHAMPAGNE = R.drawable.dom_perigon;
     public static final int IMG_COFFEE = R.drawable.greek_coffee_demitasse_cup;
+    public static final int IMG_KING_CRAB = R.drawable.crab_leg;
+    public static final int IMG_OYSTER = R.drawable.oyster;
+    public static final int IMG_SEA_BASS = R.drawable.sea_bass;
+    public static final int IMG_WHISKEY = R.drawable.rare_whiskey_flight;
+    public static final int IMG_COCKTAILS = R.drawable.signature_cocktail_selection;
+    public static final int IMG_CRYING_TIGER = R.drawable.cryingtiger;
     public static final int IMG_PLACEHOLDER = R.drawable.placeholder_food;
 
     // Sample Menu Items
@@ -77,7 +85,7 @@ public class MenuItem {
                         "Fresh seasonal oysters with champagne mignonette",
                         110.00,
                         true,
-                        getValidResourceId(R.drawable.oyster),
+                        getValidResourceId(IMG_OYSTER),
                         CATEGORY_STARTERS,
                         10,
                         190,
@@ -88,7 +96,7 @@ public class MenuItem {
                         "Alaskan king crab legs with citrus butter and sea salt",
                         180.00,
                         true,
-                        getValidResourceId(R.drawable.crab_leg),
+                        getValidResourceId(IMG_KING_CRAB),
                         CATEGORY_STARTERS,
                         15,
                         220,
@@ -123,7 +131,7 @@ public class MenuItem {
                         "45-day dry-aged prime ribeye with bone marrow crust and bordelaise sauce",
                         190.00,
                         true,
-                        getValidResourceId(IMG_WAGYU),
+                        getValidResourceId(IMG_CRYING_TIGER),
                         CATEGORY_MAIN,
                         35,
                         680,
@@ -134,7 +142,7 @@ public class MenuItem {
                         "Miso-glazed Chilean sea bass with yuzu beurre blanc",
                         210.00,
                         true,
-                        getValidResourceId(IMG_LOBSTER),
+                        getValidResourceId(IMG_SEA_BASS),
                         CATEGORY_MAIN,
                         25,
                         420,
@@ -193,7 +201,7 @@ public class MenuItem {
                         "Vanilla bean, chocolate, and raspberry ice cream with meringue flambé",
                         85.00,
                         true,
-                        getValidResourceId(R.drawable.baked_alaska),
+                        getValidResourceId(IMG_BAKED_ALASKA),
                         CATEGORY_DESSERTS,
                         25,
                         450,
@@ -204,7 +212,7 @@ public class MenuItem {
                         "Valrhona dark chocolate soufflé with vanilla crème anglaise",
                         75.00,
                         true,
-                        getValidResourceId(R.drawable.chocolate_souffle),
+                        getValidResourceId(IMG_CHOCOLATE_SOUFFLE),
                         CATEGORY_DESSERTS,
                         20,
                         380,
@@ -239,7 +247,7 @@ public class MenuItem {
                         "Three 1oz pours of rare Japanese, Scotch, and American whiskeys",
                         160.00,
                         true,
-                        getValidResourceId(R.drawable.rare_whiskey_flight),
+                        getValidResourceId(IMG_WHISKEY),
                         CATEGORY_BEVERAGES,
                         5,
                         135,
@@ -250,7 +258,7 @@ public class MenuItem {
                         "Choose three cocktails from our award-winning mixology menu",
                         95.00,
                         true,
-                        getValidResourceId(R.drawable.signature_cocktail_selection),
+                        getValidResourceId(IMG_COCKTAILS),
                         CATEGORY_BEVERAGES,
                         10,
                         180,
@@ -288,6 +296,19 @@ public class MenuItem {
                 resName = FineDineApplication.getAppContext().getResources().getResourceName(resourceId);
                 if (resName == null || resName.contains("invalid") || resName.contains("null")) {
                     Log.w("MenuItem", "Invalid resource name: " + resName + ", using placeholder");
+                    return IMG_PLACEHOLDER;
+                }
+
+                // Check specifically for resource existence with getDrawable
+                try {
+                    android.graphics.drawable.Drawable drawable =
+                            FineDineApplication.getAppContext().getResources().getDrawable(resourceId, null);
+                    if (drawable == null) {
+                        Log.w("MenuItem", "Resource drawable is null: " + resName + ", using placeholder");
+                        return IMG_PLACEHOLDER;
+                    }
+                } catch (Exception e) {
+                    Log.w("MenuItem", "Resource drawable failed to load: " + resName + ", using placeholder", e);
                     return IMG_PLACEHOLDER;
                 }
             } catch (Resources.NotFoundException e) {

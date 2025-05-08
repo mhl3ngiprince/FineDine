@@ -10,28 +10,37 @@
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <ImageView
-        android:id="@+id/nav_header_logo"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginBottom="16dp"
-        android:contentDescription="App Logo"
-        android:src="@drawable/logoj" />
+        android:id="@+id/nav_header_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        app:srcCompat="@drawable/default_profile_picture"
+        android:contentDescription="Profile Image" />
 
     <TextView
+        android:id="@+id/nav_header_user_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="FINE DINE"
+        android:paddingTop="8dp"
+        android:text="Fine Dine User"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textColor="@color/restaurant_text_light"
-        android:textSize="20sp"
+        android:textSize="16sp"
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/nav_header_user_role"
-        android:layout_width="wrap_content"
+        android:id="@+id/nav_header_user_email"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Restaurant Management System"
-        android:textColor="@color/restaurant_text_light"
+        android:text="user@email.com"
         android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/nav_header_user_role"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:text="Customer"
+        android:textSize="12sp"
+        android:textStyle="italic" />
 
 </LinearLayout>

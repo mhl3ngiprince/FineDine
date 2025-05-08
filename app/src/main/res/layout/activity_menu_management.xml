@@ -61,6 +61,16 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/syncButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:src="@drawable/ic_sync"
+                app:backgroundTint="@color/blue"
+                android:tint="@color/white"
+                app:borderWidth="0dp" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fabAddItem"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -36,7 +36,7 @@
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 android:contentDescription="Menu Item Image"
-                tools:src="@tools:sample/backgrounds/scenic" />
+                android:src="@drawable/placeholder_food" />
 
             <!-- Gradient Overlay -->
             <View

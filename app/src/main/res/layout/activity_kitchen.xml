@@ -177,16 +177,62 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="16dp"
+                        android:animateLayoutChanges="true">
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Pending Orders"
+                            android:text="Active Orders"
                             android:textColor="@color/restaurant_text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:layout_marginBottom="16dp" />
+
+                        <!-- Filter options -->
+                        <com.google.android.material.chip.ChipGroup
+                            android:id="@+id/filterChipGroup"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            app:singleSelection="false">
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chipPending"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Pending"
+                                android:checkable="true"
+                                android:checked="true"
+                                app:chipBackgroundColor="@color/restaurant_pending_color" />
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chipPreparing"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Preparing"
+                                android:checkable="true"
+                                android:checked="true"
+                                app:chipBackgroundColor="@color/restaurant_preparing_color" />
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chipReady"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Ready"
+                                android:checkable="true"
+                                android:checked="true"
+                                app:chipBackgroundColor="@color/restaurant_ready_color" />
+
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/chipUpcoming"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Upcoming"
+                                android:checkable="true"
+                                android:checked="true"
+                                app:chipBackgroundColor="@color/restaurant_accent" />
+                        </com.google.android.material.chip.ChipGroup>
 
                         <!-- SwipeRefreshLayout for Order List -->
                         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -209,7 +255,7 @@
                             android:layout_height="100dp"
                             android:gravity="center"
                             android:text="No active orders at this time"
-                            android:textColor="@color/restaurant_text_secondary"
+                            android:textColor="@color/restaurant_text_primary"
                             android:textSize="16sp"
                             android:visibility="gone" />
                     </LinearLayout>

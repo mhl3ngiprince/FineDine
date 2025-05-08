@@ -49,6 +49,9 @@ public class Order {
     @ColumnInfo(name = "externalId")
     private String externalId;
 
+    @ColumnInfo(name = "recovered")
+    private boolean recovered;
+
     @Ignore
     public Order(int tableNumber, String status) {
         this.tableNumber = tableNumber;
@@ -58,6 +61,7 @@ public class Order {
         this.waiterId = 1; // Default waiter ID
         this.totalAmount = 0.0;
         this.specialInstructions = "";
+        this.recovered = false;
     }
 
     public Order() {
@@ -69,6 +73,7 @@ public class Order {
         this.waiterId = 1; // Default waiter ID
         this.totalAmount = 0.0;
         this.specialInstructions = "";
+        this.recovered = false;
     }
 
     // Getters and setters
@@ -175,6 +180,14 @@ public class Order {
 
     public void setExternalId(String externalId) {
         this.externalId = externalId;
+    }
+
+    public boolean isRecovered() {
+        return recovered;
+    }
+
+    public void setRecovered(boolean recovered) {
+        this.recovered = recovered;
     }
 
     public void notifyCustomer() {

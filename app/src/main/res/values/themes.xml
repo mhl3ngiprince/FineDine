@@ -196,6 +196,22 @@
         <item name="bottomNavigationStyle">@style/Widget.Design.BottomNavigationView</item>
     </style>
 
+    <!-- Theme for login and registration screens with no action bar -->
+    <style name="Theme.FineDine.NoActionBar" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/restaurant_primary</item>
+        <item name="colorPrimaryDark">@color/restaurant_primary_dark</item>
+        <item name="colorAccent">@color/restaurant_accent</item>
+        <item name="android:windowBackground">@color/restaurant_bg</item>
+        <item name="android:textColorPrimary">@color/restaurant_text_primary</item>
+        <item name="android:textColorSecondary">@color/restaurant_text_secondary</item>
+        <item name="android:statusBarColor">@color/restaurant_primary_dark</item>
+        <item name="android:navigationBarColor">@color/restaurant_primary_dark</item>
+
+        <!-- Text styles -->
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
     <!-- Navigation-compatible theme that combines AppCompat with Material Design elements -->
     <style name="Theme.FineDineNavigation" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimary">@color/restaurant_primary</item>

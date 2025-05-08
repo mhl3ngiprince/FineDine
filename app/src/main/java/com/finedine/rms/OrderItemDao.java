@@ -59,8 +59,8 @@ public interface OrderItemDao {
             }
 
             // Check if menu item ID is valid - set to null if not exists
-            Integer menuItemId = orderItem.getMenuItemId();
-            if (menuItemId != null && menuItemId > 0) {
+            Long menuItemId = orderItem.getMenuItemId();
+            if (menuItemId != null) {
                 String checkSql = "SELECT COUNT(*) FROM menu_items WHERE item_id = ?";
                 android.database.Cursor cursor = db.query(checkSql, new Object[]{menuItemId});
                 boolean exists = false;
@@ -148,5 +148,15 @@ public interface OrderItemDao {
                 Log.e("OrderItemDao", "Error ending transaction: " + e.getMessage());
             }
         }
+    }
+
+    /**
+     * Set all menu_item_ids to null - needed for Firebase compatibility
+     * Default implementation for Room database
+     */
+    default void updateMenuItemIdsToNull() {
+        // Default implementation does nothing
+        // Implemented in Firebase version
+        Log.d("OrderItemDao", "updateMenuItemIdsToNull called in base OrderItemDao");
     }
 }

@@ -1,10 +1,11 @@
 package com.finedine.rms;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -15,7 +16,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,14 +28,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.finedine.rms.MenuAdapter;
 import com.finedine.rms.OrderItemAdapter;
 import com.finedine.rms.utils.NotificationUtils;
+import com.finedine.rms.utils.OrderSafetyWrapper;
+import com.finedine.rms.utils.DatabaseEmergencyRepair;
 import com.finedine.rms.utils.SharedPrefsManager;
+import com.finedine.rms.utils.OrderFirebaseHelper;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,12 +72,20 @@ public class OrderActivity extends BaseActivity {
     private AppDatabase appDatabase;
     private ExecutorService databaseExecutor;
     private DatabaseReference ordersRef; // Firebase database reference
+    private OrderSafetyWrapper orderSafetyWrapper; // Added safety wrapper
+    private OrderFirebaseHelper orderFirebaseHelper; // Added Firebase helper
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         try {
+            // Setup modern navigation with proper title
+            setupModernNavigationPanel("Orders", R.layout.activity_order);
+
+            // Initialize manual navigation controls to ensure everything works
+            setupNavigationManually();
+
             // Initialize prefsManager
             prefsManager = new SharedPrefsManager(this);
 
@@ -80,19 +99,33 @@ public class OrderActivity extends BaseActivity {
             // Initialize database and executor
             appDatabase = AppDatabase.getDatabase(this);
             databaseExecutor = java.util.concurrent.Executors.newSingleThreadExecutor();
-
-            // Use modern navigation layout
-            setupModernNavigationPanel("Orders", R.layout.activity_order);
             Log.d(TAG, "Modern navigation setup completed");
+
+            // Initialize our new OrderSafetyWrapper
+            orderSafetyWrapper = new OrderSafetyWrapper(this, appDatabase, databaseExecutor);
+            Log.d(TAG, "OrderSafetyWrapper initialized");
+
+            // Run emergency database repair on startup
+            new Thread(() -> {
+                try {
+                    Log.d(TAG, "Running database emergency repair on startup");
+                    boolean repairResult = DatabaseEmergencyRepair.runFullDatabaseRepair(this);
+                    Log.d(TAG, "Database emergency repair completed with result: " + repairResult);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error during startup database repair: " + e.getMessage(), e);
+                }
+            }).start();
 
             // Initialize Firebase if available
             try {
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 ordersRef = database.getReference("orders");
+                orderFirebaseHelper = new OrderFirebaseHelper(this);
                 Log.d(TAG, "Firebase initialized successfully");
             } catch (Exception e) {
                 Log.w(TAG, "Firebase initialization failed, will use local database only: " + e.getMessage());
                 ordersRef = null;
+                orderFirebaseHelper = null;
             }
 
             // Set appropriate layout based on user role
@@ -171,7 +204,11 @@ public class OrderActivity extends BaseActivity {
             // Submit button initialization
             btnSubmitOrder = findViewById(R.id.btnSubmitOrder);
             if (btnSubmitOrder != null) {
-                btnSubmitOrder.setOnClickListener(v -> showCart());
+                Log.d(TAG, "btnSubmitOrder found, setting click listener");
+                btnSubmitOrder.setOnClickListener(v -> {
+                    Log.d(TAG, "btnSubmitOrder clicked, calling submitOrder()");
+                    submitOrder(v);
+                });
             }
 
             // No FAB in this layout - removed fabOrder related code
@@ -246,6 +283,38 @@ public class OrderActivity extends BaseActivity {
     /**
      * Initialize the regular staff order view
      */
+    private void setupNavigationManually() {
+        // Use helper methods from BaseActivity to ensure navigation works
+        ensureMenuButtonWorks();
+        ensureBottomNavigationWorks(R.id.navigation_orders);
+
+        // Add menu option for creating sample data
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar != null && userRole != null &&
+                (userRole.equalsIgnoreCase("admin") || userRole.equalsIgnoreCase("manager"))) {
+            toolbar.setOnMenuItemClickListener(item -> {
+                int id = item.getItemId();
+                if (id == R.id.action_sample_data) {
+                    // Load sample order data
+                    com.finedine.rms.utils.SampleDataHelper.loadSampleOrders(this);
+                    Toast.makeText(this, "Creating sample orders...", Toast.LENGTH_SHORT).show();
+
+                    // Refresh UI after a delay
+                    new android.os.Handler().postDelayed(() -> {
+                        // In a real app, this would reload the orders list
+                        Toast.makeText(this, "Sample orders created! Please check orders list.",
+                                Toast.LENGTH_LONG).show();
+                    }, 3000);
+                    return true;
+                }
+                return false;
+            });
+
+            // Inflate menu
+            toolbar.inflateMenu(R.menu.order_menu);
+        }
+    }
+
     private void initializeStaffView() {
         try {
             // Initialize customer info fields
@@ -265,6 +334,12 @@ public class OrderActivity extends BaseActivity {
 
             if (btnViewCart != null) {
                 btnViewCart.setOnClickListener(v -> showCart());
+            }
+
+            // Set button click listener for Submit Order
+            btnSubmitOrder = findViewById(R.id.btnSubmitOrder);
+            if (btnSubmitOrder != null) {
+                btnSubmitOrder.setOnClickListener(v -> submitOrder(v));
             }
 
             // Adjust UI based on user role
@@ -569,7 +644,127 @@ public class OrderActivity extends BaseActivity {
                     String email = phone + "@customer.com";
 
                     dialog.dismiss(); // Dismiss dialog after valid input
-                    processOrderSubmission(name, phone, email, calculateOrderTotal());
+
+                    // Create order progress dialog
+                    AlertDialog progressDialog = new AlertDialog.Builder(OrderActivity.this)
+                            .setTitle("Processing Order")
+                            .setMessage("Please wait...")
+                            .setCancelable(false)
+                            .create();
+                    progressDialog.show();
+
+                    // Create order object
+                    Order order = new Order();
+                    order.setTableNumber(currentTableNumber);
+                    order.setWaiterId(prefsManager != null ? prefsManager.getUserId() : 1);
+                    order.setTimestamp(System.currentTimeMillis());
+                    order.setStatus("pending");
+                    order.setCustomerName(name);
+                    order.setCustomerPhone(phone);
+                    order.setCustomerEmail(email);
+                    order.setTotal(calculateOrderTotal());
+                    order.setExternalId("ORD_" + System.currentTimeMillis());
+
+                    // Copy order items to avoid modification issues
+                    final List<OrderItem> orderItemsCopy = new ArrayList<>(currentOrderItems);
+
+                    // Try Firebase submission first if available
+                    if (orderFirebaseHelper != null) {
+                        orderFirebaseHelper.submitOrder(order, orderItemsCopy, new OrderFirebaseHelper.OrderSubmissionCallback() {
+                            @Override
+                            public void onSuccess(String firebaseKey, long orderId) {
+                                // Close progress dialog
+                                progressDialog.dismiss();
+
+                                // Update order with Firebase-generated ID
+                                order.setOrderId(orderId);
+
+                                // Show success UI
+                                notifyKitchenAboutNewOrder(orderId, currentTableNumber);
+                                showPaymentOptionsDialog(orderId, calculateOrderTotal());
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                // Firebase failed, fall back to local database
+                                Log.e(TAG, "Firebase order submission failed: " + e.getMessage());
+
+                                // Fall back to local database (keep progress dialog showing)
+                                orderSafetyWrapper.submitOrderSafely(order, orderItemsCopy, new OrderSafetyWrapper.OrderSubmitCallback() {
+                                    @Override
+                                    public void onSuccess(long orderId) {
+                                        // Close progress dialog
+                                        progressDialog.dismiss();
+
+                                        // Show success UI
+                                        notifyKitchenAboutNewOrder(orderId, currentTableNumber);
+                                        showPaymentOptionsDialog(orderId, calculateOrderTotal());
+                                    }
+
+                                    @Override
+                                    public void onPartialSuccess(long orderId, String message) {
+                                        // Close progress dialog
+                                        progressDialog.dismiss();
+
+                                        // Show partial success UI
+                                        Toast.makeText(OrderActivity.this, "Order saved with limitations: " + message, Toast.LENGTH_LONG).show();
+
+                                        if (orderId > 0) {
+                                            notifyKitchenAboutNewOrder(orderId, currentTableNumber);
+                                            showPaymentOptionsDialog(orderId, calculateOrderTotal());
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(String error) {
+                                        // Close progress dialog
+                                        progressDialog.dismiss();
+
+                                        // Show error dialog with retry option
+                                        showErrorDialog("Order Submission Failed",
+                                                "Unable to process your order: " + error + "\n\nPlease try again.");
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        // No Firebase, use local database directly
+                        orderSafetyWrapper.submitOrderSafely(order, orderItemsCopy, new OrderSafetyWrapper.OrderSubmitCallback() {
+                            @Override
+                            public void onSuccess(long orderId) {
+                                // Close progress dialog
+                                progressDialog.dismiss();
+
+                                // Show success UI
+                                notifyKitchenAboutNewOrder(orderId, currentTableNumber);
+                                showPaymentOptionsDialog(orderId, calculateOrderTotal());
+                            }
+
+                            @Override
+                            public void onPartialSuccess(long orderId, String message) {
+                                // Close progress dialog
+                                progressDialog.dismiss();
+
+                                // Show partial success UI
+                                Toast.makeText(OrderActivity.this, "Order saved with limitations: " + message, Toast.LENGTH_LONG).show();
+
+                                if (orderId > 0) {
+                                    notifyKitchenAboutNewOrder(orderId, currentTableNumber);
+                                    showPaymentOptionsDialog(orderId, calculateOrderTotal());
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(String error) {
+                                // Close progress dialog
+                                progressDialog.dismiss();
+
+                                // Show error dialog with retry option
+                                showErrorDialog("Order Submission Failed",
+                                        "Unable to process your order: " + error + "\n\nPlease try again.");
+                            }
+                        });
+                    }
                 } catch (NumberFormatException e) {
                     etTableNum.setError("Please enter a valid table number");
                 }
@@ -822,7 +1017,7 @@ public class OrderActivity extends BaseActivity {
             orderItem.setQuantity(quantity);
             orderItem.setPrice(item.price * quantity);
             orderItem.setNotes(notes);
-            orderItem.setMenuItemId(item.getItem_id());  // Set the menu item ID reference
+            orderItem.setMenuItemId(Long.valueOf(item.getItem_id()));  // Set the menu item ID reference
 
             // Validate the item
             if (item.name == null || item.name.isEmpty()) {
@@ -942,6 +1137,11 @@ public class OrderActivity extends BaseActivity {
                 databaseExecutor = java.util.concurrent.Executors.newSingleThreadExecutor();
             }
 
+            // Initialize OrderSafetyWrapper if needed
+            if (orderSafetyWrapper == null) {
+                orderSafetyWrapper = new OrderSafetyWrapper(this, appDatabase, databaseExecutor);
+            }
+
             // Validate table number and customer info
             String tableNumberStr = "";
             String customerName = "";
@@ -1024,7 +1224,126 @@ public class OrderActivity extends BaseActivity {
             builder.setMessage(String.format("Submit order for table #%d?\nTotal: R%.2f",
                     currentTableNumber, finalOrderTotal));
             builder.setPositiveButton("Submit", (dialog, which) -> {
-                processOrderSubmission(finalCustomerName, finalCustomerPhone, finalCustomerEmail, finalOrderTotal);
+                // Create simple progress dialog
+                AlertDialog progressDialog = new AlertDialog.Builder(this)
+                        .setTitle("Processing Order")
+                        .setMessage("Please wait...")
+                        .setCancelable(false)
+                        .create();
+                progressDialog.show();
+
+                // Create order object
+                Order order = new Order();
+                order.setTableNumber(currentTableNumber);
+                order.setWaiterId(prefsManager != null ? prefsManager.getUserId() : 1);
+                order.setTimestamp(System.currentTimeMillis());
+                order.setStatus("pending");
+                order.setCustomerName(finalCustomerName);
+                order.setCustomerPhone(finalCustomerPhone);
+                order.setCustomerEmail(finalCustomerEmail);
+                order.setTotal(finalOrderTotal);
+                order.setExternalId("ORD_" + System.currentTimeMillis());
+
+                // Copy order items to avoid modification issues
+                final List<OrderItem> orderItemsCopy = new ArrayList<>(currentOrderItems);
+
+                // Try Firebase submission first if available
+                if (orderFirebaseHelper != null) {
+                    orderFirebaseHelper.submitOrder(order, orderItemsCopy, new OrderFirebaseHelper.OrderSubmissionCallback() {
+                        @Override
+                        public void onSuccess(String firebaseKey, long orderId) {
+                            // Close progress dialog
+                            progressDialog.dismiss();
+
+                            // Update order with Firebase-generated ID
+                            order.setOrderId(orderId);
+
+                            // Show success UI
+                            notifyKitchenAboutNewOrder(orderId, currentTableNumber);
+                            showPaymentOptionsDialog(orderId, finalOrderTotal);
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            // Firebase failed, fall back to local database
+                            Log.e(TAG, "Firebase order submission failed: " + e.getMessage());
+
+                            // Fall back to local database (keep progress dialog showing)
+                            orderSafetyWrapper.submitOrderSafely(order, orderItemsCopy, new OrderSafetyWrapper.OrderSubmitCallback() {
+                                @Override
+                                public void onSuccess(long orderId) {
+                                    // Close progress dialog
+                                    progressDialog.dismiss();
+
+                                    // Show success UI
+                                    notifyKitchenAboutNewOrder(orderId, currentTableNumber);
+                                    showPaymentOptionsDialog(orderId, finalOrderTotal);
+                                }
+
+                                @Override
+                                public void onPartialSuccess(long orderId, String message) {
+                                    // Close progress dialog
+                                    progressDialog.dismiss();
+
+                                    // Show partial success UI
+                                    Toast.makeText(OrderActivity.this, "Order saved with limitations: " + message, Toast.LENGTH_LONG).show();
+
+                                    if (orderId > 0) {
+                                        notifyKitchenAboutNewOrder(orderId, currentTableNumber);
+                                        showPaymentOptionsDialog(orderId, finalOrderTotal);
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(String error) {
+                                    // Close progress dialog
+                                    progressDialog.dismiss();
+
+                                    // Show error dialog with retry option
+                                    showErrorDialog("Order Submission Failed",
+                                            "Unable to process your order: " + error + "\n\nPlease try again.");
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    // No Firebase, use local database directly
+                    orderSafetyWrapper.submitOrderSafely(order, orderItemsCopy, new OrderSafetyWrapper.OrderSubmitCallback() {
+                        @Override
+                        public void onSuccess(long orderId) {
+                            // Close progress dialog
+                            progressDialog.dismiss();
+
+                            // Show success UI
+                            notifyKitchenAboutNewOrder(orderId, currentTableNumber);
+                            showPaymentOptionsDialog(orderId, finalOrderTotal);
+                        }
+
+                        @Override
+                        public void onPartialSuccess(long orderId, String message) {
+                            // Close progress dialog
+                            progressDialog.dismiss();
+
+                            // Show partial success UI
+                            Toast.makeText(OrderActivity.this, "Order saved with limitations: " + message, Toast.LENGTH_LONG).show();
+
+                            if (orderId > 0) {
+                                notifyKitchenAboutNewOrder(orderId, currentTableNumber);
+                                showPaymentOptionsDialog(orderId, finalOrderTotal);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(String error) {
+                            // Close progress dialog
+                            progressDialog.dismiss();
+
+                            // Show error dialog with retry option
+                            showErrorDialog("Order Submission Failed",
+                                    "Unable to process your order: " + error + "\n\nPlease try again.");
+                        }
+                    });
+                }
             });
             builder.setNegativeButton("Cancel", null);
             builder.show();
@@ -1053,8 +1372,42 @@ public class OrderActivity extends BaseActivity {
                         // Do nothing, dialog will dismiss
                     })
                     .setNegativeButton("Contact Support", (dialog, which) -> {
-                        // Show support contact info
-                        Toast.makeText(this, "Please contact support at support@finedine.com", Toast.LENGTH_LONG).show();
+                        // Show support contact dialog with email option
+                        try {
+                            // Create contact options dialog
+                            AlertDialog.Builder supportBuilder = new AlertDialog.Builder(this);
+                            supportBuilder.setTitle("Contact Support");
+                            supportBuilder.setItems(new String[]{"Email", "Call", "Live Chat"}, (d, which2) -> {
+                                switch (which2) {
+                                    case 0: // Email
+                                        try {
+                                            Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                                            emailIntent.setType("message/rfc822");
+                                            emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"support@finedine.com"});
+                                            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Support Request - Order App");
+                                            startActivity(Intent.createChooser(emailIntent, "Send Email to Support"));
+                                        } catch (Exception e) {
+                                            Log.e(TAG, "Error sending email", e);
+                                        }
+                                        break;
+                                    case 1: // Call
+                                        try {
+                                            Intent callIntent = new Intent(Intent.ACTION_DIAL);
+                                            callIntent.setData(android.net.Uri.parse("tel:+1234567890"));
+                                            startActivity(callIntent);
+                                        } catch (Exception e) {
+                                            Log.e(TAG, "Error initiating call", e);
+                                        }
+                                        break;
+                                    case 2: // Live Chat
+                                        // In a real app, this would open a chat interface
+                                        break;
+                                }
+                            });
+                            supportBuilder.show();
+                        } catch (Exception ex) {
+                            Log.e(TAG, "Error showing support dialog", ex);
+                        }
                     })
                     .show();
         } catch (Exception e) {
@@ -1065,14 +1418,36 @@ public class OrderActivity extends BaseActivity {
     }
 
     private void processOrderSubmission(String customerName, String customerPhone, String customerEmail, double orderTotal) {
-        // Show progress dialog
+        // Show basic progress dialog that works with BaseActivity
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Processing order...");
+        builder.setTitle("Processing Order");
+        builder.setMessage("Please wait while we process your order...");
         builder.setCancelable(false);
         AlertDialog progressDialog = builder.create();
         progressDialog.show();
 
+        // Set a timeout for the progress dialog
+        final Handler handler = new Handler();
+        handler.postDelayed(() -> {
+            if (progressDialog != null && progressDialog.isShowing()) {
+                try {
+                    progressDialog.setMessage("Order submission taking longer than expected...\nStill working...");
+                } catch (Exception e) {
+                    Log.e(TAG, "Error updating progress dialog", e);
+                }
+            }
+        }, 5000); // 5 second timeout
+
         try {
+            // Run database emergency repair before proceeding
+            try {
+                Log.d(TAG, "Running database emergency repair before submission");
+                DatabaseEmergencyRepair.runFullDatabaseRepair(this);
+            } catch (Exception e) {
+                Log.e(TAG, "Error during pre-submission database repair: " + e.getMessage(), e);
+                // Continue anyway, our wrapper will handle it
+            }
+
             // Initialize database and executor if needed
             if (appDatabase == null) {
                 appDatabase = AppDatabase.getDatabase(this);
@@ -1134,14 +1509,110 @@ public class OrderActivity extends BaseActivity {
             final String unifiedOrderId = "ORD_" + System.currentTimeMillis() + "_" + Math.abs(java.util.UUID.randomUUID().hashCode() % 1000);
             order.setExternalId(unifiedOrderId);
 
-            // Track submission status to multiple destinations
-            final OrderSubmissionTracker submissionTracker = new OrderSubmissionTracker();
+            // Use our new OrderSafetyWrapper to reliably process the order
+            orderSafetyWrapper.submitOrderSafely(order, orderItemsCopy, new OrderSafetyWrapper.OrderSubmitCallback() {
+                @Override
+                public void onSuccess(long orderId) {
+                    // Dismiss the progress dialog
+                    if (progressDialog != null && progressDialog.isShowing()) {
+                        try {
+                            progressDialog.dismiss();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error dismissing progress dialog", e);
+                        }
+                    }
 
-            // Use our new OrderWrapper utility for improved order handling with retry mechanism
-            submitToLocalDatabase(order, orderItemsCopy, submissionTracker, progressDialog, unifiedOrderId);
+                    Log.d(TAG, "Order successfully submitted with ID: " + orderId);
 
-            // Submit to cloud services immediately in parallel
-            submitToCloudServices(order, orderItemsCopy, submissionTracker, unifiedOrderId);
+                    // Notify kitchen
+                    notifyKitchenAboutNewOrder(orderId, order.getTableNumber());
+
+                    // Show payment options
+                    showPaymentOptionsDialog(orderId, orderTotal);
+
+                    // Submit to Firebase for backup if it's available
+                    if (ordersRef != null) {
+                        submitOrderToFirebase(order, orderItemsCopy, orderId);
+                    }
+                }
+
+                @Override
+                public void onPartialSuccess(long orderId, String message) {
+                    // Dismiss the progress dialog
+                    if (progressDialog != null && progressDialog.isShowing()) {
+                        try {
+                            progressDialog.dismiss();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error dismissing progress dialog", e);
+                        }
+                    }
+
+                    Log.w(TAG, "Order partially successful: " + message);
+                    Toast.makeText(OrderActivity.this,
+                            "Order saved with limitations: " + message,
+                            Toast.LENGTH_LONG).show();
+
+                    // We still need to notify kitchen if we have an order ID
+                    if (orderId > 0) {
+                        notifyKitchenAboutNewOrder(orderId, order.getTableNumber());
+                        showPaymentOptionsDialog(orderId, orderTotal);
+                    } else {
+                        // Show a dialog with limited functionality
+                        AlertDialog.Builder builder = new AlertDialog.Builder(OrderActivity.this);
+                        builder.setTitle("Order Partially Processed");
+                        builder.setMessage("Your order has been saved locally but there were some issues.\n\n" +
+                                message + "\n\nA manager will help process your order.");
+                        builder.setPositiveButton("OK", (dialog, which) -> {
+                            // Clear the order form
+                            clearOrder();
+                        });
+                        builder.setCancelable(false);
+                        builder.show();
+                    }
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    // Dismiss the progress dialog
+                    if (progressDialog != null && progressDialog.isShowing()) {
+                        try {
+                            progressDialog.dismiss();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error dismissing progress dialog", e);
+                        }
+                    }
+
+                    Log.e(TAG, "Order submission failed: " + error);
+
+                    // Try one last emergency attempt
+                    try {
+                        // Create emergency local backup
+                        boolean emergencySaved = storeOrderForLaterSync(order, orderItemsCopy, unifiedOrderId);
+
+                        if (emergencySaved) {
+                            // Show a dialog with partial success
+                            AlertDialog.Builder builder = new AlertDialog.Builder(OrderActivity.this);
+                            builder.setTitle("Order Processing Issue");
+                            builder.setMessage("There was a problem processing your order, but we've saved it locally.\n\n" +
+                                    "Please notify a manager to help complete your order.");
+                            builder.setPositiveButton("OK", (dialog, which) -> {
+                                // Clear the order form
+                                clearOrder();
+                            });
+                            builder.setCancelable(false);
+                            builder.show();
+                        } else {
+                            // Complete failure, show error dialog with retry option
+                            showErrorDialog("Order Submission Failed",
+                                    "Unable to process your order: " + error + "\n\nPlease try again or contact a manager.");
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Emergency save also failed: " + e.getMessage(), e);
+                        showErrorDialog("Critical Order Error",
+                                "Unable to process or save your order. Please contact a manager immediately.");
+                    }
+                }
+            });
         } catch (Exception e) {
             Log.e(TAG, "Error submitting order", e);
 
@@ -1218,98 +1689,46 @@ public class OrderActivity extends BaseActivity {
      * Submit order to Firebase database with enhanced reliability
      */
     private void submitOrderToFirebase(Order order, List<OrderItem> orderItems, long localOrderId) {
-        if (ordersRef == null) {
+        if (ordersRef == null || orderFirebaseHelper == null) {
             Log.w(TAG, "Firebase not initialized, skipping Firebase order submission");
             return;
         }
 
         try {
-            // Track if we're using this in the context of OrderSubmissionTracker
-            OrderSubmissionTracker tracker = null;
-            for (Object obj : Thread.currentThread().getStackTrace()) {
-                if (obj.toString().contains("OrderSubmissionTracker")) {
-                    // We're called from a context with a tracker
-                    for (OrderSubmissionTracker t : findTrackers()) {
-                        tracker = t;
-                        break;
-                    }
+            // Create a new tracker for this operation
+            final OrderSubmissionTracker tracker = new OrderSubmissionTracker();
+
+            // Set the local order ID if it's valid
+            if (localOrderId > 0) {
+                order.setOrderId(localOrderId);
+            }
+
+            // Use our helper to submit the order
+            orderFirebaseHelper.submitOrder(order, orderItems, new OrderFirebaseHelper.OrderSubmissionCallback() {
+                @Override
+                public void onSuccess(String firebaseKey, long orderId) {
+                    Log.d(TAG, "Order successfully submitted to Firebase with key: " + firebaseKey);
+
+                    // Update tracker
+                    tracker.markFirebaseSuccess();
+                    tracker.checkAndProceedWithOrder(OrderActivity.this, null, orderId, order);
                 }
-            }
 
-            // Create a map for Firebase storage
-            Map<String, Object> firebaseOrder = new HashMap<>();
-            final String externalOrderId = order.getExternalId() != null ?
-                    order.getExternalId() : "ORD_" + System.currentTimeMillis();
+                @Override
+                public void onFailure(Exception e) {
+                    Log.e(TAG, "Failed to submit order to Firebase: " + e.getMessage(), e);
 
-            firebaseOrder.put("orderId", localOrderId > 0 ? localOrderId : System.currentTimeMillis());
-            firebaseOrder.put("externalId", externalOrderId);
-            firebaseOrder.put("tableNumber", order.getTableNumber());
-            firebaseOrder.put("customerName", order.getCustomerName());
-            firebaseOrder.put("customerPhone", order.getCustomerPhone());
-            firebaseOrder.put("customerEmail", order.getCustomerEmail());
-            firebaseOrder.put("timestamp", order.getTimestamp());
-            firebaseOrder.put("status", order.getStatus());
-            firebaseOrder.put("waiterId", order.waiterId);
-            firebaseOrder.put("total", order.getTotal());
+                    // Store locally for later sync
+                    storeOrderForLaterSync(order, orderItems, order.getExternalId());
 
-            // Create a list of order items
-            List<Map<String, Object>> firebaseOrderItems = new ArrayList<>();
-            for (OrderItem item : orderItems) {
-                Map<String, Object> firebaseItem = new HashMap<>();
-                firebaseItem.put("name", item.getName());
-                firebaseItem.put("quantity", item.getQuantity());
-                firebaseItem.put("price", item.getPrice());
-                firebaseItem.put("notes", item.getNotes());
-                firebaseItem.put("menuItemId", item.getMenuItemId());
-                firebaseOrderItems.add(firebaseItem);
-            }
-
-            firebaseOrder.put("items", firebaseOrderItems);
-
-            // Device info for tracking
-            Map<String, Object> deviceInfo = new HashMap<>();
-            deviceInfo.put("model", android.os.Build.MODEL);
-            deviceInfo.put("device", android.os.Build.DEVICE);
-            deviceInfo.put("appVersion", getAppVersion());
-            deviceInfo.put("installId", prefsManager != null ? prefsManager.getInstallId() : "unknown");
-            firebaseOrder.put("deviceInfo", deviceInfo);
-
-            // Capture tracker for use in callbacks
-            final OrderSubmissionTracker finalTracker = tracker;
-
-            // First try to store by external ID for consistent retrieval
-            ordersRef.child("by_external_id").child(externalOrderId).setValue(firebaseOrder)
-                    .addOnSuccessListener(aVoid -> {
-                        Log.d(TAG, "Order successfully submitted to Firebase with external ID: " + externalOrderId);
-                        if (finalTracker != null) {
-                            finalTracker.markFirebaseSuccess();
-                            finalTracker.checkAndProceedWithOrder(OrderActivity.this, null, -1, order);
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e(TAG, "Failed to submit order to Firebase by external ID: " + e.getMessage(), e);
-
-                        // Retry with push ID as fallback
-                        String firebaseOrderId = ordersRef.push().getKey();
-                        if (firebaseOrderId != null) {
-                            ordersRef.child(firebaseOrderId).setValue(firebaseOrder)
-                                    .addOnSuccessListener(innerVoid -> {
-                                        Log.d(TAG, "Order successfully submitted to Firebase with fallback ID: " + firebaseOrderId);
-                                        if (finalTracker != null) {
-                                            finalTracker.markFirebaseSuccess();
-                                            finalTracker.checkAndProceedWithOrder(OrderActivity.this, null, -1, order);
-                                        }
-                                    })
-                                    .addOnFailureListener(innerE -> {
-                                        Log.e(TAG, "Failed to submit order to Firebase with fallback: " + innerE.getMessage(), innerE);
-
-                                        // Store locally for later sync if both attempts fail
-                                        storeOrderForLaterSync(order, orderItems, externalOrderId);
-                                    });
-                        }
-                    });
+                    // Update tracker
+                    tracker.markFirebaseFailure();
+                    tracker.checkAndProceedWithOrder(OrderActivity.this, null, -1, order);
+                }
+            });
         } catch (Exception e) {
             Log.e(TAG, "Error submitting order to Firebase", e);
+
             // Store for later sync
             storeOrderForLaterSync(order, orderItems, order.getExternalId());
         }
@@ -1412,7 +1831,6 @@ public class OrderActivity extends BaseActivity {
             builder.setNegativeButton("Done", (dialog, which) -> {
                 // Clear order after successful payment
                 clearOrder();
-                Toast.makeText(this, "Payment successful! Order #" + orderId, Toast.LENGTH_SHORT).show();
             });
             builder.setCancelable(false);
             builder.show();
@@ -1600,61 +2018,258 @@ public class OrderActivity extends BaseActivity {
     private void submitToLocalDatabase(Order order, List<OrderItem> orderItems,
                                        OrderSubmissionTracker tracker, AlertDialog progressDialog,
                                        String unifiedOrderId) {
-        // Use OrderWrapper utility for database submission
-        com.finedine.rms.utils.OrderWrapper orderWrapper =
-                new com.finedine.rms.utils.OrderWrapper(this, appDatabase, databaseExecutor);
-
-        // Attach the unified order ID
-        order.setExternalId(unifiedOrderId);
-
-        // Try up to 3 times to submit the order
-        final int[] retryCount = {0};
-        final int MAX_RETRIES = 3;
-
-        orderWrapper.submitOrder(order, orderItems, new com.finedine.rms.utils.OrderWrapper.OrderSubmitCallback() {
-            @Override
-            public void onSuccess(long orderId) {
-                // Mark local database submission as successful
-                tracker.markLocalDatabaseSuccess(orderId);
-                Log.d(TAG, "Local database order submission successful with ID: " + orderId);
-
-                // Submit to Firebase if not already done
-                if (!tracker.isFirebaseSubmitted()) {
-                    submitOrderToFirebase(order, orderItems, orderId);
-                }
-
-                // Continue with order processing if we haven't done so already
-                tracker.checkAndProceedWithOrder(OrderActivity.this, progressDialog, orderId, order);
-            }
-
-            @Override
-            public void onFailure(String error) {
-                Log.e(TAG, "Local database order submission failed: " + error + ", retry: " + retryCount[0]);
-
-                if (retryCount[0] < MAX_RETRIES) {
-                    retryCount[0]++;
-                    // Exponential backoff for retries
-                    int delayMillis = 1000 * retryCount[0];
-
-                    new android.os.Handler().postDelayed(() -> {
-                        // Retry submission
-                        Log.d(TAG, "Retrying local database submission, attempt " + retryCount[0]);
-                        orderWrapper.submitOrder(order, orderItems, this);
-                    }, delayMillis);
-                } else {
-                    // Mark local database submission as failed after max retries
+        try {
+            if (appDatabase == null) {
+                Log.e(TAG, "Database is null, initializing");
+                try {
+                    appDatabase = AppDatabase.getDatabase(this);
+                    if (appDatabase == null) {
+                        throw new Exception("Could not initialize database");
+                    }
+                } catch (Exception dbEx) {
+                    Log.e(TAG, "Critical error initializing database", dbEx);
                     tracker.markLocalDatabaseFailure();
+                    Toast.makeText(this, "Error connecting to database. Please try again.", Toast.LENGTH_SHORT).show();
 
-                    // Try Firebase as fallback if local database failed
+                    // Try Firebase as fallback immediately
                     if (ordersRef != null && !tracker.isFirebaseSubmitted()) {
                         submitOrderToFirebase(order, orderItems, -1);
                     }
 
                     // Continue with order processing using Firebase or cloud data if available
                     tracker.checkAndProceedWithOrder(OrderActivity.this, progressDialog, -1, order);
+                    return;
                 }
             }
-        });
+
+            if (databaseExecutor == null) {
+                Log.e(TAG, "Database executor is null, initializing");
+                try {
+                    databaseExecutor = java.util.concurrent.Executors.newSingleThreadExecutor();
+                } catch (Exception execEx) {
+                    Log.e(TAG, "Critical error initializing database executor", execEx);
+                    tracker.markLocalDatabaseFailure();
+
+                    // Try Firebase as fallback
+                    if (ordersRef != null && !tracker.isFirebaseSubmitted()) {
+                        submitOrderToFirebase(order, orderItems, -1);
+                    }
+
+                    // Continue with order processing using Firebase or cloud data if available
+                    tracker.checkAndProceedWithOrder(OrderActivity.this, progressDialog, -1, order);
+                    return;
+                }
+            }
+
+            // Use OrderWrapper utility for database submission
+            com.finedine.rms.utils.OrderWrapper orderWrapper =
+                    new com.finedine.rms.utils.OrderWrapper(this, appDatabase, databaseExecutor);
+
+            // Attach the unified order ID
+            order.setExternalId(unifiedOrderId);
+
+            // Try up to 3 times to submit the order
+            final int[] retryCount = {0};
+            final int MAX_RETRIES = 3;
+
+            // Make sure all order data is valid before submission
+            if (!validateOrderBeforeSubmission(order, orderItems)) {
+                Log.e(TAG, "Order validation failed, cannot submit to database");
+                tracker.markLocalDatabaseFailure();
+
+                // Show error and continue with other submission methods
+                runOnUiThread(() -> {
+                    Toast.makeText(OrderActivity.this, "Order validation failed. Trying alternate methods...", Toast.LENGTH_SHORT).show();
+                });
+
+                // Try Firebase as fallback
+                if (ordersRef != null && !tracker.isFirebaseSubmitted()) {
+                    submitOrderToFirebase(order, orderItems, -1);
+                }
+
+                // Continue with order processing using Firebase or cloud data if available
+                tracker.checkAndProceedWithOrder(this, progressDialog, -1, order);
+                return;
+            }
+
+            orderWrapper.submitOrder(order, orderItems, new com.finedine.rms.utils.OrderWrapper.OrderSubmitCallback() {
+                @Override
+                public void onSuccess(long orderId) {
+                    // Mark local database submission as successful
+                    tracker.markLocalDatabaseSuccess(orderId);
+                    Log.d(TAG, "Local database order submission successful with ID: " + orderId);
+
+                    // Submit to Firebase if not already done
+                    if (!tracker.isFirebaseSubmitted()) {
+                        submitOrderToFirebase(order, orderItems, orderId);
+                    }
+
+                    // Continue with order processing if we haven't done so already
+                    tracker.checkAndProceedWithOrder(OrderActivity.this, progressDialog, orderId, order);
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    Log.e(TAG, "Local database order submission failed: " + error + ", retry: " + retryCount[0]);
+
+                    if (retryCount[0] < MAX_RETRIES) {
+                        retryCount[0]++;
+                        // Exponential backoff for retries
+                        int delayMillis = 1000 * retryCount[0];
+
+                        new android.os.Handler().postDelayed(() -> {
+                            // Retry submission
+                            Log.d(TAG, "Retrying local database submission, attempt " + retryCount[0]);
+                            orderWrapper.submitOrder(order, orderItems, this);
+                        }, delayMillis);
+                    } else {
+                        // Mark local database submission as failed after max retries
+                        tracker.markLocalDatabaseFailure();
+
+                        // Try Firebase as fallback if local database failed
+                        if (ordersRef != null && !tracker.isFirebaseSubmitted()) {
+                            submitOrderToFirebase(order, orderItems, -1);
+                        }
+
+                        // Continue with order processing using Firebase or cloud data if available
+                        tracker.checkAndProceedWithOrder(OrderActivity.this, progressDialog, -1, order);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Critical error in submitToLocalDatabase", e);
+            tracker.markLocalDatabaseFailure();
+
+            // Try Firebase as fallback
+            if (ordersRef != null && !tracker.isFirebaseSubmitted()) {
+                submitOrderToFirebase(order, orderItems, -1);
+            }
+
+            // Continue with order processing using Firebase or cloud data if available
+            tracker.checkAndProceedWithOrder(this, progressDialog, -1, order);
+        }
+    }
+
+    /**
+     * Validates order data before submission
+     */
+    private boolean validateOrderBeforeSubmission(Order order, List<OrderItem> orderItems) {
+        try {
+            // Check essential order properties
+            if (order == null) {
+                Log.e(TAG, "Order object is null");
+                return false;
+            }
+
+            // Make a deep copy of the order to avoid modifying the original
+            // This prevents potential concurrent modification issues
+            Order validatedOrder = new Order();
+            // Copy order properties without using getId/setId which may not exist
+            validatedOrder.setTableNumber(order.getTableNumber());
+            validatedOrder.setCustomerName(order.getCustomerName());
+            validatedOrder.setCustomerEmail(order.getCustomerEmail());
+            validatedOrder.setCustomerPhone(order.getCustomerPhone());
+            validatedOrder.setTimestamp(order.getTimestamp());
+            validatedOrder.setStatus(order.getStatus());
+            validatedOrder.setTotal(order.getTotal());
+            validatedOrder.waiterId = order.waiterId;
+            validatedOrder.setExternalId(order.getExternalId());
+
+            // Validate table number
+            if (validatedOrder.getTableNumber() <= 0) {
+                Log.e(TAG, "Invalid table number: " + validatedOrder.getTableNumber());
+                validatedOrder.setTableNumber(1); // Default to table 1
+            }
+
+            // Verify items list
+            if (orderItems == null) {
+                Log.e(TAG, "Order items list is null");
+                return false;
+            }
+
+            if (orderItems.isEmpty()) {
+                Log.e(TAG, "Order items list is empty");
+                return false;
+            }
+
+            // Set default values for nullable fields
+            if (validatedOrder.getStatus() == null) validatedOrder.setStatus("pending");
+            if (validatedOrder.getTimestamp() == 0)
+                validatedOrder.setTimestamp(System.currentTimeMillis());
+            if (validatedOrder.getCustomerName() == null) validatedOrder.setCustomerName("Guest");
+            if (validatedOrder.getCustomerEmail() == null)
+                validatedOrder.setCustomerEmail("guest@example.com");
+            if (validatedOrder.getCustomerPhone() == null) validatedOrder.setCustomerPhone("");
+            if (validatedOrder.getExternalId() == null) {
+                validatedOrder.setExternalId("ORD_" + System.currentTimeMillis());
+            }
+
+            // Create a validated copy of order items
+            List<OrderItem> validatedItems = new ArrayList<>();
+
+            // Validate all order items before submission
+            for (OrderItem item : orderItems) {
+                // Create a new validated item
+                OrderItem validatedItem = new OrderItem();
+
+                // Copy and validate essential fields
+                // Copy and validate essential fields without using getId/setId
+                validatedItem.setOrderId(item.getOrderId());
+
+                // Validate name
+                if (item.getName() == null || item.getName().isEmpty()) {
+                    validatedItem.setName("Unknown Item");
+                } else {
+                    validatedItem.setName(item.getName());
+                }
+
+                // Validate notes and special instructions
+                validatedItem.setNotes(item.getNotes() != null ? item.getNotes() : "");
+                validatedItem.setSpecialInstructions(item.getSpecialInstructions() != null ?
+                        item.getSpecialInstructions() : "");
+
+                // Ensure menuItemId is properly set
+                if (item.getMenuItemId() == null) {
+                    validatedItem.setMenuItemId(-1L);  // Use default indicator for manually added items
+                } else {
+                    validatedItem.setMenuItemId(item.getMenuItemId());
+                }
+
+                // Ensure quantity and price are valid
+                if (item.getQuantity() <= 0) {
+                    validatedItem.setQuantity(1);
+                } else {
+                    validatedItem.setQuantity(item.getQuantity());
+                }
+
+                if (item.getPrice() < 0) {
+                    validatedItem.setPrice(0.0);
+                } else {
+                    validatedItem.setPrice(item.getPrice());
+                }
+
+                // Add validated item to the list
+                validatedItems.add(validatedItem);
+            }
+
+            // Copy the validated data back to the original objects for submission
+            order.setTableNumber(validatedOrder.getTableNumber());
+            order.setCustomerName(validatedOrder.getCustomerName());
+            order.setCustomerEmail(validatedOrder.getCustomerEmail());
+            order.setCustomerPhone(validatedOrder.getCustomerPhone());
+            order.setTimestamp(validatedOrder.getTimestamp());
+            order.setStatus(validatedOrder.getStatus());
+            order.setExternalId(validatedOrder.getExternalId());
+
+            // Clear and replace the items list with validated items
+            orderItems.clear();
+            orderItems.addAll(validatedItems);
+
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "Error validating order: " + e.getMessage(), e);
+            return false;
+        }
     }
 
     /**
@@ -1830,9 +2445,86 @@ public class OrderActivity extends BaseActivity {
     }
 
     /**
-     * Store order locally for later synchronization when connectivity is restored
+     * Send order details to chef via Firebase Firestore
+     * @param selectedItems Map of selected items and their quantities
+     * @param notes Special instructions for the chef
      */
-    private void storeOrderForLaterSync(Order order, List<OrderItem> orderItems, String externalId) {
+    private void sendOrderToChef(HashMap<String, Integer> selectedItems, String notes) {
+        com.google.firebase.firestore.FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // Prepare order data
+        ArrayList<String> orderList = new ArrayList<>();
+        ArrayList<String> quantityList = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : selectedItems.entrySet()) {
+            String itemWithQuantity = entry.getKey() + " x" + entry.getValue();
+            orderList.add(itemWithQuantity);
+            quantityList.add(String.valueOf(entry.getValue()));
+        }
+        // Create chef order data
+        Map<String, Object> orderData = new HashMap<>();
+        orderData.put("orders", orderList);
+        orderData.put("quantities", quantityList);
+        orderData.put("notes", notes != null ? new ArrayList<>(Arrays.asList(notes)) : new ArrayList<>());
+        orderData.put("timestamp", System.currentTimeMillis());
+        orderData.put("tableNumber", currentTableNumber);
+        orderData.put("status", "new");
+        // Add metadata
+        if (prefsManager != null) {
+            orderData.put("restaurantId", prefsManager.getRestaurantId());
+            orderData.put("sentBy", prefsManager.getUserName());
+        }
+        // Add order to Firestore
+        db.collection("chef_orders")
+                .add(orderData)
+                .addOnSuccessListener(documentReference -> {
+                    Log.d(TAG, "Order sent to chef successfully with ID: " + documentReference.getId());
+                    Toast.makeText(OrderActivity.this,
+                            "Order sent to kitchen successfully",
+                            Toast.LENGTH_SHORT).show();
+                    sendKitchenTabletNotification(-1, currentTableNumber);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error sending order to chef", e);
+                    Toast.makeText(OrderActivity.this,
+                            "Failed to send order to kitchen. Please try again.",
+                            Toast.LENGTH_SHORT).show();
+                    storeChefOrderForSync(selectedItems, notes);
+                });
+    }
+
+    /**
+     * Store chef order locally for later synchronization
+     */
+    private void storeChefOrderForSync(HashMap<String, Integer> selectedItems, String notes) {
+        try {
+            if (prefsManager != null) {
+                // Create a unique ID for this pending order
+                String pendingId = "chef_order_" + System.currentTimeMillis();
+
+                // Store data as JSON
+                com.google.gson.Gson gson = new com.google.gson.Gson();
+                String itemsJson = gson.toJson(selectedItems);
+
+                // Store in SharedPreferences
+                android.content.SharedPreferences prefs = getSharedPreferences("pending_chef_orders", MODE_PRIVATE);
+                android.content.SharedPreferences.Editor editor = prefs.edit();
+                editor.putString(pendingId + "_items", itemsJson);
+                editor.putString(pendingId + "_notes", notes);
+                editor.putInt(pendingId + "_table", currentTableNumber);
+                editor.putLong(pendingId + "_timestamp", System.currentTimeMillis());
+                editor.apply();
+
+                Log.d(TAG, "Chef order stored locally with ID: " + pendingId);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error storing chef order locally", e);
+        }
+    }
+
+    /**
+     * Store order locally for later synchronization when connectivity is restored
+     * @return true if the order was successfully stored locally
+     */
+    private boolean storeOrderForLaterSync(Order order, List<OrderItem> orderItems, String externalId) {
         try {
             // Store pending sync information in SharedPreferences
             if (prefsManager != null) {
@@ -1847,9 +2539,12 @@ public class OrderActivity extends BaseActivity {
                 prefsManager.storePendingOrderData(externalId, orderJson, itemsJson);
 
                 Log.d(TAG, "Order stored locally for later sync: " + externalId);
+                return true;
             }
+            return false;
         } catch (Exception e) {
             Log.e(TAG, "Failed to store order for later sync", e);
+            return false;
         }
     }
 
@@ -1859,12 +2554,14 @@ public class OrderActivity extends BaseActivity {
     private class OrderSubmissionTracker {
         private boolean localDatabaseSuccess = false;
         private boolean firebaseSubmitted = false;
+        private boolean firebaseSuccess = false;
         private boolean cloudSubmitted = false;
         private long localOrderId = -1;
+        private boolean hasProcessedOrder = false;
 
         // Order is considered submitted if ANY destination succeeds
         private boolean isOrderSubmitted() {
-            return localDatabaseSuccess || firebaseSubmitted || cloudSubmitted;
+            return localDatabaseSuccess || firebaseSuccess || cloudSubmitted;
         }
 
         public void markLocalDatabaseSuccess(long orderId) {
@@ -1878,6 +2575,12 @@ public class OrderActivity extends BaseActivity {
 
         public void markFirebaseSuccess() {
             firebaseSubmitted = true;
+            firebaseSuccess = true;
+        }
+
+        public void markFirebaseFailure() {
+            firebaseSubmitted = true;
+            firebaseSuccess = false;
         }
 
         public boolean isFirebaseSubmitted() {
@@ -1895,36 +2598,52 @@ public class OrderActivity extends BaseActivity {
         /**
          * Check if order can be considered submitted and proceed with UI flow
          */
-        public void checkAndProceedWithOrder(OrderActivity activity, AlertDialog progressDialog,
+        public synchronized void checkAndProceedWithOrder(OrderActivity activity, AlertDialog progressDialog,
                                              long orderId, Order order) {
+            // Prevent processing multiple times
+            if (hasProcessedOrder) {
+                return;
+            }
+
             // Only proceed once
             if (!isOrderSubmitted()) {
                 // Don't proceed yet, waiting for at least one successful submission
                 return;
             }
 
+            // Mark as processed to prevent duplicate processing
+            hasProcessedOrder = true;
+
             activity.runOnUiThread(() -> {
-                // Dismiss progress dialog if still showing
-                if (progressDialog != null && progressDialog.isShowing()) {
-                    try {
-                        progressDialog.dismiss();
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error dismissing progress dialog", e);
+                try {
+                    // Dismiss progress dialog if still showing
+                    if (progressDialog != null && progressDialog.isShowing()) {
+                        try {
+                            progressDialog.dismiss();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error dismissing progress dialog", e);
+                        }
                     }
+
+                    // Use local order ID if available, otherwise use -1
+                    long effectiveOrderId = localOrderId > 0 ? localOrderId : orderId;
+
+                    // Send notification to kitchen
+                    activity.notifyKitchenAboutNewOrder(effectiveOrderId, order.getTableNumber());
+
+                    // Show payment options dialog
+                    activity.showPaymentOptionsDialog(effectiveOrderId, order.getTotal());
+
+                    // Log submission state
+                    Log.d(TAG, "Order submission complete. Local DB: " + localDatabaseSuccess +
+                            ", Firebase: " + firebaseSubmitted + ", Cloud: " + cloudSubmitted);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error processing order completion", e);
+                    Toast.makeText(activity, "Order processed, but there was an issue displaying confirmation", Toast.LENGTH_LONG).show();
+
+                    // Force clear the order even if there was an error showing dialogs
+                    activity.clearOrder();
                 }
-
-                // Use local order ID if available, otherwise use -1
-                long effectiveOrderId = localOrderId > 0 ? localOrderId : orderId;
-
-                // Send notification to kitchen
-                activity.notifyKitchenAboutNewOrder(effectiveOrderId, order.getTableNumber());
-
-                // Show payment options dialog
-                activity.showPaymentOptionsDialog(effectiveOrderId, order.getTotal());
-
-                // Log submission state
-                Log.d(TAG, "Order submission complete. Local DB: " + localDatabaseSuccess +
-                        ", Firebase: " + firebaseSubmitted + ", Cloud: " + cloudSubmitted);
             });
         }
     }

@@ -15,23 +15,36 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import com.finedine.rms.utils.FirebaseDatabaseSetup;
+import com.finedine.rms.utils.FirebaseDbHelper;
+import com.finedine.rms.firebase.FirebaseOrderDao;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import com.finedine.rms.utils.EmailSender;
 import com.finedine.rms.utils.LayoutUtils;
 import com.finedine.rms.utils.NotificationUtils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
@@ -52,6 +65,11 @@ public class KitchenActivity extends BaseActivity {
     private TextView dateView;
     private FloatingActionButton refreshButton;
     private TextView orderCountView;
+    private ChipGroup filterChipGroup;
+    private Chip chipPending;
+    private Chip chipPreparing;
+    private Chip chipReady;
+    private Chip chipUpcoming;
 
     private List<Order> activeOrders;
     private KitchenOrderAdapter orderAdapter;
@@ -63,9 +81,33 @@ public class KitchenActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
         try {
+            super.onCreate(savedInstanceState);
+
+            // Set the content view directly first to ensure layout is available
+            setContentView(R.layout.activity_kitchen);
+
+            Log.d(TAG, "KitchenActivity.onCreate: Starting initialization");
+
+            // Initialize Firebase Realtime Database
+            try {
+                FirebaseDatabaseSetup.enableFirebaseDatabase(this);
+                Log.d(TAG, "Firebase database enabled");
+            } catch (Exception e) {
+                Log.e(TAG, "Error enabling Firebase", e);
+            }
+
+            // Get user role from intent or use a default
+            String intentRole = getIntent().getStringExtra("user_role");
+            if (intentRole != null) {
+                userRole = intentRole;
+                Log.d(TAG, "User role from intent: " + userRole);
+            } else {
+                // Use default from BaseActivity if available, or default to chef
+                userRole = (userRole != null) ? userRole : "chef";
+                Log.d(TAG, "Using default user role: " + userRole);
+            }
+
             // Check user role for access control
             if (!("chef".equalsIgnoreCase(userRole) ||
                     "admin".equalsIgnoreCase(userRole) ||
@@ -78,7 +120,7 @@ public class KitchenActivity extends BaseActivity {
                 if ("waiter".equalsIgnoreCase(userRole) || "customer".equalsIgnoreCase(userRole)) {
                     redirectIntent = new Intent(this, OrderActivity.class);
                 } else {
-                    redirectIntent = new Intent(this, LoginActivity.class);
+                    redirectIntent = new Intent(this, LoginActivity_fixed.class); // Changed to LoginActivity_fixed
                 }
                 redirectIntent.putExtra("user_role", userRole);
                 startActivity(redirectIntent);
@@ -86,25 +128,33 @@ public class KitchenActivity extends BaseActivity {
                 return;
             }
 
-            // Use modern navigation panel with layout safety
-            try {
-                setupModernNavigationPanel("Kitchen Orders", R.layout.activity_kitchen);
-            } catch (Exception e) {
-                // If modern navigation panel fails, use direct layout loading with safety
-                Log.e(TAG, "Error setting up navigation panel", e);
-                if (!LayoutUtils.safeSetContentView(this, R.layout.activity_kitchen, "Kitchen Orders")) {
-                    // If even the safe content view fails, just return - the utility will display an error screen
-                    return;
+            // Initialize toolbar
+            Toolbar toolbar = findViewById(R.id.toolbar);
+            if (toolbar != null) {
+                setSupportActionBar(toolbar);
+                if (getSupportActionBar() != null) {
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setTitle("Kitchen Orders");
                 }
             }
 
             // Initialize database
-            appDatabase = ((FineDineApplication) getApplication()).getDatabase();
-            databaseExecutor = ((FineDineApplication) getApplication()).getDatabaseExecutor();
+            try {
+                appDatabase = AppDatabase.getDatabase(this);
+                databaseExecutor = java.util.concurrent.Executors.newFixedThreadPool(4);
 
-            if (appDatabase == null || databaseExecutor == null) {
-                Toast.makeText(this, "Error: Database not initialized", Toast.LENGTH_LONG).show();
-                finish();
+                if (appDatabase == null) {
+                    Log.e(TAG, "AppDatabase is null");
+                    Toast.makeText(this, "Error: Database not initialized", Toast.LENGTH_LONG).show();
+                    createEmergencyUI();
+                    return;
+                }
+
+                Log.d(TAG, "Database initialized successfully");
+            } catch (Exception e) {
+                Log.e(TAG, "Error initializing database", e);
+                Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                createEmergencyUI();
                 return;
             }
 
@@ -116,18 +166,31 @@ public class KitchenActivity extends BaseActivity {
             createNotificationChannels();
 
             // Set up UI components with safety checks
-            recyclerView = LayoutUtils.safelyFindView(this, R.id.kitchenOrdersList, "Kitchen Orders List");
-            swipeRefreshLayout = LayoutUtils.safelyFindView(this, R.id.swipeRefresh, "Swipe Refresh");
-            emptyView = LayoutUtils.safelyFindView(this, R.id.emptyView, "Empty View");
-            kitchenNameView = LayoutUtils.safelyFindView(this, R.id.kitchenName, "Kitchen Name");
-            timeView = LayoutUtils.safelyFindView(this, R.id.timeView, "Time View");
-            dateView = LayoutUtils.safelyFindView(this, R.id.dateView, "Date View");
-            refreshButton = LayoutUtils.safelyFindView(this, R.id.refreshFab, "Refresh Button");
-            orderCountView = LayoutUtils.safelyFindView(this, R.id.orderCountView, "Order Count");
+            try {
+                recyclerView = findViewById(R.id.kitchenOrdersList);
+                swipeRefreshLayout = findViewById(R.id.swipeRefresh);
+                emptyView = findViewById(R.id.emptyView);
+                kitchenNameView = findViewById(R.id.kitchenName);
+                timeView = findViewById(R.id.timeView);
+                dateView = findViewById(R.id.dateView);
+                refreshButton = findViewById(R.id.refreshFab);
+                orderCountView = findViewById(R.id.orderCountView);
+                filterChipGroup = findViewById(R.id.filterChipGroup);
+                chipPending = findViewById(R.id.chipPending);
+                chipPreparing = findViewById(R.id.chipPreparing);
+                chipReady = findViewById(R.id.chipReady);
+                chipUpcoming = findViewById(R.id.chipUpcoming);
 
-            // Verify critical views are available
-            if (!LayoutUtils.checkRequiredViews(recyclerView, swipeRefreshLayout, emptyView)) {
-                Log.e(TAG, "Critical UI components missing - creating emergency UI");
+                // Verify critical views
+                if (recyclerView == null || swipeRefreshLayout == null || emptyView == null) {
+                    Log.e(TAG, "Critical UI components missing - creating emergency UI");
+                    createEmergencyUI();
+                    return;
+                }
+
+                Log.d(TAG, "UI components initialized successfully");
+            } catch (Exception e) {
+                Log.e(TAG, "Error initializing UI components", e);
                 createEmergencyUI();
                 return;
             }
@@ -136,25 +199,45 @@ public class KitchenActivity extends BaseActivity {
             activeOrders = new ArrayList<>();
 
             // Setup RecyclerView
-            recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            orderAdapter = new KitchenOrderAdapter(this, activeOrders, (order, action) -> {
-                if (order != null) {
-                    handleOrderAction(order, action);
-                }
-            });
-            recyclerView.setAdapter(orderAdapter);
+            try {
+                recyclerView.setLayoutManager(new LinearLayoutManager(this));
+                orderAdapter = new KitchenOrderAdapter(this, activeOrders, (order, action) -> {
+                    if (order != null) {
+                        handleOrderAction(order, action);
+                    }
+                });
+                recyclerView.setAdapter(orderAdapter);
+                Log.d(TAG, "RecyclerView setup complete");
+            } catch (Exception e) {
+                Log.e(TAG, "Error setting up RecyclerView", e);
+            }
 
             // Setup SwipeRefreshLayout
-            swipeRefreshLayout.setOnRefreshListener(this::refreshOrders);
+            if (swipeRefreshLayout != null) {
+                swipeRefreshLayout.setOnRefreshListener(this::refreshOrders);
+                Log.d(TAG, "Swipe refresh listener setup complete");
+            }
 
             // Setup refresh button
             if (refreshButton != null) {
                 refreshButton.setOnClickListener(v -> refreshOrders());
+                Log.d(TAG, "Refresh button setup complete");
+            }
+
+            // Setup filter chips
+            if (filterChipGroup != null) {
+                // Add filter change listener
+                filterChipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
+                    // Apply filter when chip selection changes
+                    applyFilters();
+                });
+                Log.d(TAG, "Filter chip group setup complete");
             }
 
             // Initial data load
             updateDateTime();
             refreshOrders();
+            Log.d(TAG, "Initial data load complete");
 
             // Start periodic refresh timer
             refreshTimer = new Timer();
@@ -163,7 +246,10 @@ public class KitchenActivity extends BaseActivity {
                 public void run() {
                     runOnUiThread(KitchenActivity.this::refreshOrders);
                 }
-            }, 0, 15000); // 15 seconds
+            }, 15000, 15000); // 15 seconds, start after 15s to avoid double refresh
+
+            Log.d(TAG, "KitchenActivity initialization complete");
+
         } catch (Exception e) {
             Log.e("KitchenActivity", "Error initializing Kitchen: " + e.getMessage(), e);
             Toast.makeText(this, "Error initializing Kitchen screen", Toast.LENGTH_LONG).show();
@@ -219,178 +305,246 @@ public class KitchenActivity extends BaseActivity {
         saveKnownOrderIdsToSharedPreferences();
     }
 
-    private void refreshOrders() {
+    public void refreshOrders() {
+        // Safety check
+        if (swipeRefreshLayout == null) {
+            Log.e(TAG, "Cannot refresh orders - SwipeRefreshLayout is null");
+            return;
+        }
+
         swipeRefreshLayout.setRefreshing(true);
 
         try {
-            if (databaseExecutor == null || appDatabase == null) {
-                Log.e("KitchenActivity", "Database or executor null");
+            Log.d(TAG, "Starting to refresh orders");
+            FirebaseDbHelper dbHelper = FirebaseDbHelper.getInstance(this);
+
+            if (dbHelper == null) {
+                Log.e(TAG, "Firebase helper is null");
                 swipeRefreshLayout.setRefreshing(false);
-                Toast.makeText(this, "Database connection error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Error: Database connection unavailable", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            databaseExecutor.execute(() -> {
-                try {
-                    // Get pending, preparing, and completed orders
+            DatabaseReference ordersRef = dbHelper.getOrdersReference();
+            if (ordersRef == null) {
+                Log.e(TAG, "Orders reference is null");
+                swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(this, "Error: Orders database unavailable", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Log.d(TAG, "Getting orders from Firebase");
+            // Get orders from kitchen_orders path instead of regular orders path
+            DatabaseReference kitchenOrdersRef = FirebaseDatabase.getInstance().getReference("kitchen_orders");
+            kitchenOrdersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
                     List<Order> newOrders = new ArrayList<>();
 
-                    // Get pending orders
-                    try {
-                        List<Order> pendingOrders = appDatabase.orderDao().getOrdersByStatus("pending");
-                        if (pendingOrders != null) {
-                            Log.d("KitchenActivity", "Found " + pendingOrders.size() + " pending orders");
-                            newOrders.addAll(pendingOrders);
-                        }
-                    } catch (Exception e) {
-                        Log.e("KitchenActivity", "Error loading pending orders: " + e.getMessage(), e);
-                    }
+                    Log.d(TAG, "Order snapshot contains " + snapshot.getChildrenCount() + " orders");
 
-                    // Get preparing orders
-                    try {
-                        List<Order> preparingOrders = appDatabase.orderDao().getOrdersByStatus("preparing");
-                        if (preparingOrders != null) {
-                            Log.d("KitchenActivity", "Found " + preparingOrders.size() + " preparing orders");
-                            newOrders.addAll(preparingOrders);
-                        }
-                    } catch (Exception e) {
-                        Log.e("KitchenActivity", "Error loading preparing orders: " + e.getMessage(), e);
-                    }
-
-                    // Get completed orders
-                    try {
-                        List<Order> completedOrders = appDatabase.orderDao().getOrdersByStatus("completed");
-                        if (completedOrders != null) {
-                            Log.d("KitchenActivity", "Found " + completedOrders.size() + " completed orders");
-                            newOrders.addAll(completedOrders);
-                        }
-                    } catch (Exception e) {
-                        Log.e("KitchenActivity", "Error loading completed orders: " + e.getMessage(), e);
-                    }
-
-                    // Clean up completed orders
-                    cleanCompletedOrders(newOrders);
-
-                    // For each order, fetch the items separately
-                    List<OrderWithItems> ordersWithItems = new ArrayList<>();
-                    for (Order order : newOrders) {
+                    for (DataSnapshot orderSnapshot : snapshot.getChildren()) {
                         try {
-                            if (order != null && order.getOrderId() > 0) {
-                                OrderWithItems orderWithItems = appDatabase.orderDao().getOrderWithItems(order.getOrderId());
-                                if (orderWithItems != null && orderWithItems.orderItems != null) {
-                                    if (!orderWithItems.orderItems.isEmpty()) {
-                                        ordersWithItems.add(orderWithItems);
-                                        Log.d("KitchenActivity", "Order #" + order.getOrderId() + " has " +
-                                                orderWithItems.orderItems.size() + " items");
-                                    } else {
-                                        Log.w("KitchenActivity", "Order #" + order.getOrderId() + " has no items");
+                            String status = orderSnapshot.child("status").getValue(String.class);
+
+                            if (status == null) {
+                                Log.d(TAG, "Order with null status found");
+                                continue;
+                            }
+
+                            Log.d(TAG, "Found order with status: " + status);
+
+                            // Include all orders: pending, preparing, ready, scheduled, and recently completed
+                            if ("pending".equals(status) || "preparing".equals(status) || "ready".equals(status) ||
+                                    "scheduled".equals(status) || ("completed".equals(status) && isRecentlyCompleted(orderSnapshot))) {
+
+                                Log.d(TAG, "Processing order with status: " + status);
+
+                                // Convert to Order object
+                                Order order = new Order();
+
+                                // Extract the order data
+                                Long orderId = orderSnapshot.child("orderId").getValue(Long.class);
+                                if (orderId != null) order.setOrderId(orderId);
+                                else {
+                                    // If orderId is null, use the snapshot key's hashcode
+                                    String key = orderSnapshot.getKey();
+                                    if (key != null) {
+                                        orderId = (long) key.hashCode();
+                                        order.setOrderId(orderId);
                                     }
-                                } else {
-                                    Log.w("KitchenActivity", "Order #" + order.getOrderId() +
-                                            " has null orderWithItems or null orderItems");
                                 }
+
+                                Integer tableNumber = orderSnapshot.child("tableNumber").getValue(Integer.class);
+                                if (tableNumber != null) order.setTableNumber(tableNumber);
+                                else order.setTableNumber(0); // Fallback to table 0 if null
+
+                                order.setStatus(status);
+
+                                Long timestamp = orderSnapshot.child("timestamp").getValue(Long.class);
+                                if (timestamp != null) order.setTimestamp(timestamp);
+                                else order.setTimestamp(System.currentTimeMillis());
+
+                                String customerName = orderSnapshot.child("customerName").getValue(String.class);
+                                if (customerName != null) order.setCustomerName(customerName);
+                                else order.setCustomerName("Customer"); // Set default name
+
+                                String customerPhone = orderSnapshot.child("customerPhone").getValue(String.class);
+                                if (customerPhone != null) order.setCustomerPhone(customerPhone);
+
+                                String customerEmail = orderSnapshot.child("customerEmail").getValue(String.class);
+                                if (customerEmail != null) order.setCustomerEmail(customerEmail);
+
+                                Double total = orderSnapshot.child("total").getValue(Double.class);
+                                if (total != null) order.setTotal(total);
+
+                                // Set the Firebase key as externalId for future reference
+                                order.setExternalId(orderSnapshot.getKey());
+
+                                // Check if this is a recovered order
+                                Boolean recovered = orderSnapshot.child("recoveredOrder").getValue(Boolean.class);
+                                if (recovered != null && recovered) {
+                                    order.setRecovered(true);
+                                    // Log for debugging recovered orders
+                                    Log.d(TAG, "Found recovered order #" + orderId + " with table " + tableNumber);
+                                }
+
+                                Log.d(TAG, "Successfully parsed order #" + orderId + " with table " +
+                                        tableNumber + " and status " + status);
+
+                                // Add to our list
+                                newOrders.add(order);
                             }
                         } catch (Exception e) {
-                            Log.e("KitchenActivity", "Error loading items for order " + order.getOrderId() + ": " + e.getMessage(), e);
+                            Log.e(TAG, "Error parsing order: " + e.getMessage(), e);
                         }
                     }
 
-                    // Convert to UI-ready list
-                    final List<Order> finalOrders = new ArrayList<>();
-                    for (OrderWithItems orderWithItems : ordersWithItems) {
-                        if (orderWithItems != null && orderWithItems.order != null) {
-                            finalOrders.add(orderWithItems.order);
-                        }
-                    }
+                    Log.d(TAG, "Total orders to display in kitchen: " + newOrders.size());
 
-                    // Update UI on the main thread
+                    // Sort orders by timestamp or scheduled time if available
+                    Collections.sort(newOrders, (o1, o2) -> {
+                        // If orders have different statuses, sort by priority
+                        if (!o1.getStatus().equals(o2.getStatus())) {
+                            // Priority: pending > preparing > ready > scheduled > completed
+                            return getOrderStatusPriority(o1.getStatus()) - getOrderStatusPriority(o2.getStatus());
+                        }
+                        // If same status, sort by timestamp
+                        return Long.compare(o1.getTimestamp(), o2.getTimestamp());
+                    });
+
+                    // Update the UI
                     runOnUiThread(() -> {
                         try {
-                            if (isFinishing() || isDestroyed()) return;
+                            if (isFinishing() || isDestroyed()) {
+                                Log.d(TAG, "Activity is finishing or destroyed, skipping UI update");
+                                return;
+                            }
 
-                            activeOrders.clear();
-                            activeOrders.addAll(finalOrders);
+                            Log.d(TAG, "Updating UI with orders");
 
-                            if (orderAdapter != null) {
+                            // Store full list of orders
+                            final List<Order> allOrders = new ArrayList<>(newOrders);
+
+                            // Apply filters
+                            final List<Order> filteredOrders = filterOrders(newOrders);
+
+                            if (activeOrders != null && orderAdapter != null) {
+                                activeOrders.clear();
+                                activeOrders.addAll(filteredOrders);
                                 orderAdapter.notifyDataSetChanged();
+                            } else {
+                                Log.e(TAG, "activeOrders or orderAdapter is null");
                             }
 
                             if (orderCountView != null) {
-                                orderCountView.setText(String.valueOf(activeOrders.size()));
+                                orderCountView.setText(String.valueOf(filteredOrders.size()));
                             }
 
-                            if (activeOrders.isEmpty()) {
+                            // Update empty state visibility
+                            if (filteredOrders.isEmpty()) {
                                 if (emptyView != null) emptyView.setVisibility(View.VISIBLE);
                                 if (recyclerView != null) recyclerView.setVisibility(View.GONE);
+                                Log.d(TAG, "No orders to display - showing empty view");
                             } else {
                                 if (emptyView != null) emptyView.setVisibility(View.GONE);
                                 if (recyclerView != null) recyclerView.setVisibility(View.VISIBLE);
+                                Log.d(TAG, "Showing " + filteredOrders.size() + " orders in the kitchen view");
                             }
 
                             if (swipeRefreshLayout != null) {
                                 swipeRefreshLayout.setRefreshing(false);
                             }
+
                             updateDateTime();
 
-                            // Check for new orders and notify kitchen staff
-                            checkForNewOrders(finalOrders);
+                            // Check for new orders and notify
+                            checkForNewOrders(allOrders);
+
                         } catch (Exception e) {
-                            Log.e("KitchenActivity", "Error updating UI: " + e.getMessage(), e);
+                            Log.e(TAG, "Error updating UI: " + e.getMessage(), e);
                             if (swipeRefreshLayout != null) {
                                 swipeRefreshLayout.setRefreshing(false);
                             }
                         }
                     });
-                } catch (Exception e) {
-                    Log.e("KitchenActivity", "Error refreshing orders: " + e.getMessage(), e);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e(TAG, "Firebase error: " + error.getMessage());
                     runOnUiThread(() -> {
                         if (swipeRefreshLayout != null) {
                             swipeRefreshLayout.setRefreshing(false);
                         }
-                        Toast.makeText(KitchenActivity.this, "Error loading orders", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(KitchenActivity.this, "Error loading orders: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                     });
                 }
             });
         } catch (Exception e) {
-            Log.e("KitchenActivity", "Error executing database query: " + e.getMessage(), e);
-            swipeRefreshLayout.setRefreshing(false);
-            Toast.makeText(this, "Error connecting to database", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void cleanCompletedOrders(List<Order> orders) {
-        // Remove orders that have been completed for more than 30 minutes
-        long currentTime = System.currentTimeMillis();
-        Iterator<Order> iterator = orders.iterator();
-        while (iterator.hasNext()) {
-            Order order = iterator.next();
-            if (order.getStatus().equals("completed")) {
-                long completionTime = order.getCompletionTime();
-                if (completionTime != 0 && (currentTime - completionTime) > 30 * 60 * 1000) {
-                    iterator.remove();
-                    try {
-                        appDatabase.orderDao().deleteOrder(order.getOrderId());
-                    } catch (Exception e) {
-                        Log.e("KitchenActivity", "Error deleting completed order: " + e.getMessage(), e);
-                    }
-                }
+            Log.e(TAG, "Error refreshing orders: " + e.getMessage(), e);
+            if (swipeRefreshLayout != null) {
+                swipeRefreshLayout.setRefreshing(false);
             }
+            Toast.makeText(this, "Error loading orders: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
     private void updateDateTime() {
-        Date now = new Date();
-        timeView.setText(timeFormat.format(now));
-        dateView.setText(dateFormat.format(now));
+        try {
+            Date now = new Date();
+            if (timeView != null) {
+                timeView.setText(timeFormat.format(now));
+            }
+            if (dateView != null) {
+                dateView.setText(dateFormat.format(now));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating date/time: " + e.getMessage());
+        }
     }
 
     private void handleOrderAction(Order order, String action) {
         if (order == null) return;
 
         try {
-            if (databaseExecutor == null || appDatabase == null) {
-                Toast.makeText(this, "Database connection error", Toast.LENGTH_SHORT).show();
-                return;
+            if (action.equals("start")) {
+                FirebaseDatabaseSetup.updateOrderStatus(this, order.getOrderId(), "preparing");
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Started preparing order #" + order.getOrderId(), Toast.LENGTH_SHORT).show();
+                });
+            } else if (action.equals("ready")) {
+                FirebaseDatabaseSetup.updateOrderStatus(this, order.getOrderId(), "ready");
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Order #" + order.getOrderId() + " is ready for serving", Toast.LENGTH_SHORT).show();
+                    notifyCustomerOrderReady(order);
+                    notifyWaitersOrderReady(order);
+                });
+            } else if (action.equals("done")) {
+                FirebaseDatabaseSetup.updateOrderStatus(this, order.getOrderId(), "completed");
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Order #" + order.getOrderId() + " has been completed", Toast.LENGTH_SHORT).show();
+                });
             }
 
             databaseExecutor.execute(() -> {
@@ -722,5 +876,225 @@ public class KitchenActivity extends BaseActivity {
         } catch (Exception e) {
             Log.e(TAG, "Error adding emergency order view", e);
         }
+    }
+
+    /**
+     * Check if an order was completed recently (within last 30 minutes)
+     */
+    private boolean isRecentlyCompleted(DataSnapshot orderSnapshot) {
+        try {
+            Long completionTime = orderSnapshot.child("completionTime").getValue(Long.class);
+            if (completionTime != null) {
+                long currentTime = System.currentTimeMillis();
+                return (currentTime - completionTime) <= 30 * 60 * 1000; // 30 minutes
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking completion time", e);
+        }
+        return false;
+    }
+
+    /**
+     * Create test orders in Firebase for demonstration
+     */
+    private void createTestOrders() {
+        try {
+            // Use our SampleDataLoader to load and display orders
+            com.finedine.rms.utils.SampleDataLoader.loadAndDisplaySampleData(this, "kitchen");
+        } catch (Exception e) {
+            Log.e(TAG, "Error creating test orders", e);
+            Toast.makeText(this, "Failed to create test orders", Toast.LENGTH_SHORT).show();
+
+            // Fall back to the original method if the sample data loader fails
+            try {
+                FirebaseDbHelper dbHelper = FirebaseDbHelper.getInstance(this);
+                DatabaseReference ordersRef = dbHelper.getOrdersReference();
+
+                // Show toast
+                Toast.makeText(this, "Creating test orders (fallback method)...", Toast.LENGTH_SHORT).show();
+
+                // Create 4 sample orders with different statuses including upcoming
+                createSampleOrder(ordersRef, 1, "pending");
+                createSampleOrder(ordersRef, 2, "preparing");
+                createSampleOrder(ordersRef, 3, "ready");
+                long tomorrowTimestamp = System.currentTimeMillis() + (24 * 60 * 60 * 1000);
+                createSampleOrder(ordersRef, 4, "scheduled", tomorrowTimestamp, "Scheduled Customer");
+
+                // Refresh the view
+                new android.os.Handler().postDelayed(this::refreshOrders, 1000);
+            } catch (Exception ex) {
+                Log.e(TAG, "Fallback method also failed", ex);
+                Toast.makeText(this, "Could not create test orders", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * Create a single sample order
+     */
+    private void createSampleOrder(DatabaseReference ordersRef, int tableNumber, String status) {
+        createSampleOrder(ordersRef, tableNumber, status, System.currentTimeMillis(), "Test Customer");
+    }
+
+    /**
+     * Create a sample order with specified timestamp and customer name
+     */
+    private void createSampleOrder(DatabaseReference ordersRef, int tableNumber, String status, long timestamp, String customerName) {
+        try {
+            // Generate a unique key
+            String key = ordersRef.push().getKey();
+            if (key == null) return;
+
+            // Get current time
+            long now = System.currentTimeMillis();
+
+            // Create order data
+            Map<String, Object> orderData = new HashMap<>();
+            orderData.put("orderId", Math.abs(key.hashCode()));
+            orderData.put("tableNumber", tableNumber);
+            orderData.put("status", status);
+            orderData.put("timestamp", timestamp);
+            orderData.put("customerName", customerName);
+            orderData.put("customerPhone", "555-1234");
+            orderData.put("customerEmail", "test@example.com");
+            orderData.put("total", 45.99);
+            orderData.put("externalId", key);
+
+            // Save to Firebase
+            ordersRef.child(key).setValue(orderData);
+            Log.d(TAG, "Created sample order with status: " + status + " for table " + tableNumber);
+
+            // Create some order items
+            FirebaseDbHelper dbHelper = FirebaseDbHelper.getInstance(this);
+            DatabaseReference itemsRef = dbHelper.getOrderItemsReference();
+
+            // Add sample items
+            createSampleOrderItem(itemsRef, Math.abs(key.hashCode()), "Burger", 15.99, 1);
+            createSampleOrderItem(itemsRef, Math.abs(key.hashCode()), "Fries", 5.99, 2);
+            createSampleOrderItem(itemsRef, Math.abs(key.hashCode()), "Soda", 2.99, 1);
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error creating sample order", e);
+        }
+    }
+
+    /**
+     * Create a sample order item
+     */
+    private void createSampleOrderItem(DatabaseReference itemsRef, long orderId, String name, double price, int quantity) {
+        try {
+            // Generate a unique key
+            String key = itemsRef.push().getKey();
+            if (key == null) return;
+
+            // Create item data
+            Map<String, Object> itemData = new HashMap<>();
+            itemData.put("id", Math.abs(key.hashCode()));
+            itemData.put("orderId", orderId);
+            itemData.put("name", name);
+            itemData.put("price", price);
+            itemData.put("quantity", quantity);
+            itemData.put("notes", "Sample item");
+
+            // Save to Firebase
+            itemsRef.child(key).setValue(itemData);
+            Log.d(TAG, "Created sample order item: " + name + " for order " + orderId);
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error creating sample order item", e);
+        }
+    }
+
+    /**
+     * Get priority number for order status for sorting
+     * Lower number = higher priority
+     */
+    private int getOrderStatusPriority(String status) {
+        if (status == null) return 99;
+        switch (status) {
+            case "pending":
+                return 1;
+            case "preparing":
+                return 2;
+            case "ready":
+                return 3;
+            case "scheduled":
+                return 4;
+            case "completed":
+                return 5;
+            default:
+                return 99;
+        }
+    }
+
+    /**
+     * Filter orders based on selected chips
+     */
+    private void applyFilters() {
+        if (activeOrders == null) return;
+
+        // Get copy of original orders from adapter before filtering
+        List<Order> filteredOrders = filterOrders(new ArrayList<>(activeOrders));
+
+        // Update adapter with filtered orders
+        activeOrders.clear();
+        activeOrders.addAll(filteredOrders);
+
+        // Update UI
+        if (orderAdapter != null) {
+            orderAdapter.notifyDataSetChanged();
+        }
+
+        // Update empty state
+        if (activeOrders.isEmpty()) {
+            if (emptyView != null) emptyView.setVisibility(View.VISIBLE);
+            if (recyclerView != null) recyclerView.setVisibility(View.GONE);
+        } else {
+            if (emptyView != null) emptyView.setVisibility(View.GONE);
+            if (recyclerView != null) recyclerView.setVisibility(View.VISIBLE);
+        }
+
+        // Update count
+        if (orderCountView != null) {
+            orderCountView.setText(String.valueOf(activeOrders.size()));
+        }
+    }
+
+    /**
+     * Apply filters to the list of orders
+     */
+    private List<Order> filterOrders(List<Order> orders) {
+        if (orders == null) return new ArrayList<>();
+
+        // If filter chips aren't available, return all orders
+        if (chipPending == null || chipPreparing == null || chipReady == null || chipUpcoming == null) {
+            return orders;
+        }
+
+        // Get filter states
+        boolean showPending = chipPending.isChecked();
+        boolean showPreparing = chipPreparing.isChecked();
+        boolean showReady = chipReady.isChecked();
+        boolean showUpcoming = chipUpcoming.isChecked();
+
+        // If all filters are disabled, show everything
+        if (!showPending && !showPreparing && !showReady && !showUpcoming) {
+            return orders;
+        }
+
+        // Filter orders by status
+        List<Order> filteredOrders = new ArrayList<>();
+        for (Order order : orders) {
+            String status = order.getStatus();
+
+            if ((showPending && "pending".equals(status)) ||
+                    (showPreparing && "preparing".equals(status)) ||
+                    (showReady && "ready".equals(status)) ||
+                    (showUpcoming && "scheduled".equals(status))) {
+                filteredOrders.add(order);
+            }
+        }
+
+        return filteredOrders;
     }
 }

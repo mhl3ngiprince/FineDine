@@ -8,6 +8,7 @@ import com.finedine.rms.utils.FirebaseConnectionHelper;
 import com.finedine.rms.utils.FirebaseSafetyWrapper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.gson.Gson;
@@ -67,19 +68,43 @@ public class OrderProcessor {
                                 Log.d(TAG, "Order saved to Firestore successfully: " + order.getOrderId());
 
                                 // Now save order items in a subcollection
-                                saveOrderItems(db, order.getOrderId(), items);
+                                saveOrderItems(context, db, order.getOrderId(), items);
+
+                                // Push order to Firebase Realtime Database to ensure it appears on the Kitchen screen
+                                pushOrderToFirebase(context, order, items, order.getOrderId());
                             } else {
                                 Log.e(TAG, "Error saving order to Firestore", task.getException());
+                                // Fallback to local processing
+                                try {
+                                    FirebaseFallbackManager fallbackManager = new FirebaseFallbackManager(context);
+                                    fallbackManager.processOrderFallback(order, items);
+
+                                    // Also save the order locally as a JSON string
+                                    OrderWithItems orderWithItems = new OrderWithItems();
+                                    orderWithItems.order = order;
+                                    orderWithItems.orderItems = items;
+                                    String orderJson = gson.toJson(orderWithItems);
+                                    FirebaseFallbackManager.saveOrderLocally(context, order.getOrderId(), orderJson);
+                                } catch (Exception ex) {
+                                    Log.e(TAG, "Fallback also failed: " + ex.getMessage());
+                                }
                             }
                         }
                     });
 
         } catch (Exception e) {
             Log.e(TAG, "Error in saveOrderToFirestore: " + e.getMessage(), e);
+            // Fallback to local processing
+            try {
+                // Fallback handling removed since we don't have order object here
+                Log.e(TAG, "Failed to save order items, but order was already saved");
+            } catch (Exception ex) {
+                Log.e(TAG, "Fallback also failed: " + ex.getMessage());
+            }
         }
     }
 
-    private static void saveOrderItems(FirebaseFirestore db, long orderId, List<OrderItem> items) {
+    private static void saveOrderItems(Context context, FirebaseFirestore db, long orderId, List<OrderItem> items) {
         try {
             if (db == null || items == null || items.isEmpty()) {
                 Log.w(TAG, "Cannot save order items: Firestore unavailable or no items");
@@ -109,6 +134,8 @@ public class OrderProcessor {
 
         } catch (Exception e) {
             Log.e(TAG, "Error in saveOrderItems: " + e.getMessage(), e);
+            // Fallback handling removed since we don't have order object here
+            Log.e(TAG, "Failed to save order items, but order was already saved");
         }
     }
 
@@ -128,6 +155,63 @@ public class OrderProcessor {
             Log.d(TAG, "Order backup saved locally: " + order.getOrderId());
         } catch (Exception e) {
             Log.e(TAG, "Failed to save order backup: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Push the order to Firebase Realtime Database to ensure it appears on the Kitchen screen
+     */
+    private static void pushOrderToFirebase(Context context, Order order, List<OrderItem> items, long orderId) {
+        try {
+            // Get Firebase instance
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+            // Create a reference to orders
+            String orderKey = database.getReference("orders").push().getKey();
+
+            if (orderKey != null) {
+                // Update order with Firebase key
+                order.setExternalId(orderKey);
+                order.setOrderId(orderId);
+
+                // Create order data map
+                Map<String, Object> orderData = new HashMap<>();
+                orderData.put("orderId", order.getOrderId());
+                orderData.put("tableNumber", order.getTableNumber());
+                orderData.put("status", order.getStatus());
+                orderData.put("timestamp", order.getTimestamp());
+                orderData.put("customerName", order.getCustomerName());
+                orderData.put("customerPhone", order.getCustomerPhone());
+                orderData.put("customerEmail", order.getCustomerEmail());
+                orderData.put("customerNotes", order.getCustomerNotes());
+                orderData.put("totalAmount", order.getTotal());
+                orderData.put("waiterId", order.getWaiterId());
+
+                // Create items data
+                Map<String, Object> itemsData = new HashMap<>();
+                for (int i = 0; i < items.size(); i++) {
+                    OrderItem item = items.get(i);
+                    Map<String, Object> itemData = new HashMap<>();
+                    itemData.put("name", item.getName());
+                    itemData.put("quantity", item.getQuantity());
+                    itemData.put("price", item.getPrice());
+                    itemData.put("notes", item.getNotes() != null ? item.getNotes() : "");
+                    itemsData.put("item_" + i, itemData);
+                }
+
+                // Add items to order data
+                orderData.put("items", itemsData);
+
+                // Save to Firebase
+                database.getReference("orders").child(orderKey).setValue(orderData);
+
+                // Also save to kitchen_orders path which is specifically watched by the kitchen screen
+                database.getReference("kitchen_orders").child(orderKey).setValue(orderData);
+
+                Log.d(TAG, "Order successfully pushed to Firebase with key: " + orderKey);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error pushing order to Firebase: " + e.getMessage(), e);
         }
     }
 }

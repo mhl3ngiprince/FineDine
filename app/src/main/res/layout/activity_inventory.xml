@@ -193,6 +193,18 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
+                <!-- View Inventory Directory Button -->
+                <Button
+                    android:id="@+id/btnViewInventoryDirectory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="View Inventory Directory"
+                    android:textColor="@color/restaurant_text_light"
+                    android:backgroundTint="@color/restaurant_accent"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:padding="12dp" />
+
                 <!-- Inventory Statistics Card -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"

@@ -53,18 +53,17 @@ public class ReservationAdapter extends RecyclerView.Adapter<ReservationAdapter.
         private final TextView tvCustomerName;
         private final TextView tvDateTime;
         private final TextView tvPartySize;
-        private final TextView tvStatus;
+        private final TextView tvReservationStatus;
 
         public ReservationViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvCustomerName = itemView.findViewById(R.id.tvCustomerName);
-            tvDateTime = itemView.findViewById(R.id.tvDateTime);
+            tvCustomerName = itemView.findViewById(R.id.customerNameText);
+            tvDateTime = itemView.findViewById(R.id.dateTimeText);
             tvPartySize = itemView.findViewById(R.id.tvPartySize);
-            tvStatus = itemView.findViewById(R.id.tvStatus);
+            tvReservationStatus = itemView.findViewById(R.id.tvReservationStatus);
         }
 
         public void bind(Reservation reservation) {
-            // In a real app, we'd fetch customer name from user table
             tvCustomerName.setText("Reservation #" + reservation.reservation_id);
 
             String dateTime = formatDate(reservation.reservation_date) + " at " +
@@ -72,24 +71,19 @@ public class ReservationAdapter extends RecyclerView.Adapter<ReservationAdapter.
             tvDateTime.setText(dateTime);
 
             tvPartySize.setText(reservation.number_of_guests + " people");
-            tvStatus.setText(capitalize(reservation.status));
+            tvReservationStatus.setText(capitalize(reservation.status));
 
-            // Set status color
             switch (reservation.status) {
                 case "confirmed":
-                    tvStatus.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.green));
+                    tvReservationStatus.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.green));
                     break;
                 case "pending":
-                    tvStatus.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.yellow));
+                    tvReservationStatus.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.yellow));
                     break;
                 case "cancelled":
-                    tvStatus.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.red));
+                    tvReservationStatus.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.red));
                     break;
             }
-        }
-        public void updateReservations(List<Reservation> newReservations) {
-            reservations = newReservations;
-            notifyDataSetChanged();
         }
 
         private String formatDate(String dateStr) {

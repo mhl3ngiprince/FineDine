@@ -17,25 +17,30 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import com.finedine.rms.utils.SharedPrefsManager;
+import com.finedine.rms.utils.MenuFirebaseIntegration;
 
 public class MenuManagementActivity extends BaseActivity {
     private static final String TAG = "MenuManagementActivity";
     private RecyclerView rvMenuItems;
     private MenuAdapter adapter;
     private List<MenuItem> menuItemsList = new ArrayList<>();
+    private MenuFirebaseIntegration menuFirebaseIntegration;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "Starting MenuManagementActivity");
         super.onCreate(savedInstanceState);
-        setupModernNavigationPanel("Menu Management", R.layout.activity_menu_management);
-        Log.d(TAG, "Content view set using setupModernNavigationPanel");
+        initializeModernNavigation("Menu Management", R.layout.activity_menu_management);
+        Log.d(TAG, "Content view set using initializeModernNavigation");
 
         // Fix the menu button - find and properly set its click handler
         setupMenuButtonClickHandler();
@@ -43,6 +48,16 @@ public class MenuManagementActivity extends BaseActivity {
         try {
             // Set title in action bar if available
             setTitle("Menu Management");
+
+            // Initialize Firebase integration
+            try {
+                db = FirebaseFirestore.getInstance();
+                menuFirebaseIntegration = new MenuFirebaseIntegration(this);
+                Log.d(TAG, "Firebase integration initialized successfully");
+            } catch (Exception e) {
+                Log.e(TAG, "Error initializing Firebase integration: " + e.getMessage(), e);
+                menuFirebaseIntegration = null;
+            }
 
             // Ensure the background color is set properly
             View rootView = findViewById(android.R.id.content);
@@ -118,6 +133,17 @@ public class MenuManagementActivity extends BaseActivity {
             // Load menu items
             loadMenuItems();
             Log.d(TAG, "MenuManagementActivity initialized successfully");
+
+            // Set up sync button if available
+            View syncButton = findViewById(R.id.syncButton);
+            if (syncButton != null) {
+                syncButton.setOnClickListener(v -> {
+                    showSyncOptions();
+                });
+                Log.d(TAG, "Sync button initialized successfully");
+            } else {
+                Log.d(TAG, "Sync button not found in layout");
+            }
         } catch (Exception e) {
             Log.e(TAG, "Error initializing MenuManagementActivity", e);
             Toast.makeText(this, "Error initializing menu screen", Toast.LENGTH_SHORT).show();
@@ -156,17 +182,21 @@ public class MenuManagementActivity extends BaseActivity {
             updateAdapterItems(directItems);
             Log.d(TAG, "Direct loaded " + directItems.size() + " items for immediate display");
 
-            // Then try to save to database in background
-            try {
-                AppDatabase db = AppDatabase.getDatabase(this);
-                if (db == null) {
-                    Log.e(TAG, "Could not get database instance");
-                    return;
+            // Force refresh of adapter after a delay to ensure items are displayed
+            new android.os.Handler().postDelayed(() -> {
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
                 }
+            }, 500);
 
+            // Load from Firebase for latest data
+            loadMenuItemsFromFirebase();
+
+            try {
                 new Thread(() -> {
                     try {
                         // Check if menuItemDao is available
+                        AppDatabase db = AppDatabase.getDatabase(MenuManagementActivity.this);
                         MenuItemDao menuItemDao = db.menuItemDao();
                         if (menuItemDao == null) {
                             Log.e(TAG, "MenuItemDao is null");
@@ -198,32 +228,21 @@ public class MenuManagementActivity extends BaseActivity {
                         }
                         Log.i(TAG, "Added " + items.size() + " premium menu items");
 
-                        // If items list is still empty (unlikely but possible), use the premium items directly
-                        final List<MenuItem> finalItems = items.isEmpty() ?
-                                new ArrayList<>(Arrays.asList(premiumItems)) : new ArrayList<>(items);
-
                         // Update UI with database items (with IDs)
                         runOnUiThread(() -> {
                             try {
-                                if (finalItems.isEmpty()) {
-                                    Log.w(TAG, "No menu items to display");
-                                    // Keep the direct loaded items visible
+                                if (items.isEmpty()) {
+                                    Log.w(TAG, "No menu items to display from database");
                                 } else {
-                                    Log.d(TAG, "Updating adapter with " + finalItems.size() + " items from database");
-                                    // Update adapter with loaded items
-                                    updateAdapterItems(finalItems);
-                                    Toast.makeText(MenuManagementActivity.this,
-                                            finalItems.size() + " menu items loaded",
-                                            Toast.LENGTH_SHORT).show();
+                                    Log.d(TAG, "Updating adapter with " + items.size() + " items from database");
+                                    updateAdapterItems(items);
                                 }
                             } catch (Exception e) {
-                                Log.e(TAG, "Error updating menu items UI", e);
-                                showErrorMessage("Error displaying menu items: " + e.getMessage());
+                                Log.e(TAG, "Error updating menu items", e);
                             }
                         });
                     } catch (Exception e) {
                         Log.e(TAG, "Error loading menu items from database", e);
-                        // We already have direct loaded items, so no need for another fallback
                     }
                 }).start();
             } catch (Exception e) {
@@ -232,15 +251,6 @@ public class MenuManagementActivity extends BaseActivity {
         } catch (Exception e) {
             Log.e(TAG, "Error in loadMenuItems", e);
             Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-
-            // Emergency direct loading if thread fails
-            try {
-                final MenuItem[] items = MenuItem.premiumMenu();
-                updateAdapterItems(new ArrayList<>(Arrays.asList(items)));
-                Log.d(TAG, "Emergency direct loading " + items.length + " items");
-            } catch (Exception ex) {
-                Log.e(TAG, "Critical failure loading menu items", ex);
-            }
         }
     }
 
@@ -701,6 +711,108 @@ public class MenuManagementActivity extends BaseActivity {
     }
 
     /**
+     * Load menu items directly from Firebase Firestore
+     */
+    private void loadMenuItemsFromFirebase() {
+        try {
+            if (db == null) {
+                db = FirebaseFirestore.getInstance();
+            }
+
+            // Show progress
+            Toast.makeText(this, "Syncing with Firebase...", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Loading menu items from Firebase");
+
+            // Query menu_items collection in Firestore
+            db.collection("menu_items")
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            List<MenuItem> firebaseItems = new ArrayList<>();
+
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                try {
+                                    MenuItem item = new MenuItem();
+
+                                    // Set fields from document
+                                    item.name = document.getString("name");
+                                    item.description = document.getString("description");
+
+                                    // Handle price - it could be a Double or Long
+                                    if (document.contains("price")) {
+                                        if (document.get("price") instanceof Double) {
+                                            item.price = document.getDouble("price");
+                                        } else if (document.get("price") instanceof Long) {
+                                            item.price = document.getLong("price");
+                                        }
+                                    }
+
+                                    // Handle availability
+                                    if (document.contains("availability")) {
+                                        item.availability = document.getBoolean("availability");
+                                    } else {
+                                        item.availability = true; // Default to true
+                                    }
+
+                                    // Set category
+                                    item.category = document.getString("category");
+                                    if (item.category == null) {
+                                        item.category = "Main Course"; // Default category
+                                    }
+
+                                    // Handle numeric fields
+                                    if (document.contains("prepTimeMinutes")) {
+                                        if (document.get("prepTimeMinutes") instanceof Long) {
+                                            item.prepTimeMinutes = Math.toIntExact(document.getLong("prepTimeMinutes"));
+                                        }
+                                    } else {
+                                        item.prepTimeMinutes = 15; // Default prep time
+                                    }
+
+                                    if (document.contains("calories")) {
+                                        if (document.get("calories") instanceof Long) {
+                                            item.calories = Math.toIntExact(document.getLong("calories"));
+                                        }
+                                    } else {
+                                        item.calories = 0; // Default calories
+                                    }
+
+                                    // Set spice level
+                                    item.spiceLevel = document.getString("spiceLevel");
+                                    if (item.spiceLevel == null) {
+                                        item.spiceLevel = "None"; // Default spice level
+                                    }
+
+                                    // Set image resource
+                                    item.imageResourceId = R.drawable.placeholder_food;
+
+                                    // Validate item before adding
+                                    if (item.name != null && !item.name.isEmpty()) {
+                                        firebaseItems.add(item);
+                                        Log.d(TAG, "Added Firebase menu item: " + item.name);
+                                    }
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error parsing Firebase menu item: " + e.getMessage());
+                                }
+                            }
+
+                            // Update adapter with Firebase items if any were found
+                            if (!firebaseItems.isEmpty()) {
+                                Log.d(TAG, "Loaded " + firebaseItems.size() + " menu items from Firebase");
+                                runOnUiThread(() -> updateAdapterItems(firebaseItems));
+                            } else {
+                                Log.d(TAG, "No menu items found in Firebase");
+                            }
+                        } else {
+                            Log.e(TAG, "Error loading menu items from Firebase", task.getException());
+                        }
+                    });
+        } catch (Exception e) {
+            Log.e(TAG, "Error in loadMenuItemsFromFirebase", e);
+        }
+    }
+
+    /**
      * Show an error message with toast
      */
     private void showErrorMessage(String message) {
@@ -845,10 +957,16 @@ public class MenuManagementActivity extends BaseActivity {
             popup.getMenu().add("Search");
             popup.getMenu().add("Sort");
             popup.getMenu().add("Filter");
+            popup.getMenu().add("Sync to Firebase");
             popup.getMenu().add("Refresh");
             popup.getMenu().add("Settings");
 
             popup.setOnMenuItemClickListener(item -> {
+                String title = item.getTitle().toString();
+                if ("Sync to Firebase".equals(title)) {
+                    showSyncOptions();
+                    return true;
+                }
                 Toast.makeText(this, "Selected: " + item.getTitle(), Toast.LENGTH_SHORT).show();
                 return true;
             });
@@ -857,6 +975,240 @@ public class MenuManagementActivity extends BaseActivity {
         } catch (Exception e) {
             Log.e(TAG, "Error showing menu options", e);
             Toast.makeText(this, "Menu options unavailable", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Show options for synchronizing menu items with Firebase Realtime Database
+     */
+    private void showSyncOptions() {
+        try {
+            if (menuFirebaseIntegration == null) {
+                Toast.makeText(this, "Firebase integration not available", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String[] options = {
+                    "Upload current menu items",
+                    "Upload single selected item",
+                    "Sync and replace all items in Firebase"
+            };
+
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle("Firebase Sync Options")
+                    .setItems(options, (dialog, which) -> {
+                        switch (which) {
+                            case 0:
+                                uploadAllMenuItemsToFirebase();
+                                break;
+                            case 1:
+                                showItemSelectionForUpload();
+                                break;
+                            case 2:
+                                confirmSyncAndReplaceAllItems();
+                                break;
+                        }
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        } catch (Exception e) {
+            Log.e(TAG, "Error showing sync options", e);
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Upload all current menu items to Firebase
+     */
+    private void uploadAllMenuItemsToFirebase() {
+        try {
+            // Get current menu items
+            List<MenuItem> items = adapter.getItems();
+            if (items.isEmpty()) {
+                Toast.makeText(this, "No menu items to upload", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Show progress dialog
+            android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+            progressDialog.setTitle("Uploading Menu Items");
+            progressDialog.setMessage("Uploading " + items.size() + " items to Firebase...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+
+            // Convert list to array
+            MenuItem[] itemsArray = items.toArray(new MenuItem[0]);
+
+            // Upload items
+            menuFirebaseIntegration.uploadAllMenuItems(itemsArray, new MenuFirebaseIntegration.MenuOperationListener() {
+                @Override
+                public void onSuccess(MenuItem menuItem) {
+                    runOnUiThread(() -> {
+                        if (progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                        Toast.makeText(MenuManagementActivity.this,
+                                "Successfully uploaded all menu items to Firebase",
+                                Toast.LENGTH_LONG).show();
+                    });
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    runOnUiThread(() -> {
+                        if (progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                        showErrorDialog("Upload Error", "Error uploading menu items: " + errorMessage);
+                    });
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error uploading menu items", e);
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Show dialog to select a menu item for upload
+     */
+    private void showItemSelectionForUpload() {
+        try {
+            List<MenuItem> items = adapter.getItems();
+            if (items.isEmpty()) {
+                Toast.makeText(this, "No menu items to upload", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Create list of item names for selection
+            String[] itemNames = new String[items.size()];
+            for (int i = 0; i < items.size(); i++) {
+                itemNames[i] = items.get(i).getName();
+            }
+
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle("Select Menu Item to Upload")
+                    .setItems(itemNames, (dialog, which) -> {
+                        uploadSingleMenuItemToFirebase(items.get(which));
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        } catch (Exception e) {
+            Log.e(TAG, "Error showing item selection dialog", e);
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Upload a single menu item to Firebase
+     */
+    private void uploadSingleMenuItemToFirebase(MenuItem menuItem) {
+        try {
+            // Show progress dialog
+            android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+            progressDialog.setTitle("Uploading Menu Item");
+            progressDialog.setMessage("Uploading " + menuItem.getName() + " to Firebase...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+
+            // Upload item
+            menuFirebaseIntegration.uploadMenuItem(menuItem, new MenuFirebaseIntegration.MenuOperationListener() {
+                @Override
+                public void onSuccess(MenuItem uploadedItem) {
+                    runOnUiThread(() -> {
+                        if (progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                        Toast.makeText(MenuManagementActivity.this,
+                                "Successfully uploaded " + uploadedItem.getName() + " to Firebase",
+                                Toast.LENGTH_LONG).show();
+                    });
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    runOnUiThread(() -> {
+                        if (progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                        showErrorDialog("Upload Error", "Error uploading " + menuItem.getName() + ": " + errorMessage);
+                    });
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error uploading menu item", e);
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Confirm and sync all menu items, replacing everything in Firebase
+     */
+    private void confirmSyncAndReplaceAllItems() {
+        try {
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle("Warning: Full Sync")
+                    .setMessage("This will DELETE all existing menu items in Firebase and replace them with the current items. This cannot be undone. Continue?")
+                    .setPositiveButton("Sync & Replace", (dialog, which) -> {
+                        syncAndReplaceAllItems();
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        } catch (Exception e) {
+            Log.e(TAG, "Error showing confirmation dialog", e);
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Sync and replace all menu items in Firebase
+     */
+    private void syncAndReplaceAllItems() {
+        try {
+            // Get current menu items
+            List<MenuItem> items = adapter.getItems();
+            if (items.isEmpty()) {
+                Toast.makeText(this, "No menu items to sync", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Show progress dialog
+            android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+            progressDialog.setTitle("Syncing Menu Items");
+            progressDialog.setMessage("Syncing " + items.size() + " items to Firebase...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+
+            // Convert list to array
+            MenuItem[] itemsArray = items.toArray(new MenuItem[0]);
+
+            // Sync items
+            menuFirebaseIntegration.synchronizeMenuItems(itemsArray, new MenuFirebaseIntegration.MenuOperationListener() {
+                @Override
+                public void onSuccess(MenuItem menuItem) {
+                    runOnUiThread(() -> {
+                        if (progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                        Toast.makeText(MenuManagementActivity.this,
+                                "Successfully synced all menu items to Firebase",
+                                Toast.LENGTH_LONG).show();
+                    });
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    runOnUiThread(() -> {
+                        if (progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
+                        showErrorDialog("Sync Error", "Error syncing menu items: " + errorMessage);
+                    });
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error syncing menu items", e);
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 }

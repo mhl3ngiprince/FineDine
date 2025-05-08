@@ -21,6 +21,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.signature.ObjectKey;
 import com.finedine.rms.R;
 
 import java.io.ByteArrayOutputStream;
@@ -204,16 +205,64 @@ public class ImageLoader {
     public static void clearAllCaches(Context context) {
         if (context != null) {
             try {
+                // Clear memory cache on the main thread
                 Glide.get(context.getApplicationContext()).clearMemory();
+
+                // Clear disk cache in a background thread
                 new Thread(() -> {
                     try {
                         Glide.get(context.getApplicationContext()).clearDiskCache();
+
+                        // Force garbage collection to completely release image resources
+                        System.gc();
+                        System.runFinalization();
                     } catch (Exception e) {
                         Log.e(TAG, "Error clearing disk cache", e);
                     }
                 }).start();
+
+                Log.d(TAG, "Successfully initiated cache clearing");
             } catch (Exception e) {
                 Log.e(TAG, "Error clearing caches", e);
+            }
+        }
+    }
+
+    /**
+     * Reload an image with a fresh signature to bypass cache
+     */
+    public static void reloadImage(Context context, Object imageSource, ImageView imageView) {
+        if (context == null || imageView == null) {
+            Log.e(TAG, "Context or ImageView is null");
+            return;
+        }
+
+        try {
+            // Clear any existing requests for this view
+            Glide.with(context.getApplicationContext()).clear(imageView);
+
+            // Create timestamp-based signature to force reload
+            RequestOptions options = new RequestOptions()
+                    .placeholder(R.drawable.ic_food_placeholder)
+                    .error(R.drawable.ic_broken_image)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE) // Skip disk cache
+                    .skipMemoryCache(true) // Skip memory cache
+                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())));
+
+            // Load with the new signature
+            Glide.with(context.getApplicationContext())
+                    .load(imageSource)
+                    .apply(options)
+                    .into(imageView);
+
+            Log.d(TAG, "Forced image reload for: " + imageSource);
+        } catch (Exception e) {
+            Log.e(TAG, "Error reloading image", e);
+            try {
+                imageView.setImageResource(R.drawable.ic_broken_image);
+            } catch (Exception ex) {
+                // If even setting error image fails, just log it
+                Log.e(TAG, "Error setting error image", ex);
             }
         }
     }

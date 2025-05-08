@@ -11,6 +11,7 @@ public class SharedPrefsManager {
     private static final String KEY_USER_ID = "user_id";
     private static final String KEY_USER_ROLE = "user_role";
     private static final String KEY_USER_NAME = "user_name";
+    private static final String KEY_USER_EMAIL = "user_email";
     private static final String KEY_FCM_TOKEN = "fcm_token";
     private static final String KEY_LAST_SYNC = "last_sync";
     private static final String KEY_IS_LOGGED_IN = "is_logged_in";
@@ -56,13 +57,14 @@ public class SharedPrefsManager {
         return instance;
     }
 
-    public void saveUserSession(int userId, String role, String name) {
-        Log.d(TAG, "Saving user session - userId: " + userId + ", role: " + role + ", name: " + name);
+    public void saveUserSession(int userId, String role, String name, String email) {
+        Log.d(TAG, "Saving user session - userId: " + userId + ", role: " + role + ", name: " + name + ", email: " + email);
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putInt(KEY_USER_ID, userId);
                 editor.putString(KEY_USER_NAME, name);
+                editor.putString(KEY_USER_EMAIL, email);
 
                 // Always set the role explicitly to ensure it's saved correctly
                 if (role != null && !role.isEmpty()) {
@@ -109,6 +111,14 @@ public class SharedPrefsManager {
         }
     }
 
+    /**
+     * Overloaded method for backward compatibility - creates a default email from the name
+     */
+    public void saveUserSession(int userId, String role, String name) {
+        String email = name != null ? name.toLowerCase().replace(" ", "_") + "@user.finedine.com" : "user@finedine.com";
+        saveUserSession(userId, role, name, email);
+    }
+
     public int getUserId() {
         return prefs.getInt(KEY_USER_ID, -1);
     }
@@ -123,12 +133,17 @@ public class SharedPrefsManager {
         return prefs.getString(KEY_USER_NAME, "");
     }
 
+    public String getUserEmail() {
+        return prefs.getString(KEY_USER_EMAIL, "");
+    }
+
     public void clearUserSession() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
             prefs.edit()
                     .remove(KEY_USER_ID)
                     .remove(KEY_USER_ROLE)
                     .remove(KEY_USER_NAME)
+                    .remove(KEY_USER_EMAIL)
                     .remove(KEY_IS_LOGGED_IN)
                     .apply();
         }

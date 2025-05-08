@@ -2,6 +2,7 @@ package com.finedine.rms;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -308,16 +309,29 @@ public class RegisterActivity extends AppCompatActivity {
                         // Save user info in SharedPreferences
                         if (prefsManager != null) {
                             String userId = user != null ? user.getUid() : "local-" + System.currentTimeMillis();
-                            prefsManager.saveUserSession(userId.hashCode(), role, name);
+                            prefsManager.saveUserSession(userId.hashCode(), role, name, email);
                             prefsManager.setUserLoggedIn(true);
                             prefsManager.setUserRole(role);
+
+                            // Also save credentials for login
+                            SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putString("email", email);
+                            editor.putString("password", password);
+                            editor.apply();
                         }
 
-                        // Show success message
-                        Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
-
-                        // Navigate based on role
-                        navigateBasedOnRole(role);
+                        // Show success dialog instead of just a toast
+                        new AlertDialog.Builder(RegisterActivity.this)
+                                .setTitle("Registration Successful")
+                                .setMessage("Your account has been created successfully! You will now be redirected to the appropriate screen.")
+                                .setPositiveButton("OK", (dialog, which) -> {
+                                    dialog.dismiss();
+                                    // Navigate based on role after user acknowledges
+                                    navigateBasedOnRole(role);
+                                })
+                                .setCancelable(false)
+                                .show();
                     } else {
                         // If registration fails, display a message to the user
                         Log.w(TAG, "createUserWithEmail:failure", task.getException());
@@ -341,19 +355,48 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void registerLocally(String email, String password, String name, String role) {
-        // Save user info in SharedPreferences
-        if (prefsManager != null) {
-            String localUserId = "local-" + email.hashCode();
-            prefsManager.saveUserSession(localUserId.hashCode(), role, name);
-            prefsManager.setUserLoggedIn(true);
-            prefsManager.setUserRole(role);
+        try {
+            // Save user info in SharedPreferences
+            if (prefsManager != null) {
+                String localUserId = "local-" + email.hashCode();
+                prefsManager.saveUserSession(localUserId.hashCode(), role, name, email);
+                prefsManager.setUserLoggedIn(true);
+                prefsManager.setUserRole(role);
+
+                // Also save credentials for login
+                SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString("email", email);
+                editor.putString("password", password);
+                editor.apply();
+            }
+
+            // Show success dialog instead of just a toast
+            new AlertDialog.Builder(this)
+                    .setTitle("Registration Successful")
+                    .setMessage("Your account has been created successfully! You will now be redirected to the appropriate screen.")
+                    .setPositiveButton("OK", (dialog, which) -> {
+                        dialog.dismiss();
+                        // Navigate based on role after user acknowledges
+                        navigateBasedOnRole(role);
+                    })
+                    .setCancelable(false)
+                    .show();
+
+            // Log success for debugging
+            Log.d(TAG, "Successfully registered user: " + email + " with role: " + role);
+        } catch (Exception e) {
+            Log.e(TAG, "Error during local registration", e);
+            Toast.makeText(this, "Registration error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+
+            // Reset UI
+            if (progressBar != null) {
+                progressBar.setVisibility(View.GONE);
+            }
+            if (registerButton != null) {
+                registerButton.setEnabled(true);
+            }
         }
-
-        // Show success message
-        Toast.makeText(RegisterActivity.this, "Local registration successful!", Toast.LENGTH_SHORT).show();
-
-        // Navigate based on role
-        navigateBasedOnRole(role);
     }
 
     private String mapSelectedRole(String selectedRole) {
@@ -413,10 +456,18 @@ public class RegisterActivity extends AppCompatActivity {
                 registerButton.setEnabled(true);
             }
 
+            Log.d(TAG, "Navigating user to role-specific screen: " + role);
+
+            // For chef role, use NavigationManager to ensure proper role handling
+            if (role.equalsIgnoreCase("chef")) {
+                NavigationManager.navigateBasedOnRole(this, role);
+                return;
+            }
+
             // Launch the appropriate activity
             Intent intent;
 
-            switch (role) {
+            switch (role.toLowerCase()) {
                 case "manager":
                     intent = new Intent(this, ManagerDashboardActivity.class);
                     break;
@@ -435,7 +486,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
 
             // Add the role as an extra and clear flags
-            intent.putExtra("user_role", role);
+            intent.putExtra("user_role", role.toLowerCase());
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
             // Start the activity
@@ -445,6 +496,13 @@ public class RegisterActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(TAG, "Navigation error", e);
             Toast.makeText(this, "Error navigating: " + e.getMessage(), Toast.LENGTH_LONG).show();
+
+            // Last resort: try NavigationManager for all roles
+            try {
+                NavigationManager.navigateBasedOnRole(this, role);
+            } catch (Exception ne) {
+                Log.e(TAG, "Even NavigationManager failed", ne);
+            }
         }
     }
 

@@ -31,8 +31,8 @@ public interface InventoryDao {
     @Query("SELECT * FROM inventory WHERE item_id = :id")
     Inventory getItemById(int id);
 
-    @Query("SELECT * FROM inventory WHERE item_name = :name LIMIT 1")
-    Inventory getItemByName(String name);
+    @Query("SELECT * FROM inventory WHERE item_name LIKE :searchTerm LIMIT 1")
+    Inventory searchByName(String searchTerm);
 
     @Query("UPDATE inventory SET quantity_in_stock = quantity_in_stock + :amount, last_updated = :timestamp WHERE item_id = :id")
     void updateStock(int id, double amount, long timestamp);

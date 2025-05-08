@@ -7,15 +7,23 @@
     <uses-permission android:name="android.permission.INTERNET" /> 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/logoj"
         android:label="@string/app_name"
         android:roundIcon="@drawable/logoj"
-        android:name=".FineDineApplication"
+        android:name=".ApplicationClass"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+        android:theme="@style/Theme.FineDineNavigation"
+        tools:targetApi="31">
 
         <!-- Splash Activity - restored as launcher -->
         <activity
@@ -25,6 +33,16 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Home Activity for Firebase Dashboard -->
+        <activity
+            android:name=".HomeActivity"
+            android:exported="true"
+            android:theme="@style/Theme.FineDineNavigation">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
 
@@ -44,130 +62,170 @@
         <activity
             android:name=".LoginActivity"
             android:exported="true"
-            android:theme="@style/Theme.FineDineAppCompat" />
+            android:theme="@style/Theme.FineDine.NoActionBar" />
 
         <!-- Logout Activity -->
         <activity
             android:name=".LogoutActivity"
-            android:theme="@style/Theme.FineDineAppCompat"
+            android:theme="@style/Theme.FineDine.NoActionBar"
             android:noHistory="true" />
+
+        <!-- Register Activity -->
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FineDine.NoActionBar" />
 
         <!-- All available activities for navigation -->
         <activity
-            android:name=".RegisterActivity"
-            android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
-
-        <activity
             android:name=".ForgotPasswordActivity"
-            android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".AdminActivity"
-            android:exported="true"
-            android:theme="@style/Theme.FineDineAppCompat" />
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".ManagerDashboardActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".KitchenActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".OrderActivity"
-            android:exported="true"
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
+
+        <activity
+            android:name=".OrderRecoveryActivity"
+            android:exported="false"
             android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".ReservationActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".InventoryActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".MenuManagementActivity"
-            android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
-            android:label="Menu" />
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".ReceiptActivity"
-            android:exported="true"
-            android:theme="@style/Theme.FineDineAppCompat"
-            android:label="Receipt" />
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".StaffManagementActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".SettingsActivity"
-            android:exported="true"
-            android:theme="@style/Theme.FineDineAppCompat"
-            android:label="Settings" />
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".MenuItemDetailActivity"
-            android:exported="true"
-            android:theme="@style/Theme.FineDineAppCompat" />
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".ReviewsActivity"
-            android:exported="true"
-            android:theme="@style/Theme.FineDineAppCompat"
-            android:label="Reviews" />
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".EditStaffActivity"
-            android:exported="true"
-            android:theme="@style/Theme.FineDineAppCompat"
-            android:label="Edit Staff" />
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".BackupActivity"
-            android:exported="true"
-            android:theme="@style/Theme.FineDineAppCompat"
-            android:label="Backup &amp; Restore" />
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".EmailSettingsActivity"
-            android:exported="true"
-            android:theme="@style/Theme.FineDineAppCompat"
-            android:label="Email Settings" />
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
+
+        <activity
+            android:name=".FirebaseMigrationActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".CustomerMenuActivity"
-            android:exported="true"
-            android:theme="@style/Theme.FineDineNavigation"
-            android:label="Menu" />
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".PaymentActivity"
-            android:exported="true"
-            android:theme="@style/Theme.FineDineAppCompat"
-            android:label="Payment" />
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".CartActivity"
-            android:exported="true"
-            android:theme="@style/Theme.FineDineAppCompat"
-            android:label="Your Cart" />
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".CustomerMenu"
-            android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
-            android:label="Menu" />
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
+
+        <activity
+            android:name=".TableManagementActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
+
+        <activity
+            android:name=".OrderManagementActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
+
+        <activity
+            android:name=".DrawableUploadActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
+
+        <activity
+            android:name=".ReservationListActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
+
+        <activity
+            android:name=".CreateReservationActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
+
+        <activity
+            android:name=".ViewStaffActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
+
+        <activity
+            android:name=".ViewInventoryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
+
+        <activity
+            android:name=".FirebaseTestActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <!-- Firebase Messaging Service -->
         <service

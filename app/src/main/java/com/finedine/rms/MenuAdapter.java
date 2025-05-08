@@ -1,5 +1,6 @@
 package com.finedine.rms;
 
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.signature.ObjectKey;
 
 import java.util.List;
 
@@ -126,13 +128,21 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
             // Try loading from resource first, fallback to URL if available
             try {
                 // Use Glide for all image loading for consistency and better performance
-                if (imageResource > 0) {
-                    loadWithGlide(imageResource, item);
+                if (imageResource > 0 && imageResource != R.drawable.placeholder_food) {
+                    try {
+                        // First check if the resource exists
+                        itemView.getContext().getResources().getResourceName(imageResource);
+                        loadWithGlide(imageResource, item);
+                    } catch (Resources.NotFoundException e) {
+                        android.util.Log.e("MenuAdapter", "Resource not found: " + imageResource);
+                        // Resource doesn't exist, try alternate methods
+                        loadAlternativeImage(item);
+                    }
                 } else if (item.imageUrl != null && !item.imageUrl.isEmpty()) {
                     loadWithGlide(item.imageUrl, item);
                 } else {
-                    // Fallback to placeholder
-                    loadWithGlide(R.drawable.placeholder_food, item);
+                    // Try to load specific image based on the item name
+                    loadAlternativeImage(item);
                 }
             } catch (Exception e) {
                 android.util.Log.e("MenuAdapter", "Error loading image: " + e.getMessage());
@@ -181,21 +191,76 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
         }
 
         /**
+         * Attempts to load an alternative image based on the menu item name
+         */
+        private void loadAlternativeImage(MenuItem item) {
+            if (item.name == null) {
+                loadWithGlide(R.drawable.placeholder_food, item);
+                return;
+            }
+
+            String lowerName = item.name.toLowerCase();
+
+            // Try to find a matching image based on the item name
+            if (lowerName.contains("oyster")) {
+                loadWithGlide(R.drawable.oyster, item);
+            } else if (lowerName.contains("scallop")) {
+                loadWithGlide(R.drawable.scallops, item);
+            } else if (lowerName.contains("foie") || lowerName.contains("torchon")) {
+                loadWithGlide(R.drawable.torchon, item);
+            } else if (lowerName.contains("lobster")) {
+                loadWithGlide(R.drawable.lobster, item);
+            } else if (lowerName.contains("truffle") || lowerName.contains("risotto")) {
+                loadWithGlide(R.drawable.black_truffle_risotto_recipe, item);
+            } else if (lowerName.contains("alaska")) {
+                loadWithGlide(R.drawable.baked_alaska, item);
+            } else if (lowerName.contains("souffle")) {
+                loadWithGlide(R.drawable.chocolate_souffle, item);
+            } else if (lowerName.contains("champagne")) {
+                loadWithGlide(R.drawable.dom_perigon, item);
+            } else if (lowerName.contains("beef") || lowerName.contains("wagyu") || lowerName.contains("steak")) {
+                loadWithGlide(R.drawable.tenderloin, item);
+            } else if (lowerName.contains("chocolate")) {
+                loadWithGlide(R.drawable.chocolate_symphony, item);
+            } else if (lowerName.contains("coffee")) {
+                loadWithGlide(R.drawable.greek_coffee_demitasse_cup, item);
+            } else if (lowerName.contains("crab")) {
+                loadWithGlide(R.drawable.crab_leg, item);
+            } else if (lowerName.contains("sea") && lowerName.contains("bass")) {
+                loadWithGlide(R.drawable.sea_bass, item);
+            } else if (lowerName.contains("whiskey")) {
+                loadWithGlide(R.drawable.rare_whiskey_flight, item);
+            } else if (lowerName.contains("cocktail")) {
+                loadWithGlide(R.drawable.signature_cocktail_selection, item);
+            } else {
+                // Fallback to placeholder
+                loadWithGlide(R.drawable.placeholder_food, item);
+            }
+        }
+
+        /**
          * Helper method to load image with Glide
          */
         private void loadWithGlide(Object imageSource, MenuItem item) {
             try {
-                Glide.with(itemView.getContext())
-                        .load(imageSource)
-                        .apply(new RequestOptions().centerCrop())
-                        .transition(DrawableTransitionOptions.withCrossFade())
+                // Add a unique request signature to prevent image caching problems
+                RequestOptions options = new RequestOptions()
+                        .centerCrop()
                         .placeholder(R.drawable.placeholder_food)
                         .error(R.drawable.placeholder_food)
+                        .signature(new ObjectKey(item.name + "_" + item.imageResourceId + "_" + System.currentTimeMillis()));
+
+                Glide.with(itemView.getContext())
+                        .load(imageSource)
+                        .apply(options)
+                        .transition(DrawableTransitionOptions.withCrossFade(300))
                         .into(itemImage);
                 android.util.Log.d("MenuAdapter", "Loaded image with Glide for: " + item.name);
             } catch (Exception e) {
                 android.util.Log.e("MenuAdapter", "Glide error for " + item.name + ": " + e.getMessage());
-                itemImage.setImageResource(R.drawable.placeholder_food);
+                Glide.with(itemView.getContext())
+                        .load(R.drawable.placeholder_food)
+                        .into(itemImage);
             }
         }
     }

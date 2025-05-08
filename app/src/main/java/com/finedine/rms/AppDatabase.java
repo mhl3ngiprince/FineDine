@@ -128,6 +128,44 @@ public class AppDatabase {
     }
 
     /**
+     * Get the raw SupportSQLiteDatabase for direct SQL operations with context fallback
+     *
+     * @param context Application context to create database if needed
+     * @return SupportSQLiteDatabase instance
+     */
+    public SupportSQLiteDatabase getSQLiteDatabase(Context context) {
+        // Try regular method first
+        SupportSQLiteDatabase db = getSQLiteDatabase();
+        if (db != null) {
+            return db;
+        }
+
+        // If that fails and we have a context, try to recreate the database connection
+        if (context != null && roomDatabase == null) {
+            Log.w(TAG, "Attempting to reconnect to database using provided context");
+            try {
+                roomDatabase = RoomAppDatabase.getDatabase(context);
+                if (roomDatabase != null) {
+                    return getSQLiteDatabase(); // Try again with the new connection
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to reconnect to database: " + e.getMessage(), e);
+            }
+        }
+
+        // If even reconstruction fails, try get it directly from static method
+        if (context != null) {
+            try {
+                return RoomAppDatabase.getSQLiteDatabase(context);
+            } catch (Exception e) {
+                Log.e(TAG, "All database connection attempts failed", e);
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Get the underlying RoomAppDatabase instance
      *
      * @return RoomAppDatabase instance

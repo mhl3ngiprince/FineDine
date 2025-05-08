@@ -2,17 +2,28 @@ package com.finedine.rms;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.finedine.rms.firebase.FirebaseDao;
+import com.finedine.rms.firebase.FirebaseDataLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +33,13 @@ public class InventoryActivity extends BaseActivity {
     private RecyclerView inventoryRecyclerView;
     private InventoryAdapter inventoryAdapter;
     private final List<Inventory> inventoryItems = new ArrayList<>();
+    private FirebaseFirestore db;
+    private ListenerRegistration inventoryListener;
+    private TextView tvTotalItems;
+    private TextView tvLowStockItems;
+    private TextView tvOutOfStockItems;
+    private FirebaseDao firebaseDao;
+    private FirebaseDataLoader firebaseDataLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +66,11 @@ public class InventoryActivity extends BaseActivity {
                 showErrorDialog("Setup Error", "Could not initialize inventory list. Please try again.");
             }
 
+            // Initialize stat text views
+            tvTotalItems = findViewById(R.id.tvTotalItems);
+            tvLowStockItems = findViewById(R.id.tvLowStockItems);
+            tvOutOfStockItems = findViewById(R.id.tvOutOfStockItems);
+
             // Initialize FloatingActionButton with null check
             FloatingActionButton fabAddItem = findViewById(R.id.fabAddItem);
             if (fabAddItem != null) {
@@ -57,86 +80,225 @@ public class InventoryActivity extends BaseActivity {
                 Toast.makeText(this, "Some features may be limited", Toast.LENGTH_SHORT).show();
             }
 
+            // Set up View Inventory Directory button
+            Button btnViewInventoryDirectory = findViewById(R.id.btnViewInventoryDirectory);
+            if (btnViewInventoryDirectory != null) {
+                btnViewInventoryDirectory.setOnClickListener(v -> {
+                    Intent intent = new Intent(InventoryActivity.this, ViewInventoryActivity.class);
+                    startActivity(intent);
+                });
+            } else {
+                Log.e(TAG, "View Inventory Directory button not found in layout");
+                Toast.makeText(this, "Some features may be limited", Toast.LENGTH_SHORT).show();
+            }
+
+            // Initialize Firebase
+            db = FirebaseFirestore.getInstance();
+
+            // Initialize FirebaseDao
+            firebaseDao = new FirebaseDao();
+
+            // Initialize filter chips
+            setupFilterChips();
+
             // Load inventory data
             loadInventory();
+
+            // Set up real-time listener for inventory changes
+            setupInventoryListener();
+
+            // Setup options menu for sample data
+            setupOptionsMenu();
+
+            // Add a sample data button
+            addSampleDataButton();
         } catch (Exception e) {
             Log.e(TAG, "Error initializing InventoryActivity", e);
             Toast.makeText(this, "Error initializing inventory screen", Toast.LENGTH_SHORT).show();
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private void loadInventory() {
+    private void setupFilterChips() {
         try {
-            AppDatabase db = AppDatabase.getDatabase(this);
-            if (db == null) {
-                Log.e(TAG, "Failed to get database instance");
-                Toast.makeText(this, "Error accessing inventory database", Toast.LENGTH_SHORT).show();
-                return;
+            // Set up the filter chips
+            Chip chipAllItems = findViewById(R.id.chipAllItems);
+            Chip chipLowStock = findViewById(R.id.chipLowStock);
+            Chip chipOutOfStock = findViewById(R.id.chipOutOfStock);
+
+            if (chipAllItems != null) {
+                chipAllItems.setOnClickListener(v -> {
+                    filterInventoryItems("all");
+                });
             }
 
-            // Show loading indicator
+            if (chipLowStock != null) {
+                chipLowStock.setOnClickListener(v -> {
+                    filterInventoryItems("low");
+                });
+            }
+
+            if (chipOutOfStock != null) {
+                chipOutOfStock.setOnClickListener(v -> {
+                    filterInventoryItems("out");
+                });
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting up filter chips", e);
+        }
+    }
+
+    private void filterInventoryItems(String filter) {
+        List<Inventory> filteredItems = new ArrayList<>();
+
+        switch (filter) {
+            case "low":
+                for (Inventory item : inventoryItems) {
+                    if (item.quantity_in_stock < item.reorder_threshold && item.quantity_in_stock > 0) {
+                        filteredItems.add(item);
+                    }
+                }
+                break;
+
+            case "out":
+                for (Inventory item : inventoryItems) {
+                    if (item.quantity_in_stock == 0) {
+                        filteredItems.add(item);
+                    }
+                }
+                break;
+
+            case "all":
+            default:
+                filteredItems.addAll(inventoryItems);
+                break;
+        }
+
+        // Update the adapter with the filtered list
+        inventoryAdapter = new InventoryAdapter(filteredItems, this::onItemSelected);
+        inventoryRecyclerView.setAdapter(inventoryAdapter);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Remove Firestore listener when activity is destroyed
+        if (inventoryListener != null) {
+            inventoryListener.remove();
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void loadInventory() {
+        try {
             Toast.makeText(this, "Loading inventory items...", Toast.LENGTH_SHORT).show();
 
-            new Thread(() -> {
-                try {
-                    // Get inventory items safely
-                    List<Inventory> items = new ArrayList<>();
-                    try {
-                        items = db.inventoryDao().getAll();
-                        Log.d(TAG, "Successfully loaded " + items.size() + " inventory items from database");
+            if (firebaseDataLoader == null) {
+                firebaseDataLoader = new FirebaseDataLoader();
+            }
 
-                        // Log each item for debugging
-                        for (Inventory item : items) {
-                            Log.d(TAG, "Loaded item: " + item.item_id + " - " + item.item_name +
-                                    " (Qty: " + item.quantity_in_stock + ", Threshold: " +
-                                    item.reorder_threshold + ")");
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Database error when loading inventory", e);
+            runOnUiThread(() -> {
+                firebaseDataLoader.loadInventory(new FirebaseDataLoader.DataLoadCallback<Inventory>() {
+                    @Override
+                    public void onDataLoaded(List<Inventory> items) {
+                        updateInventoryUI(items);
                     }
 
-                    // Final copy for UI thread
-                    final List<Inventory> finalItems = items;
-
-                    runOnUiThread(() -> {
-                        try {
-                            inventoryItems.clear();
-                            inventoryItems.addAll(finalItems);
-
-                            if (inventoryAdapter != null) {
-                                inventoryAdapter.notifyDataSetChanged();
-                            } else {
-                                Log.e(TAG, "Inventory adapter is null, recreating");
-                                inventoryAdapter = new InventoryAdapter(inventoryItems, this::onItemSelected);
-
-                                if (inventoryRecyclerView != null) {
-                                    inventoryRecyclerView.setAdapter(inventoryAdapter);
-                                } else {
-                                    Log.e(TAG, "RecyclerView is null, can't set adapter");
-                                }
-                            }
-
-                            // Update UI based on inventory status
-                            if (inventoryItems.isEmpty()) {
-                                Toast.makeText(this, "No inventory items found. Add some items!", Toast.LENGTH_SHORT).show();
-                            } else {
-                                checkLowStockItems();
-                            }
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error updating inventory UI", e);
-                        }
-                    });
-                } catch (Exception e) {
-                    Log.e(TAG, "Error in inventory loading thread", e);
-                    runOnUiThread(() -> {
-                        Toast.makeText(this, "Error loading inventory data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-                }
-            }).start();
+                    @Override
+                    public void onError(String errorMessage) {
+                        Log.e(TAG, "Firebase error: " + errorMessage);
+                        Toast.makeText(InventoryActivity.this, "Error loading inventory: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            });
         } catch (Exception e) {
             Log.e(TAG, "Error starting inventory loading", e);
             Toast.makeText(this, "Error loading inventory data", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void updateInventoryUI(List<Inventory> items) {
+        runOnUiThread(() -> {
+            try {
+                inventoryItems.clear();
+                inventoryItems.addAll(items);
+
+                if (inventoryAdapter != null) {
+                    inventoryAdapter.notifyDataSetChanged();
+                } else {
+                    Log.e(TAG, "Inventory adapter is null, recreating");
+                    inventoryAdapter = new InventoryAdapter(inventoryItems, this::onItemSelected);
+
+                    if (inventoryRecyclerView != null) {
+                        inventoryRecyclerView.setAdapter(inventoryAdapter);
+                    } else {
+                        Log.e(TAG, "RecyclerView is null, can't set adapter");
+                    }
+                }
+
+                // Update UI based on inventory status
+                if (inventoryItems.isEmpty()) {
+                    Toast.makeText(this, "No inventory items found. Add some items!", Toast.LENGTH_SHORT).show();
+                } else {
+                    checkLowStockItems();
+                    updateInventoryStats();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error updating inventory UI", e);
+            }
+        });
+    }
+
+    /**
+     * Sets up a real-time listener for inventory changes in Firestore
+     */
+    private void setupInventoryListener() {
+        // Remove any existing listener
+        if (inventoryListener != null) {
+            inventoryListener.remove();
+        }
+
+        // Set up a listener for changes to the inventory collection
+        inventoryListener = db.collection("inventory")
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null) {
+                        Log.e(TAG, "Error listening for inventory updates", e);
+                        return;
+                    }
+
+                    if (snapshots != null && !snapshots.isEmpty()) {
+                        // Reload inventory data when changes occur
+                        loadInventory();
+                    }
+                });
+    }
+
+    /**
+     * Update the inventory statistics
+     */
+    private void updateInventoryStats() {
+        int totalItems = inventoryItems.size();
+        int lowStockItems = 0;
+        int outOfStockItems = 0;
+
+        for (Inventory item : inventoryItems) {
+            if (item.quantity_in_stock == 0) {
+                outOfStockItems++;
+            } else if (item.quantity_in_stock < item.reorder_threshold) {
+                lowStockItems++;
+            }
+        }
+
+        if (tvTotalItems != null) {
+            tvTotalItems.setText(String.valueOf(totalItems));
+        }
+
+        if (tvLowStockItems != null) {
+            tvLowStockItems.setText(String.valueOf(lowStockItems));
+        }
+
+        if (tvOutOfStockItems != null) {
+            tvOutOfStockItems.setText(String.valueOf(outOfStockItems));
         }
     }
 
@@ -251,22 +413,30 @@ public class InventoryActivity extends BaseActivity {
 
                     new Thread(() -> {
                         try {
-                            AppDatabase db = AppDatabase.getDatabase(this);
-                            if (db != null) {
-                                db.inventoryDao().update(item);
-                                runOnUiThread(() -> {
-                                    loadInventory();
-                                    Toast.makeText(this, "Inventory updated", Toast.LENGTH_SHORT).show();
-                                });
-                            } else {
-                                runOnUiThread(() -> {
-                                    Toast.makeText(this, "Database error", Toast.LENGTH_SHORT).show();
-                                });
+                            if (firebaseDao == null) {
+                                firebaseDao = new FirebaseDao();
                             }
+
+                            firebaseDao.saveInventoryItem(item, new FirebaseDao.FirebaseOperationCallback() {
+                                @Override
+                                public void onSuccess(String message) {
+                                    runOnUiThread(() -> {
+                                        loadInventory();
+                                        Toast.makeText(InventoryActivity.this, "Inventory updated", Toast.LENGTH_SHORT).show();
+                                    });
+                                }
+
+                                @Override
+                                public void onFailure(String errorMessage) {
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(InventoryActivity.this, "Failed to update inventory: " + errorMessage, Toast.LENGTH_SHORT).show();
+                                    });
+                                }
+                            });
                         } catch (Exception e) {
                             Log.e(TAG, "Error updating inventory item", e);
                             runOnUiThread(() -> {
-                                Toast.makeText(this, "Error updating inventory: " + e.getMessage(),
+                                Toast.makeText(InventoryActivity.this, "Error updating inventory: " + e.getMessage(),
                                         Toast.LENGTH_SHORT).show();
                             });
                         }
@@ -377,147 +547,34 @@ public class InventoryActivity extends BaseActivity {
                 newItem.reorder_threshold = threshold;
                 newItem.last_updated = System.currentTimeMillis();
 
-                // Initialize database and save in background
-                AppDatabase db = AppDatabase.getDatabase(this);
-                if (db == null) {
-                    progressDialog.dismiss();
-                    showErrorDialog("Database Error", "Unable to connect to inventory database");
-                    return;
-                }
-
-                // Save to database
                 new Thread(() -> {
                     try {
-                        // Check if item already exists
-                        Inventory existingItem = null;
-                        try {
-                            existingItem = db.inventoryDao().getItemByName(itemName);
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error checking for existing item", e);
-                            // Continue with null existingItem
+                        if (firebaseDao == null) {
+                            firebaseDao = new FirebaseDao();
                         }
 
-                        if (existingItem != null) {
-                            // Update existing item instead of creating new one
-                            final Inventory finalExistingItem = existingItem;
-                            runOnUiThread(() -> {
-                                // Dismiss progress dialog first
-                                progressDialog.dismiss();
-
-                                AlertDialog.Builder updateDialog = new AlertDialog.Builder(this);
-                                updateDialog.setTitle("Item Already Exists");
-                                updateDialog.setMessage("\"" + itemName + "\" already exists with " +
-                                        finalExistingItem.quantity_in_stock + " in stock. Do you want to update the quantity?");
-                                updateDialog.setPositiveButton("Update", (d, w) -> {
-                                    // Show progress dialog for update
-                                    AlertDialog updateProgressDialog = new AlertDialog.Builder(this)
-                                            .setMessage("Updating inventory...")
-                                            .setCancelable(false)
-                                            .create();
-                                    updateProgressDialog.show();
-
-                                    // Update the existing item's quantity
-                                    new Thread(() -> {
-                                        try {
-                                            finalExistingItem.quantity_in_stock += quantity;
-                                            finalExistingItem.last_updated = System.currentTimeMillis();
-                                            db.inventoryDao().update(finalExistingItem);
-
-                                            runOnUiThread(() -> {
-                                                updateProgressDialog.dismiss();
-                                                loadInventory();
-                                                Toast.makeText(this, "Inventory updated successfully", Toast.LENGTH_SHORT).show();
-                                            });
-                                        } catch (Exception e) {
-                                            Log.e(TAG, "Error updating inventory item", e);
-                                            runOnUiThread(() -> {
-                                                updateProgressDialog.dismiss();
-                                                showErrorDialog("Update Error", "Could not update inventory: " + e.getMessage());
-                                            });
-                                        }
-                                    }).start();
-                                });
-                                updateDialog.setNegativeButton("Cancel", null);
-                                updateDialog.show();
-                            });
-                        } else {
-                            // Insert new item with timeout protection
-                            boolean[] insertCompleted = {false};
-
-                            // Create a timeout handler
-                            new android.os.Handler(getMainLooper()).postDelayed(() -> {
-                                if (!insertCompleted[0]) {
-                                    Log.w(TAG, "Insert operation taking too long, may have failed");
-                                    runOnUiThread(() -> {
-                                        if (progressDialog.isShowing()) {
-                                            progressDialog.dismiss();
-                                            Toast.makeText(InventoryActivity.this,
-                                                    "Operation is taking longer than expected. Please check inventory list.",
-                                                    Toast.LENGTH_LONG).show();
-                                        }
-                                    });
-                                }
-                            }, 5000); // 5-second timeout
-
-                            try {
-                                long itemId = db.inventoryDao().insert(newItem);
-                                Log.d(TAG, "Added new inventory item with ID: " + itemId);
-                                insertCompleted[0] = true;
-
-                                // Verify the item was inserted by trying to retrieve it
-                                Inventory checkItem = null;
-                                try {
-                                    checkItem = db.inventoryDao().getItemById((int) itemId);
-                                } catch (Exception e) {
-                                    Log.e(TAG, "Failed to verify item after insert", e);
-                                }
-
-                                if (checkItem == null) {
-                                    throw new Exception("Failed to verify newly added inventory item");
-                                }
-
-                                Log.d(TAG, "Verified new inventory item: " + checkItem.item_name);
-                                Log.d(TAG, "New item quantity: " + checkItem.quantity_in_stock);
-                                Log.d(TAG, "New item threshold: " + checkItem.reorder_threshold);
-
+                        firebaseDao.saveInventoryItem(newItem, new FirebaseDao.FirebaseOperationCallback() {
+                            @Override
+                            public void onSuccess(String message) {
                                 runOnUiThread(() -> {
                                     progressDialog.dismiss();
                                     loadInventory();
-                                    Toast.makeText(this, "Item added successfully", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(InventoryActivity.this, "Item added successfully", Toast.LENGTH_SHORT).show();
                                 });
-                            } catch (Exception e) {
-                                insertCompleted[0] = true; // Mark as completed even though it failed
-                                Log.e(TAG, "Error inserting inventory item", e);
-
-                                // Try a more direct insert approach as fallback
-                                try {
-                                    db.getSQLiteDatabase().execSQL(
-                                            "INSERT INTO inventory (item_name, quantity_in_stock, reorder_threshold, last_updated) " +
-                                                    "VALUES (?, ?, ?, ?)",
-                                            new Object[]{itemName, quantity, threshold, System.currentTimeMillis()}
-                                    );
-                                    Log.d(TAG, "Successfully added item using direct SQL");
-
-                                    runOnUiThread(() -> {
-                                        progressDialog.dismiss();
-                                        loadInventory();
-                                        Toast.makeText(this, "Item added successfully", Toast.LENGTH_SHORT).show();
-                                    });
-                                } catch (Exception e2) {
-                                    Log.e(TAG, "Both insert methods failed", e2);
-                                    runOnUiThread(() -> {
-                                        progressDialog.dismiss();
-                                        showErrorDialog("Add Error", "Could not add item to inventory database");
-                                    });
-                                }
                             }
-                        }
+
+                            @Override
+                            public void onFailure(String errorMessage) {
+                                runOnUiThread(() -> {
+                                    progressDialog.dismiss();
+                                    showErrorDialog("Add Error", "Could not add item to inventory: " + errorMessage);
+                                });
+                            }
+                        });
                     } catch (Exception e) {
-                        Log.e(TAG, "Error saving inventory item to database: " + e.getMessage(), e);
+                        Log.e(TAG, "Error saving inventory item to Firebase", e);
                         runOnUiThread(() -> {
-                            if (progressDialog.isShowing()) {
-                                progressDialog.dismiss();
-                            }
+                            progressDialog.dismiss();
                             showErrorDialog("Database Error", "Error adding inventory item: " + e.getMessage());
                         });
                     }
@@ -526,6 +583,60 @@ public class InventoryActivity extends BaseActivity {
         } catch (Exception e) {
             Log.e(TAG, "Error showing add item dialog: " + e.getMessage(), e);
             showErrorDialog("Dialog Error", "Could not show the add item dialog");
+        }
+    }
+
+    private void updateFirebaseItem(Inventory item) {
+        try {
+            if (item == null || item.item_name == null) return;
+
+            if (firebaseDao == null) {
+                firebaseDao = new FirebaseDao();
+            }
+
+            firebaseDao.saveInventoryItem(item, new FirebaseDao.FirebaseOperationCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    Log.d(TAG, "Item updated in Firebase: " + item.item_name);
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    Log.e(TAG, "Error updating item in Firebase: " + errorMessage);
+                    runOnUiThread(() -> Toast.makeText(InventoryActivity.this,
+                            "Failed to update item in cloud database", Toast.LENGTH_SHORT).show());
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error in updateFirebaseItem", e);
+        }
+    }
+
+    private void addItemToFirebase(Inventory item) {
+        try {
+            if (item == null || item.item_name == null) return;
+
+            if (firebaseDao == null) {
+                firebaseDao = new FirebaseDao();
+            }
+
+            firebaseDao.saveInventoryItem(item, new FirebaseDao.FirebaseOperationCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    Log.d(TAG, "Item added to Firebase: " + item.item_name);
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    Log.e(TAG, "Error adding item to Firebase: " + errorMessage);
+                    runOnUiThread(() -> {
+                        Toast.makeText(InventoryActivity.this,
+                                "Note: Item saved locally but not to cloud database", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error in addItemToFirebase", e);
         }
     }
 
@@ -546,6 +657,93 @@ public class InventoryActivity extends BaseActivity {
         } catch (Exception e) {
             Log.e(TAG, "Error showing error dialog", e);
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * Set up the options menu for this activity
+     */
+    private void setupOptionsMenu() {
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            toolbar.inflateMenu(R.menu.inventory_menu);
+            toolbar.setOnMenuItemClickListener(item -> {
+                int itemId = item.getItemId();
+                if (itemId == R.id.action_sample_data) {
+                    // Load sample inventory data
+                    com.finedine.rms.utils.SampleDataHelper.loadSampleInventory(this);
+                    Toast.makeText(this, "Creating sample inventory items...", Toast.LENGTH_SHORT).show();
+
+                    // Reload after a delay
+                    new Handler().postDelayed(this::loadInventory, 2000);
+                    return true;
+                } else if (itemId == R.id.action_refresh) {
+                    loadInventory();
+                    return true;
+                }
+                return false;
+            });
+        }
+    }
+
+    /**
+     * Add a sample data button programmatically if not in layout
+     */
+    private void addSampleDataButton() {
+        try {
+            // Find a container to add the button to
+            ViewGroup rootView = findViewById(android.R.id.content);
+            ViewGroup container = rootView;
+
+            if (container != null) {
+                Button btnSampleData = new Button(this);
+                btnSampleData.setText("Load Sample Inventory");
+                btnSampleData.setLayoutParams(new ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+
+                // Style button
+                btnSampleData.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_light));
+                btnSampleData.setTextColor(getResources().getColor(android.R.color.white));
+                btnSampleData.setPadding(20, 10, 20, 10);
+
+                // Add click listener
+                btnSampleData.setOnClickListener(v -> loadSampleData());
+
+                // Add to layout
+                container.addView(btnSampleData);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error adding sample data button", e);
+        }
+    }
+
+    /**
+     * Load sample inventory data using SampleDataHelper
+     */
+    private void loadSampleData() {
+        try {
+            // Show progress dialog
+            AlertDialog progress = new AlertDialog.Builder(this)
+                    .setMessage("Loading sample inventory data...")
+                    .setCancelable(false)
+                    .create();
+            progress.show();
+
+            // Load sample data
+            com.finedine.rms.utils.SampleDataHelper.loadSampleInventory(this);
+
+            // Dismiss progress and reload after a delay
+            new Handler().postDelayed(() -> {
+                if (progress.isShowing()) {
+                    progress.dismiss();
+                }
+                loadInventory();
+                Toast.makeText(this, "Sample inventory data loaded", Toast.LENGTH_SHORT).show();
+            }, 2000);
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading sample data", e);
+            Toast.makeText(this, "Error loading sample data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 }

@@ -41,9 +41,6 @@ public interface ReservationDao {
     @Query("SELECT COUNT(*) FROM reservations WHERE reservation_date = :today")
     int getTodayReservationCount(String today);
 
-    @Query("SELECT * FROM reservations WHERE reservation_date = :today ORDER BY reservation_time ASC")
-    List<Reservation> getTodayReservations(String today);
-
     @Query("SELECT * FROM reservations WHERE customerName LIKE '%' || :searchTerm || '%' OR phone LIKE '%' || :searchTerm || '%'")
     List<Reservation> searchReservations(String searchTerm);
 

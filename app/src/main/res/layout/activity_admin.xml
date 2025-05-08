@@ -180,7 +180,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:columnCount="2"
-                android:rowCount="3"
+                android:rowCount="4"
                 android:alignmentMode="alignMargins"
                 android:columnOrderPreserved="false">
 
@@ -363,6 +363,18 @@
                             android:textStyle="bold" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
+
+                <!-- Firebase Test Button -->
+                <Button
+                    android:id="@+id/btnFirebaseTest"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Firebase Database Test"
+                    android:layout_columnSpan="2"
+                    android:layout_margin="8dp"
+                    android:backgroundTint="@color/design_default_color_error"
+                    android:textColor="@color/white"
+                    android:padding="12dp" />
 
                 <!-- Back Button -->
                 <androidx.cardview.widget.CardView

@@ -17,6 +17,7 @@ public class Reservation {
     public String phone;
     public String email;
     public String specialRequests;
+    public int tableNumber; // Table number assigned to this reservation
 
     // Getters and Setters
     public int getReservation_id() {
@@ -97,5 +98,13 @@ public class Reservation {
 
     public void setSpecialRequests(String specialRequests) {
         this.specialRequests = specialRequests;
+    }
+
+    public int getTableNumber() {
+        return tableNumber;
+    }
+
+    public void setTableNumber(int tableNumber) {
+        this.tableNumber = tableNumber;
     }
 }

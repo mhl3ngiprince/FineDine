@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,6 +51,14 @@ public class AdminActivity extends BaseActivity {
             CardView backButton = findViewById(R.id.backButton);
             CardView cardEmailSettings = findViewById(R.id.cardEmailSettings);
             CardView cardBackup = findViewById(R.id.cardBackup);
+            Button btnFirebaseTest = findViewById(R.id.btnFirebaseTest);
+
+            if (btnFirebaseTest != null) {
+                btnFirebaseTest.setOnClickListener(view -> {
+                    Intent intent = new Intent(AdminActivity.this, FirebaseTestActivity.class);
+                    startActivity(intent);
+                });
+            }
 
             if (cardStaff != null) {
                 cardStaff.setOnClickListener(v -> {

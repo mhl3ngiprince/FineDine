@@ -94,6 +94,7 @@
     <color name="dark_gray">#333333</color>
     <color name="medium_gray">#666666</color>
     <color name="ripple_green">#4433CC33</color>
+    <color name="primary_green_light">#81C784</color>
 
     <!-- Theme remapping for easy updates -->
     <color name="primary">@color/med_blue</color>
@@ -117,6 +118,8 @@
     <color name="luxe_dark">@color/med_navy</color>
     <color name="luxe_gray">@color/text_medium</color>
     <color name="luxe_light_bg">@color/med_bg_cream</color>
+    <color name="luxe_primary">@color/med_blue</color>
+    <color name="luxe_secondary">@color/med_blue_light</color>
 
     <!-- Fresh scheme compatibility -->
     <color name="fresh_teal">@color/med_blue</color>
@@ -192,6 +195,7 @@
     <color name="restaurant_pending_color">@color/transparent_blue</color>
     <color name="restaurant_preparing_color">@color/med_bg_blue</color>
     <color name="restaurant_ready_color">@color/restaurant_success</color>
+    <color name="restaurant_scheduled_color">#FFF9C4</color>
     <color name="restaurant_completed_color">@color/restaurant_success</color>
     <color name="restaurant_default_color">@color/med_white</color>
 </resources>

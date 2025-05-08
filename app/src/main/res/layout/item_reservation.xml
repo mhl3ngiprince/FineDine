@@ -1,93 +1,159 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_margin="8dp"
-    android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="@color/luxe_dark"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp"
-    app:strokeColor="@color/luxe_gold"
-    app:strokeWidth="1dp">
+    android:layout_margin="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:orientation="vertical">
 
-        <!-- Gold trim at top -->
-        <View
-            android:layout_width="40dp"
-            android:layout_height="2dp"
-            android:background="@color/luxe_gold"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Top Section -->
+        <!-- Reservation header with customer name and status -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/luxe_burgundy"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_calendar"
-                android:contentDescription="@string/reservation_date"
-                app:tint="@color/luxe_gold" />
+            android:padding="8dp">
 
             <TextView
-                android:id="@+id/tvDateTime"
+                android:id="@+id/customerNameText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="16dp"
-                android:textSize="14sp"
-                android:textColor="@color/text_white"
+                android:textColor="@color/white"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                tools:text="2023-05-15 19:30"/>
+                tools:text="John Smith" />
 
             <TextView
-                android:id="@+id/tvStatus"
+                android:id="@+id/statusText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textColor="@color/luxe_gold"
+                android:background="@drawable/bg_status_pending"
+                android:paddingStart="8dp"
+                android:paddingTop="2dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="2dp"
+                android:textColor="@color/white"
+                android:textSize="12sp"
                 android:textStyle="bold"
-                android:drawableEnd="@drawable/ic_status_indicator"
-                android:drawablePadding="4dp"
-                android:drawableTint="@color/luxe_gold"
-                tools:text="Confirmed"/>
+                tools:text="PENDING" />
+
         </LinearLayout>
 
-        <!-- Customer Information -->
+        <!-- Reservation details -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="12dp"
-            android:gravity="center_vertical">
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:padding="12dp">
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_user"
-                android:contentDescription="@string/customer_icon"
-                app:tint="@color/luxe_gold" />
-
-            <TextView
-                android:id="@+id/tvCustomerName"
-                android:layout_width="0dp"
+            <!-- Date and Time -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="16dp"
-                android:textSize="16sp"
-                android:textColor="@color/text_white"
-                android:textStyle="bold"
-                tools:text="John Doe"/>
+                android:layout_marginBottom="4dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@android:drawable/ic_menu_my_calendar"
+                    app:tint="@color/luxe_gold" />
+
+                <TextView
+                    android:id="@+id/dateTimeText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#333333"
+                    android:textSize="14sp"
+                    tools:text="Friday, May 20, 2023 at 7:30 PM" />
+
+            </LinearLayout>
+
+            <!-- Party Size and Table -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@android:drawable/ic_menu_myplaces"
+                    app:tint="@color/luxe_gold" />
+
+                <TextView
+                    android:id="@+id/tableInfoText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#333333"
+                    android:textSize="14sp"
+                    tools:text="4 People • Table #12" />
+
+            </LinearLayout>
+
+            <!-- Contact info -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@android:drawable/ic_menu_call"
+                    app:tint="@color/luxe_gold" />
+
+                <TextView
+                    android:id="@+id/contactInfoText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#333333"
+                    android:textSize="14sp"
+                    tools:text="(555) 123-4567 • john@example.com" />
+
+            </LinearLayout>
+
+            <!-- Special Requests (if any) -->
+            <LinearLayout
+                android:id="@+id/specialRequestsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Special Requests:"
+                    android:textColor="#333333"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/specialRequestsText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#555555"
+                    android:textSize="14sp"
+                    android:textStyle="italic"
+                    tools:text="Window table preferred. Celebrating anniversary." />
+
+            </LinearLayout>
+
         </LinearLayout>
 
         <!-- Reservation Details -->
@@ -95,60 +161,80 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_people"
-                android:contentDescription="@string/party_size"
-                app:tint="@color/luxe_gold" />
-
-            <TextView
-                android:id="@+id/tvPartySize"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="16dp"
-                android:textSize="14sp"
-                android:textColor="@color/text_white"
-                tools:text="Party of 4"/>
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="24dp"
-                android:src="@drawable/ic_clock"
-                android:contentDescription="@string/reservation_time"
-                app:tint="@color/luxe_gold" />
+            android:layout_marginTop="12dp">
 
             <TextView
                 android:id="@+id/tvReservationTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:textSize="14sp"
-                android:textColor="@color/text_white"
-                tools:text="7:30 PM"/>
+                android:text="7:30 PM"
+                android:textColor="@color/primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvTableNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Table #5"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginStart="16dp" />
+
+            <TextView
+                android:id="@+id/tvPartySize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4 people"
+                android:layout_marginStart="8dp" />
+
+            <TextView
+                android:id="@+id/tvReservationStatus"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Confirmed"
+                android:textColor="@color/primary_green"
+                android:gravity="end" />
         </LinearLayout>
 
-        <!-- Divider -->
-        <View
+        <!-- Action buttons -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="16dp"
-            android:background="@color/luxe_gold"
-            android:alpha="0.3" />
+            android:layout_height="wrap_content"
+            android:background="#F5F5F5"
+            android:gravity="end"
+            android:orientation="horizontal"
+            android:padding="8dp">
 
-        <!-- Gold corner accent -->
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="end"
-            android:layout_marginTop="16dp"
-            android:src="@drawable/corner_gold"
-            android:alpha="0.7" />
+            <Button
+                android:id="@+id/btnCancel"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Cancel"
+                android:textColor="#D32F2F"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnEdit"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Edit"
+                android:textColor="@color/luxe_gold"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnConfirm"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Confirm"
+                android:textColor="#388E3C"
+                android:textSize="12sp" />
+
+        </LinearLayout>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

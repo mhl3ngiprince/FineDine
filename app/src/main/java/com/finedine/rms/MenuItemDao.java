@@ -59,4 +59,6 @@ public interface MenuItemDao {
 
     @Query("DELETE FROM menu_items")
     void deleteAll();
+    @Query("SELECT * FROM menu_items WHERE availability = 1 ORDER BY item_id DESC LIMIT :limit")
+    List<MenuItem> getPopularItems(int limit);
 }

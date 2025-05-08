@@ -51,6 +51,32 @@
                         android:textStyle="bold" />
 
                     <ImageView
+                        android:id="@+id/cartButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_toStartOf="@id/profileButton"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="8dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_shopping_cart"
+                        app:tint="@color/restaurant_text_light" />
+
+                    <TextView
+                        android:id="@+id/cartBadgeCount"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_alignTop="@id/cartButton"
+                        android:layout_alignEnd="@id/cartButton"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:background="@drawable/circle_badge"
+                        android:gravity="center"
+                        android:text="0"
+                        android:textColor="@color/white"
+                        android:textSize="10sp" />
+
+                    <ImageView
                         android:id="@+id/profileButton"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
@@ -293,6 +319,59 @@
                                 android:textSize="12sp" />
                         </LinearLayout>
 
+                        <!-- Category Chips for horizontal scrolling -->
+                        <HorizontalScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:scrollbars="none">
+
+                            <com.google.android.material.chip.ChipGroup
+                                android:id="@+id/categoryChipGroup"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:singleSelection="true"
+                                app:selectionRequired="true"
+                                app:chipSpacing="8dp">
+
+                                <com.google.android.material.chip.Chip
+                                    android:id="@+id/chipAll"
+                                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="All"
+                                    android:checked="true" />
+
+                                <com.google.android.material.chip.Chip
+                                    android:id="@+id/chipStarters"
+                                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Starters" />
+
+                                <com.google.android.material.chip.Chip
+                                    android:id="@+id/chipMain"
+                                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Main Course" />
+
+                                <com.google.android.material.chip.Chip
+                                    android:id="@+id/chipDesserts"
+                                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Desserts" />
+
+                                <com.google.android.material.chip.Chip
+                                    android:id="@+id/chipBeverages"
+                                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Beverages" />
+                            </com.google.android.material.chip.ChipGroup>
+                        </HorizontalScrollView>
+
                         <!-- Menu Category Tabs -->
                         <com.google.android.material.tabs.TabLayout
                             android:id="@+id/menuTabLayout"
@@ -450,6 +529,22 @@
                         </LinearLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
+
+                <!-- View Cart Button -->
+                <Button
+                    android:id="@+id/btnViewCart"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/restaurant_accent"
+                    android:elevation="4dp"
+                    android:layout_marginBottom="16dp"
+                    android:paddingVertical="14dp"
+                    android:text="View Cart"
+                    android:textColor="@color/restaurant_text_light"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp"
+                    app:icon="@drawable/ic_shopping_cart"
+                    app:iconGravity="textStart" />
 
                 <!-- Submit Order Button -->
                 <Button
