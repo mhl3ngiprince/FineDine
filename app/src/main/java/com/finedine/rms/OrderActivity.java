@@ -29,10 +29,14 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 public class OrderActivity extends BaseActivity {
@@ -50,12 +54,13 @@ public class OrderActivity extends BaseActivity {
     private String userRole = "waiter"; // Default role
     private SharedPrefsManager prefsManager;
     private ChipGroup categoryChipGroup;
-    private TextView tvCartItemCount;
-    private MaterialCardView btnViewCart;
-    private ExtendedFloatingActionButton fabCart;
+    private TextView tvOrderCount; // For displaying the count of items in order
+    private Button btnViewCart; // Changed from MaterialCardView to Button
+    private Button btnSubmitOrder; // Added correct button reference
     private String currentCategory = "All"; // Track current category
     private AppDatabase appDatabase;
     private ExecutorService databaseExecutor;
+    private DatabaseReference ordersRef; // Firebase database reference
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,22 +81,37 @@ public class OrderActivity extends BaseActivity {
             appDatabase = AppDatabase.getDatabase(this);
             databaseExecutor = java.util.concurrent.Executors.newSingleThreadExecutor();
 
+            // Use modern navigation layout
+            setupModernNavigationPanel("Orders", R.layout.activity_order);
+            Log.d(TAG, "Modern navigation setup completed");
+
+            // Initialize Firebase if available
+            try {
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                ordersRef = database.getReference("orders");
+                Log.d(TAG, "Firebase initialized successfully");
+            } catch (Exception e) {
+                Log.w(TAG, "Firebase initialization failed, will use local database only: " + e.getMessage());
+                ordersRef = null;
+            }
+
             // Set appropriate layout based on user role
             if ("customer".equalsIgnoreCase(userRole)) {
-                setContentView(R.layout.activity_customer_menu);
                 initializeCustomerView();
             } else {
-                setContentView(R.layout.activity_order);
                 initializeStaffView();
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "Error initializing OrderActivity", e);
-            Toast.makeText(this, "Error initializing order screen. Please try again.", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Error setting up modern navigation", e);
+            Toast.makeText(this, "Error initializing navigation", Toast.LENGTH_SHORT).show();
 
-            // Fall back to regular view on error
-            setContentView(R.layout.activity_order);
-            initializeStaffView();
+            // Initialize appropriate view based on role
+            if ("customer".equalsIgnoreCase(userRole)) {
+                initializeCustomerView();
+            } else {
+                initializeStaffView();
+            }
         }
     }
 
@@ -100,9 +120,6 @@ public class OrderActivity extends BaseActivity {
      */
     private void initializeCustomerView() {
         try {
-            // Setup navigation panel
-            setupNavigationPanel("Menu");
-
             // Show welcome message for customers
             Toast.makeText(this, "Welcome to Fine Dine! Browse our menu and place your order.", Toast.LENGTH_LONG).show();
 
@@ -146,26 +163,38 @@ public class OrderActivity extends BaseActivity {
 
             // Initialize cart button and badge
             btnViewCart = findViewById(R.id.btnViewCart);
-            tvCartItemCount = findViewById(R.id.tvCartItemCount);
+            tvOrderCount = findViewById(R.id.tvOrderCount);
 
-            // Note: fabCart might not be present in all layouts
-            try {
-                fabCart = findViewById(R.id.fabCart);
-                if (fabCart != null) {
-                    fabCart.setOnClickListener(v -> showCart());
-                }
-            } catch (Exception e) {
-                Log.d(TAG, "fabCart not found in this layout, continuing initialization");
+            // Initialize orderItemAdapter to handle cart items
+            orderItemAdapter = new OrderItemAdapter(currentOrderItems, this::removeOrderItem);
+
+            // Submit button initialization
+            btnSubmitOrder = findViewById(R.id.btnSubmitOrder);
+            if (btnSubmitOrder != null) {
+                btnSubmitOrder.setOnClickListener(v -> showCart());
             }
 
+            // No FAB in this layout - removed fabOrder related code
+
             if (btnViewCart != null) {
-                btnViewCart.setOnClickListener(v -> showCart());
+                Log.d(TAG, "btnViewCart found, setting click listener");
+                btnViewCart.setOnClickListener(v -> {
+                    Log.d(TAG, "btnViewCart clicked, calling showCart()");
+                    showCart();
+                });
+            } else {
+                Log.e(TAG, "btnViewCart not found in layout");
             }
 
             updateCartBadge();
 
             // Initialize Menu RecyclerView with 2 columns
             RecyclerView menuRecyclerView = findViewById(R.id.menuRecyclerView);
+            if (menuRecyclerView == null) {
+                Log.e(TAG, "menuRecyclerView is null, cannot display menu items");
+                return;
+            }
+
             // Use more columns for grid display in landscape mode
             int columnCount = getResources().getConfiguration().orientation ==
                     android.content.res.Configuration.ORIENTATION_LANDSCAPE ? 3 : 2;
@@ -175,9 +204,15 @@ public class OrderActivity extends BaseActivity {
             int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.grid_spacing);
             menuRecyclerView.addItemDecoration(new GridSpacingItemDecoration(columnCount, spacingInPixels, true));
 
-            // Create menu adapter
+            // Create menu items array directly for faster loading
+            List<MenuItem> initialItems = new ArrayList<>(Arrays.asList(MenuItem.premiumMenu()));
+
+            // Create menu adapter with direct loading of images for customer view
+            menuItems.clear();
+            menuItems.addAll(initialItems);
             menuAdapter = new MenuAdapter(menuItems, this::onItemSelected);
             menuRecyclerView.setAdapter(menuAdapter);
+            Log.d(TAG, "Initial menu items loaded for customer: " + initialItems.size());
 
             // Long press on search box to enable menu reset option
             if (etSearchMenu != null) {
@@ -192,6 +227,16 @@ public class OrderActivity extends BaseActivity {
 
             // Initialize search functionality
             setupSearchFunctionality();
+
+            // Initialize reset menu button for customer view
+            Button btnResetMenu = findViewById(R.id.btnResetMenu);
+            if (btnResetMenu != null) {
+                btnResetMenu.setOnClickListener(v -> resetAllMenuItems());
+            }
+
+            // Force display menu items directly - don't wait for database
+            // This ensures items always appear for customers
+            loadMenuItemsDirectFromClass();
         } catch (Exception e) {
             Log.e(TAG, "Error initializing customer view", e);
             Toast.makeText(this, "Error initializing menu screen", Toast.LENGTH_SHORT).show();
@@ -203,9 +248,6 @@ public class OrderActivity extends BaseActivity {
      */
     private void initializeStaffView() {
         try {
-            // Setup navigation panel
-            setupNavigationPanel("Order Management");
-
             // Initialize customer info fields
             etTableNumber = findViewById(R.id.etTableNumber);
             etCustomerName = findViewById(R.id.etCustomerName);
@@ -386,6 +428,8 @@ public class OrderActivity extends BaseActivity {
      */
     private void showCart() {
         try {
+            Log.d(TAG, "showCart() called, items in cart: " + currentOrderItems.size());
+
             if (currentOrderItems.isEmpty()) {
                 Toast.makeText(this, "Your cart is empty", Toast.LENGTH_SHORT).show();
                 return;
@@ -395,17 +439,42 @@ public class OrderActivity extends BaseActivity {
             View cartView = LayoutInflater.from(this).inflate(R.layout.dialog_cart, null);
             RecyclerView cartRecyclerView = cartView.findViewById(R.id.cartRecyclerView);
             TextView totalText = cartView.findViewById(R.id.tvTotalPrice);
+            TextView subtotalText = cartView.findViewById(R.id.tvSubtotal);
+            TextView serviceFeeText = cartView.findViewById(R.id.tvServiceFee);
+
+            // Ensure we have an adapter
+            if (orderItemAdapter == null) {
+                orderItemAdapter = new OrderItemAdapter(currentOrderItems, this::removeOrderItem);
+            }
 
             // Set up recycler view
             cartRecyclerView.setLayoutManager(new LinearLayoutManager(this));
             cartRecyclerView.setAdapter(orderItemAdapter);
 
-            // Calculate total
-            double total = 0;
+            // Calculate subtotal
+            double subtotal = 0;
             for (OrderItem item : currentOrderItems) {
-                total += item.getPrice();
+                subtotal += item.getPrice();
             }
-            totalText.setText(String.format("Total: R%.2f", total));
+
+            // Calculate service fee (10%)
+            double serviceFee = subtotal * 0.10;
+
+            // Calculate total
+            double total = subtotal + serviceFee;
+
+            // Update text views
+            if (subtotalText != null) {
+                subtotalText.setText(String.format("R%.2f", subtotal));
+            }
+
+            if (serviceFeeText != null) {
+                serviceFeeText.setText(String.format("R%.2f", serviceFee));
+            }
+
+            if (totalText != null) {
+                totalText.setText(String.format("R%.2f", total));
+            }
 
             // Show dialog
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -416,9 +485,17 @@ public class OrderActivity extends BaseActivity {
                 collectCustomerInformation();
             });
             builder.setNegativeButton("Continue Shopping", null);
-            builder.show();
+
+            AlertDialog dialog = builder.create();
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().getDecorView().setTag("cart_dialog");
+            }
+            dialog.show();
+
+            Log.d(TAG, "Cart dialog displayed with " + currentOrderItems.size() + " items");
         } catch (Exception e) {
             Log.e(TAG, "Error showing cart", e);
+            Toast.makeText(this, "Error showing cart: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -440,32 +517,66 @@ public class OrderActivity extends BaseActivity {
                 }
             }
 
+            // Pre-fill existing information if we have it
+            if (etCustomerName != null && etCustomerName.getText() != null && !etCustomerName.getText().toString().isEmpty()) {
+                etName.setText(etCustomerName.getText().toString());
+            }
+
+            if (etCustomerPhone != null && etCustomerPhone.getText() != null && !etCustomerPhone.getText().toString().isEmpty()) {
+                etPhone.setText(etCustomerPhone.getText().toString());
+            }
+
+            if (etTableNumber != null && etTableNumber.getText() != null && !etTableNumber.getText().toString().isEmpty()) {
+                etTableNum.setText(etTableNumber.getText().toString());
+            } else {
+                // Default to table 1 if not specified
+                etTableNum.setText("1");
+            }
+
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Complete Your Order");
             builder.setView(customerInfoView);
-            builder.setPositiveButton("Confirm", (dialog, which) -> {
+
+            // Use null for button to prevent automatic dismiss on error
+            builder.setPositiveButton("Confirm", null);
+            builder.setNegativeButton("Cancel", null);
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
+            // Override the positive button click listener
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
                 // Validate inputs
                 String name = etName.getText().toString().trim();
                 String phone = etPhone.getText().toString().trim();
                 String tableNumStr = etTableNum.getText().toString().trim();
 
-                if (name.isEmpty() || phone.isEmpty() || tableNumStr.isEmpty()) {
-                    Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                if (name.isEmpty()) {
+                    etName.setError("Please enter your name");
+                    return;
+                }
+
+                if (tableNumStr.isEmpty()) {
+                    etTableNum.setError("Please enter a table number");
                     return;
                 }
 
                 try {
                     int tableNum = Integer.parseInt(tableNumStr);
                     currentTableNumber = tableNum;
-                    processOrderSubmission(name, phone, phone + "@customer.com", calculateOrderTotal());
+
+                    // Email is optional, create a default one if needed
+                    String email = phone + "@customer.com";
+
+                    dialog.dismiss(); // Dismiss dialog after valid input
+                    processOrderSubmission(name, phone, email, calculateOrderTotal());
                 } catch (NumberFormatException e) {
-                    Toast.makeText(this, "Please enter a valid table number", Toast.LENGTH_SHORT).show();
+                    etTableNum.setError("Please enter a valid table number");
                 }
             });
-            builder.setNegativeButton("Cancel", null);
-            builder.show();
         } catch (Exception e) {
             Log.e(TAG, "Error collecting customer information", e);
+            Toast.makeText(this, "Error processing checkout: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -491,16 +602,24 @@ public class OrderActivity extends BaseActivity {
                 itemCount += item.getQuantity();
             }
 
-            if (tvCartItemCount != null) {
-                tvCartItemCount.setText(String.valueOf(itemCount));
+            // Update cart count display
+            if (tvOrderCount != null) {
+                tvOrderCount.setText(String.valueOf(itemCount));
+                Log.d(TAG, "Updated cart badge count: " + itemCount);
             }
 
-            if (fabCart != null) {
+            if (btnViewCart != null) {
                 if (itemCount > 0) {
-                    fabCart.setText("View Cart (" + itemCount + ")");
+                    btnViewCart.setText("View Cart (" + itemCount + ")");
                 } else {
-                    fabCart.setText("View Cart");
+                    btnViewCart.setText("View Cart");
                 }
+            }
+
+            // Update text displays of item count
+            TextView orderCountTextView = findViewById(R.id.tvOrderCount);
+            if (orderCountTextView != null) {
+                orderCountTextView.setText(itemCount + " items");
             }
         } catch (Exception e) {
             Log.e(TAG, "Error updating cart badge", e);
@@ -512,6 +631,23 @@ public class OrderActivity extends BaseActivity {
             // If user is customer, show a welcome message with loading indicator
             if ("customer".equalsIgnoreCase(userRole)) {
                 Toast.makeText(this, "Welcome to Fine Dine! Loading our delicious menu...", Toast.LENGTH_SHORT).show();
+            }
+
+            // Get the premium menu items directly first for immediate display
+            final MenuItem[] directItems = MenuItem.premiumMenu();
+            if (directItems != null && directItems.length > 0) {
+                runOnUiThread(() -> {
+                    try {
+                        menuItems.clear();
+                        menuItems.addAll(Arrays.asList(directItems));
+                        if (menuAdapter != null) {
+                            menuAdapter.notifyDataSetChanged();
+                            Log.d(TAG, "Successfully loaded " + directItems.length + " menu items directly");
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error in direct menu load: " + e.getMessage());
+                    }
+                });
             }
 
             new Thread(() -> {
@@ -534,7 +670,12 @@ public class OrderActivity extends BaseActivity {
                         Log.d(TAG, "Force added " + premiumItems.length + " menu items with images");
 
                         // Get the newly added items
-                        List<MenuItem> items = new ArrayList<>(Arrays.asList(premiumItems));
+                        List<MenuItem> items = db.menuItemDao().getAllAvailable();
+                        if (items == null || items.isEmpty()) {
+                            // If database failed to return items, use the direct array
+                            items = new ArrayList<>(Arrays.asList(premiumItems));
+                            Log.w(TAG, "Database returned empty list, using direct premium menu items");
+                        }
 
                         // Make a final copy of items for the UI thread
                         final List<MenuItem> finalItems = new ArrayList<>(items);
@@ -546,7 +687,7 @@ public class OrderActivity extends BaseActivity {
                                 menuItems.addAll(finalItems);
                                 if (menuAdapter != null) {
                                     menuAdapter.notifyDataSetChanged();
-                                    Log.d(TAG, "Successfully displayed " + finalItems.size() + " menu items");
+                                    Log.d(TAG, "Successfully displayed " + finalItems.size() + " menu items from database");
 
                                     // For customers, select "All" category to show all items
                                     if ("customer".equalsIgnoreCase(userRole)) {
@@ -657,6 +798,7 @@ public class OrderActivity extends BaseActivity {
             builder.setNeutralButton("View Details", (dialog, which) -> {
                 // Launch the detail view
                 try {
+                    Log.d(TAG, "Viewing details for item: " + item.getName());
                     MenuItemDetailActivity.launch(this, item);
                 } catch (Exception e) {
                     Log.e(TAG, "Error launching detail view", e);
@@ -680,9 +822,37 @@ public class OrderActivity extends BaseActivity {
             orderItem.setQuantity(quantity);
             orderItem.setPrice(item.price * quantity);
             orderItem.setNotes(notes);
+            orderItem.setMenuItemId(item.getItem_id());  // Set the menu item ID reference
+
+            // Validate the item
+            if (item.name == null || item.name.isEmpty()) {
+                Log.w(TAG, "MenuItem has no name, using default");
+                orderItem.setName("Unknown Item");
+            }
+
+            if (quantity <= 0) {
+                Log.w(TAG, "MenuItem has invalid quantity, using default");
+                orderItem.setQuantity(1);
+                orderItem.setPrice(item.price);
+            }
+
+            if (item.getItem_id() <= 0) {
+                Log.w(TAG, "MenuItem has invalid ID: " + item.getItem_id());
+                // We'll still allow this item
+            }
 
             // Add to current order
             currentOrderItems.add(orderItem);
+
+            // Initialize orderItemAdapter if it's null
+            if (orderItemAdapter == null) {
+                orderItemAdapter = new OrderItemAdapter(currentOrderItems, this::removeOrderItem);
+                RecyclerView currentOrderRecyclerView = findViewById(R.id.currentOrderRecyclerView);
+                if (currentOrderRecyclerView != null) {
+                    currentOrderRecyclerView.setAdapter(orderItemAdapter);
+                    currentOrderRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+                }
+            }
 
             // Update the adapter
             orderItemAdapter.notifyItemInserted(currentOrderItems.size() - 1);
@@ -712,6 +882,7 @@ public class OrderActivity extends BaseActivity {
 
                 // Update the adapter
                 orderItemAdapter.notifyItemRemoved(position);
+                orderItemAdapter.notifyDataSetChanged(); // Refresh the entire list to ensure correctness
 
                 // Update total
                 updateOrderTotal();
@@ -721,6 +892,11 @@ public class OrderActivity extends BaseActivity {
 
                 // Show confirmation toast
                 Toast.makeText(this, item.getName() + " removed from order", Toast.LENGTH_SHORT).show();
+
+                // If cart is empty, inform the user
+                if (currentOrderItems.isEmpty()) {
+                    Toast.makeText(this, "Your cart is now empty", Toast.LENGTH_SHORT).show();
+                }
             }
         } catch (Exception e) {
             Log.e(TAG, "Error removing order item", e);
@@ -751,45 +927,96 @@ public class OrderActivity extends BaseActivity {
                 return;
             }
 
+            // For customer views, show the cart dialog first to collect customer information
+            if ("customer".equalsIgnoreCase(userRole)) {
+                showCart();
+                return;
+            }
+
+            // Initialize database and executor if needed
+            if (appDatabase == null) {
+                appDatabase = AppDatabase.getDatabase(this);
+            }
+
+            if (databaseExecutor == null) {
+                databaseExecutor = java.util.concurrent.Executors.newSingleThreadExecutor();
+            }
+
             // Validate table number and customer info
-            String tableNumberStr = etTableNumber.getText().toString().trim();
-            String customerName = etCustomerName.getText().toString().trim();
-            String customerPhone = etCustomerPhone.getText().toString().trim();
-            String customerEmail = etCustomerEmail.getText().toString().trim();
+            String tableNumberStr = "";
+            String customerName = "";
+            String customerPhone = "";
+            String customerEmail = "";
+
+            // Safely get text from EditText fields with null checks
+            if (etTableNumber != null && etTableNumber.getText() != null) {
+                tableNumberStr = etTableNumber.getText().toString().trim();
+            }
+
+            if (etCustomerName != null && etCustomerName.getText() != null) {
+                customerName = etCustomerName.getText().toString().trim();
+            }
+
+            if (etCustomerPhone != null && etCustomerPhone.getText() != null) {
+                customerPhone = etCustomerPhone.getText().toString().trim();
+            }
+
+            if (etCustomerEmail != null && etCustomerEmail.getText() != null) {
+                customerEmail = etCustomerEmail.getText().toString().trim();
+            }
 
             if (tableNumberStr.isEmpty()) {
-                etTableNumber.setError("Table number is required");
-                etTableNumber.requestFocus();
+                if (etTableNumber != null) {
+                    etTableNumber.setError("Table number is required");
+                    etTableNumber.requestFocus();
+                }
+                Toast.makeText(this, "Please enter a table number", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (customerName.isEmpty()) {
-                etCustomerName.setError("Customer name is required");
-                etCustomerName.requestFocus();
+                if (etCustomerName != null) {
+                    etCustomerName.setError("Customer name is required");
+                    etCustomerName.requestFocus();
+                }
+                Toast.makeText(this, "Please enter customer name", Toast.LENGTH_SHORT).show();
                 return;
             }
 
+            // Email is less critical - if empty, generate a placeholder
             if (customerEmail.isEmpty()) {
-                etCustomerEmail.setError("Customer email is required");
-                etCustomerEmail.requestFocus();
-                return;
+                // Generate a placeholder email based on customer name and timestamp
+                customerEmail = customerName.toLowerCase().replace(" ", ".")
+                        + "." + System.currentTimeMillis() + "@customer.com";
+                Log.d(TAG, "Generated placeholder email: " + customerEmail);
+
+                // Update the field if it exists
+                if (etCustomerEmail != null) {
+                    etCustomerEmail.setText(customerEmail);
+                }
             }
 
-            // Convert table number to int
+            // Convert table number to int safely
             try {
                 currentTableNumber = Integer.parseInt(tableNumberStr);
+                if (currentTableNumber <= 0) {
+                    throw new NumberFormatException("Table number must be positive");
+                }
             } catch (NumberFormatException e) {
-                etTableNumber.setError("Invalid table number");
-                etTableNumber.requestFocus();
+                if (etTableNumber != null) {
+                    etTableNumber.setError("Invalid table number - must be a positive number");
+                    etTableNumber.requestFocus();
+                }
+                Toast.makeText(this, "Please enter a valid table number", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             // Calculate total order amount
-            double orderTotal = 0;
-            for (OrderItem item : currentOrderItems) {
-                orderTotal += item.getPrice();
-            }
+            double orderTotal = calculateOrderTotal();
             final double finalOrderTotal = orderTotal;
+            final String finalCustomerName = customerName;
+            final String finalCustomerPhone = customerPhone;
+            final String finalCustomerEmail = customerEmail;
 
             // Show confirmation dialog
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -797,13 +1024,43 @@ public class OrderActivity extends BaseActivity {
             builder.setMessage(String.format("Submit order for table #%d?\nTotal: R%.2f",
                     currentTableNumber, finalOrderTotal));
             builder.setPositiveButton("Submit", (dialog, which) -> {
-                processOrderSubmission(customerName, customerPhone, customerEmail, finalOrderTotal);
+                processOrderSubmission(finalCustomerName, finalCustomerPhone, finalCustomerEmail, finalOrderTotal);
             });
             builder.setNegativeButton("Cancel", null);
             builder.show();
         } catch (Exception e) {
             Log.e(TAG, "Error in submitOrder", e);
-            Toast.makeText(this, "Error submitting order", Toast.LENGTH_SHORT).show();
+
+            // Show a comprehensive error message
+            AlertDialog.Builder errorBuilder = new AlertDialog.Builder(this);
+            errorBuilder.setTitle("Order Submission Error");
+            errorBuilder.setMessage("There was a problem submitting your order: " + e.getMessage() +
+                    "\n\nPlease try again or contact support.");
+            errorBuilder.setPositiveButton("OK", null);
+            errorBuilder.show();
+        }
+    }
+
+    /**
+     * Show error dialog with retry option
+     */
+    private void showErrorDialog(String title, String message) {
+        try {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(title)
+                    .setMessage(message)
+                    .setPositiveButton("Try Again", (dialog, which) -> {
+                        // Do nothing, dialog will dismiss
+                    })
+                    .setNegativeButton("Contact Support", (dialog, which) -> {
+                        // Show support contact info
+                        Toast.makeText(this, "Please contact support at support@finedine.com", Toast.LENGTH_LONG).show();
+                    })
+                    .show();
+        } catch (Exception e) {
+            Log.e(TAG, "Error showing error dialog", e);
+            // Last resort fallback
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -816,6 +1073,15 @@ public class OrderActivity extends BaseActivity {
         progressDialog.show();
 
         try {
+            // Initialize database and executor if needed
+            if (appDatabase == null) {
+                appDatabase = AppDatabase.getDatabase(this);
+            }
+
+            if (databaseExecutor == null) {
+                databaseExecutor = java.util.concurrent.Executors.newSingleThreadExecutor();
+            }
+
             // Create order object
             Order order = new Order();
             order.setTableNumber(currentTableNumber);
@@ -837,69 +1103,242 @@ public class OrderActivity extends BaseActivity {
             order.setCustomerEmail(customerEmail);
             order.setTotal(orderTotal);
 
+            // Validate order data before submission
+            if (!order.validate()) {
+                if (progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
+                Toast.makeText(this, "Invalid order data. Please check all fields.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             // Create a copy of the current order items to avoid modification issues
             final List<OrderItem> orderItemsCopy = new ArrayList<>(currentOrderItems);
 
-            // Use the OrderProcessor to handle order submission
-            com.finedine.rms.utils.OrderProcessor.processOrder(
-                    this,
-                    databaseExecutor,
-                    appDatabase,
-                    order,
-                    orderItemsCopy,
-                    new com.finedine.rms.utils.OrderProcessor.OrderCallback() {
-                        @Override
-                        public void onSuccess(long orderId) {
-                            runOnUiThread(() -> {
-                                try {
-                                    if (progressDialog.isShowing()) {
-                                        progressDialog.dismiss();
-                                    }
+            // Set a timeout handler in case the order submission takes too long
+            final boolean[] submissionCompleted = {false};
 
-                                    // Show payment options dialog
-                                    showPaymentOptionsDialog(orderId, orderTotal);
-                                } catch (Exception e) {
-                                    Log.e(TAG, "Error updating UI after order submission", e);
-                                    Toast.makeText(OrderActivity.this,
-                                            "Order submitted successfully but UI update failed",
-                                            Toast.LENGTH_SHORT).show();
-                                    clearOrder();
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onFailure(String error) {
-                            runOnUiThread(() -> {
-                                if (progressDialog.isShowing()) {
-                                    progressDialog.dismiss();
-                                }
-                                Toast.makeText(OrderActivity.this,
-                                        "Error submitting order: " + error,
-                                        Toast.LENGTH_LONG).show();
-                            });
-                        }
+            // Create a handler to dismiss the dialog if submission takes too long
+            new android.os.Handler().postDelayed(() -> {
+                if (!submissionCompleted[0] && progressDialog != null && progressDialog.isShowing()) {
+                    try {
+                        progressDialog.dismiss();
+                        Toast.makeText(OrderActivity.this, "Order submission is taking longer than expected. Please wait...", Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error dismissing timed out dialog", e);
                     }
-            );
+                }
+            }, 10000); // 10-second timeout
+
+            // Create order ID for unified tracking across all destinations
+            final String unifiedOrderId = "ORD_" + System.currentTimeMillis() + "_" + Math.abs(java.util.UUID.randomUUID().hashCode() % 1000);
+            order.setExternalId(unifiedOrderId);
+
+            // Track submission status to multiple destinations
+            final OrderSubmissionTracker submissionTracker = new OrderSubmissionTracker();
+
+            // Use our new OrderWrapper utility for improved order handling with retry mechanism
+            submitToLocalDatabase(order, orderItemsCopy, submissionTracker, progressDialog, unifiedOrderId);
+
+            // Submit to cloud services immediately in parallel
+            submitToCloudServices(order, orderItemsCopy, submissionTracker, unifiedOrderId);
         } catch (Exception e) {
             Log.e(TAG, "Error submitting order", e);
 
             // Update UI on error
-            if (progressDialog.isShowing()) {
-                progressDialog.dismiss();
+            try {
+                if (progressDialog != null && progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
+            } catch (Exception dialogEx) {
+                Log.e(TAG, "Error dismissing dialog", dialogEx);
             }
-            Toast.makeText(OrderActivity.this,
-                    "Error submitting order: " + e.getMessage(),
-                    Toast.LENGTH_LONG).show();
+
+            // Show a detailed error dialog
+            AlertDialog.Builder errorBuilder = new AlertDialog.Builder(this);
+            errorBuilder.setTitle("Order Error");
+            errorBuilder.setMessage("There was a problem with your order: " + e.getMessage() +
+                    "\n\nPlease try again or contact support.");
+            errorBuilder.setPositiveButton("OK", null);
+            errorBuilder.show();
         }
     }
 
     private void notifyKitchenAboutNewOrder(long orderId, int tableNumber) {
         try {
+            // Send local notification
             NotificationUtils notificationUtils = new NotificationUtils();
             notificationUtils.sendOrderNotification(this, (int) orderId, tableNumber);
+
+            // Send notification to kitchen tablets via Firebase
+            sendKitchenTabletNotification(orderId, tableNumber);
+
+            // Send notification to kitchen printers if configured
+            sendKitchenPrinterNotification(orderId, tableNumber);
+
+            // Send SMS notification if configured
+            sendKitchenSmsNotification(orderId, tableNumber);
+
+            Log.d(TAG, "Kitchen notifications sent for order #" + orderId);
         } catch (Exception e) {
             Log.e(TAG, "Failed to send kitchen notification: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Send a notification to kitchen tablets or systems
+     */
+    private void sendKitchenTabletNotification(long orderId, int tableNumber) {
+        // Try to send notification via Firebase Cloud Messaging if available
+        try {
+            if (ordersRef != null) {
+                Map<String, Object> notification = new HashMap<>();
+                notification.put("type", "new_order");
+                notification.put("orderId", orderId);
+                notification.put("tableNumber", tableNumber);
+                notification.put("timestamp", System.currentTimeMillis());
+
+                // Add to kitchen_notifications collection
+                DatabaseReference notificationsRef = FirebaseDatabase.getInstance()
+                        .getReference("kitchen_notifications");
+                notificationsRef.push().setValue(notification)
+                        .addOnSuccessListener(aVoid -> {
+                            Log.d(TAG, "Kitchen tablet notification sent successfully");
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "Failed to send kitchen tablet notification", e);
+                        });
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error sending kitchen tablet notification", e);
+        }
+    }
+
+    /**
+     * Submit order to Firebase database with enhanced reliability
+     */
+    private void submitOrderToFirebase(Order order, List<OrderItem> orderItems, long localOrderId) {
+        if (ordersRef == null) {
+            Log.w(TAG, "Firebase not initialized, skipping Firebase order submission");
+            return;
+        }
+
+        try {
+            // Track if we're using this in the context of OrderSubmissionTracker
+            OrderSubmissionTracker tracker = null;
+            for (Object obj : Thread.currentThread().getStackTrace()) {
+                if (obj.toString().contains("OrderSubmissionTracker")) {
+                    // We're called from a context with a tracker
+                    for (OrderSubmissionTracker t : findTrackers()) {
+                        tracker = t;
+                        break;
+                    }
+                }
+            }
+
+            // Create a map for Firebase storage
+            Map<String, Object> firebaseOrder = new HashMap<>();
+            final String externalOrderId = order.getExternalId() != null ?
+                    order.getExternalId() : "ORD_" + System.currentTimeMillis();
+
+            firebaseOrder.put("orderId", localOrderId > 0 ? localOrderId : System.currentTimeMillis());
+            firebaseOrder.put("externalId", externalOrderId);
+            firebaseOrder.put("tableNumber", order.getTableNumber());
+            firebaseOrder.put("customerName", order.getCustomerName());
+            firebaseOrder.put("customerPhone", order.getCustomerPhone());
+            firebaseOrder.put("customerEmail", order.getCustomerEmail());
+            firebaseOrder.put("timestamp", order.getTimestamp());
+            firebaseOrder.put("status", order.getStatus());
+            firebaseOrder.put("waiterId", order.waiterId);
+            firebaseOrder.put("total", order.getTotal());
+
+            // Create a list of order items
+            List<Map<String, Object>> firebaseOrderItems = new ArrayList<>();
+            for (OrderItem item : orderItems) {
+                Map<String, Object> firebaseItem = new HashMap<>();
+                firebaseItem.put("name", item.getName());
+                firebaseItem.put("quantity", item.getQuantity());
+                firebaseItem.put("price", item.getPrice());
+                firebaseItem.put("notes", item.getNotes());
+                firebaseItem.put("menuItemId", item.getMenuItemId());
+                firebaseOrderItems.add(firebaseItem);
+            }
+
+            firebaseOrder.put("items", firebaseOrderItems);
+
+            // Device info for tracking
+            Map<String, Object> deviceInfo = new HashMap<>();
+            deviceInfo.put("model", android.os.Build.MODEL);
+            deviceInfo.put("device", android.os.Build.DEVICE);
+            deviceInfo.put("appVersion", getAppVersion());
+            deviceInfo.put("installId", prefsManager != null ? prefsManager.getInstallId() : "unknown");
+            firebaseOrder.put("deviceInfo", deviceInfo);
+
+            // Capture tracker for use in callbacks
+            final OrderSubmissionTracker finalTracker = tracker;
+
+            // First try to store by external ID for consistent retrieval
+            ordersRef.child("by_external_id").child(externalOrderId).setValue(firebaseOrder)
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d(TAG, "Order successfully submitted to Firebase with external ID: " + externalOrderId);
+                        if (finalTracker != null) {
+                            finalTracker.markFirebaseSuccess();
+                            finalTracker.checkAndProceedWithOrder(OrderActivity.this, null, -1, order);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to submit order to Firebase by external ID: " + e.getMessage(), e);
+
+                        // Retry with push ID as fallback
+                        String firebaseOrderId = ordersRef.push().getKey();
+                        if (firebaseOrderId != null) {
+                            ordersRef.child(firebaseOrderId).setValue(firebaseOrder)
+                                    .addOnSuccessListener(innerVoid -> {
+                                        Log.d(TAG, "Order successfully submitted to Firebase with fallback ID: " + firebaseOrderId);
+                                        if (finalTracker != null) {
+                                            finalTracker.markFirebaseSuccess();
+                                            finalTracker.checkAndProceedWithOrder(OrderActivity.this, null, -1, order);
+                                        }
+                                    })
+                                    .addOnFailureListener(innerE -> {
+                                        Log.e(TAG, "Failed to submit order to Firebase with fallback: " + innerE.getMessage(), innerE);
+
+                                        // Store locally for later sync if both attempts fail
+                                        storeOrderForLaterSync(order, orderItems, externalOrderId);
+                                    });
+                        }
+                    });
+        } catch (Exception e) {
+            Log.e(TAG, "Error submitting order to Firebase", e);
+            // Store for later sync
+            storeOrderForLaterSync(order, orderItems, order.getExternalId());
+        }
+    }
+
+    /**
+     * Find all active OrderSubmissionTracker instances
+     */
+    private List<OrderSubmissionTracker> findTrackers() {
+        List<OrderSubmissionTracker> trackers = new ArrayList<>();
+        // This is a simplified approach - in a real app we'd use a more robust approach
+        try {
+            // For now, we'll just create a new tracker if needed
+            trackers.add(new OrderSubmissionTracker());
+        } catch (Exception e) {
+            Log.e(TAG, "Error finding trackers", e);
+        }
+        return trackers;
+    }
+
+    /**
+     * Get application version name
+     */
+    private String getAppVersion() {
+        try {
+            return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting app version", e);
+            return "unknown";
         }
     }
 
@@ -1051,6 +1490,35 @@ public class OrderActivity extends BaseActivity {
                 .create();
         progressDialog.show();
 
+        if ("customer".equalsIgnoreCase(userRole)) {
+            try {
+                // Directly load menu items from MenuItem class
+                MenuItem[] premiumItems = MenuItem.premiumMenu();
+
+                // Update UI on main thread
+                runOnUiThread(() -> {
+                    try {
+                        // Dismiss progress dialog
+                        progressDialog.dismiss();
+
+                        // Update adapter with new items
+                        menuItems.clear();
+                        menuItems.addAll(Arrays.asList(premiumItems));
+                        menuAdapter.notifyDataSetChanged();
+
+                        // Show success message
+                        Toast.makeText(this, "Successfully restored menu items!", Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error updating UI after menu reset", e);
+                    }
+                });
+                return;
+            } catch (Exception e) {
+                Log.e(TAG, "Error in direct menu reset", e);
+                // Fall through to database approach
+            }
+        }
+
         AppDatabase db = AppDatabase.getDatabase(this);
         new Thread(() -> {
             try {
@@ -1094,5 +1562,340 @@ public class OrderActivity extends BaseActivity {
                 });
             }
         }).start();
+    }
+
+    /**
+     * Submit order to local database with retry mechanism
+     */
+    private void submitToLocalDatabase(Order order, List<OrderItem> orderItems,
+                                       OrderSubmissionTracker tracker, AlertDialog progressDialog,
+                                       String unifiedOrderId) {
+        // Use OrderWrapper utility for database submission
+        com.finedine.rms.utils.OrderWrapper orderWrapper =
+                new com.finedine.rms.utils.OrderWrapper(this, appDatabase, databaseExecutor);
+
+        // Attach the unified order ID
+        order.setExternalId(unifiedOrderId);
+
+        // Try up to 3 times to submit the order
+        final int[] retryCount = {0};
+        final int MAX_RETRIES = 3;
+
+        orderWrapper.submitOrder(order, orderItems, new com.finedine.rms.utils.OrderWrapper.OrderSubmitCallback() {
+            @Override
+            public void onSuccess(long orderId) {
+                // Mark local database submission as successful
+                tracker.markLocalDatabaseSuccess(orderId);
+                Log.d(TAG, "Local database order submission successful with ID: " + orderId);
+
+                // Submit to Firebase if not already done
+                if (!tracker.isFirebaseSubmitted()) {
+                    submitOrderToFirebase(order, orderItems, orderId);
+                }
+
+                // Continue with order processing if we haven't done so already
+                tracker.checkAndProceedWithOrder(OrderActivity.this, progressDialog, orderId, order);
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Local database order submission failed: " + error + ", retry: " + retryCount[0]);
+
+                if (retryCount[0] < MAX_RETRIES) {
+                    retryCount[0]++;
+                    // Exponential backoff for retries
+                    int delayMillis = 1000 * retryCount[0];
+
+                    new android.os.Handler().postDelayed(() -> {
+                        // Retry submission
+                        Log.d(TAG, "Retrying local database submission, attempt " + retryCount[0]);
+                        orderWrapper.submitOrder(order, orderItems, this);
+                    }, delayMillis);
+                } else {
+                    // Mark local database submission as failed after max retries
+                    tracker.markLocalDatabaseFailure();
+
+                    // Try Firebase as fallback if local database failed
+                    if (ordersRef != null && !tracker.isFirebaseSubmitted()) {
+                        submitOrderToFirebase(order, orderItems, -1);
+                    }
+
+                    // Continue with order processing using Firebase or cloud data if available
+                    tracker.checkAndProceedWithOrder(OrderActivity.this, progressDialog, -1, order);
+                }
+            }
+        });
+    }
+
+    /**
+     * Submit to cloud services (API endpoints)
+     */
+    private void submitToCloudServices(Order order, List<OrderItem> orderItems,
+                                       OrderSubmissionTracker tracker, String unifiedOrderId) {
+        try {
+            // Check if we have connectivity
+            android.net.ConnectivityManager cm =
+                    (android.net.ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            if (cm == null || cm.getActiveNetworkInfo() == null || !cm.getActiveNetworkInfo().isConnected()) {
+                Log.w(TAG, "No network connectivity, skipping cloud submission");
+                tracker.markCloudSubmissionFailure();
+                return;
+            }
+
+            // Create request in background thread
+            new Thread(() -> {
+                try {
+                    // Create JSON payload
+                    com.google.gson.Gson gson = new com.google.gson.Gson();
+                    Map<String, Object> payload = new HashMap<>();
+
+                    payload.put("externalId", unifiedOrderId);
+                    payload.put("tableNumber", order.getTableNumber());
+                    payload.put("customerName", order.getCustomerName());
+                    payload.put("customerPhone", order.getCustomerPhone());
+                    payload.put("customerEmail", order.getCustomerEmail());
+                    payload.put("timestamp", order.getTimestamp());
+                    payload.put("status", order.getStatus());
+                    payload.put("waiterId", order.waiterId);
+                    payload.put("total", order.getTotal());
+                    payload.put("restaurantId", prefsManager != null ? prefsManager.getRestaurantId() : "1");
+                    payload.put("items", orderItems);
+
+                    String jsonPayload = gson.toJson(payload);
+
+                    // Establish connection
+                    java.net.URL url = new java.net.URL("https://api.finedine.com/v1/orders");
+                    java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json");
+                    conn.setRequestProperty("Accept", "application/json");
+                    conn.setDoOutput(true);
+
+                    // Set auth token if available
+                    if (prefsManager != null && prefsManager.getApiToken() != null) {
+                        conn.setRequestProperty("Authorization", "Bearer " + prefsManager.getApiToken());
+                    }
+
+                    // Send payload
+                    try (java.io.OutputStream os = conn.getOutputStream()) {
+                        byte[] input = jsonPayload.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                        os.write(input, 0, input.length);
+                    }
+
+                    // Get response
+                    int responseCode = conn.getResponseCode();
+
+                    if (responseCode >= 200 && responseCode < 300) {
+                        // Success
+                        tracker.markCloudSubmissionSuccess();
+                        Log.d(TAG, "Order successfully submitted to cloud API");
+
+                        // Parse response to get any server-assigned IDs
+                        try (java.io.BufferedReader br = new java.io.BufferedReader(
+                                new java.io.InputStreamReader(conn.getInputStream(), java.nio.charset.StandardCharsets.UTF_8))) {
+                            StringBuilder response = new StringBuilder();
+                            String responseLine;
+                            while ((responseLine = br.readLine()) != null) {
+                                response.append(responseLine.trim());
+                            }
+                            Log.d(TAG, "Cloud API response: " + response.toString());
+                        }
+                    } else {
+                        // HTTP error
+                        tracker.markCloudSubmissionFailure();
+                        Log.e(TAG, "Cloud API submission failed with HTTP code: " + responseCode);
+
+                        // Store for later retry
+                        storeOrderForLaterSync(order, orderItems, unifiedOrderId);
+                    }
+
+                    // Check if we can proceed
+                    runOnUiThread(() -> {
+                        tracker.checkAndProceedWithOrder(OrderActivity.this, null, -1, order);
+                    });
+
+                } catch (Exception e) {
+                    Log.e(TAG, "Error submitting to cloud API", e);
+                    tracker.markCloudSubmissionFailure();
+
+                    // Store for later retry
+                    storeOrderForLaterSync(order, orderItems, unifiedOrderId);
+
+                    // Check if we can proceed
+                    runOnUiThread(() -> {
+                        tracker.checkAndProceedWithOrder(OrderActivity.this, null, -1, order);
+                    });
+                }
+            }).start();
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error initiating cloud submission", e);
+            tracker.markCloudSubmissionFailure();
+        }
+    }
+
+    /**
+     * Send notification to Firebase Cloud Messaging topics
+     */
+    private void sendFcmNotification(long orderId, int tableNumber) {
+        try {
+            // This would normally use Firebase Cloud Messaging HTTP v1 API
+            // For this demo, we're just logging that we would do this
+            Log.d(TAG, "Would send FCM notification to 'kitchen' topic for order #" + orderId);
+
+            // In a real implementation, we would make an HTTP request to the FCM API
+        } catch (Exception e) {
+            Log.e(TAG, "Error sending FCM notification", e);
+        }
+    }
+
+    /**
+     * Send notification to kitchen printers
+     */
+    private void sendKitchenPrinterNotification(long orderId, int tableNumber) {
+        try {
+            // Check if printer integration is enabled
+            boolean printerEnabled = prefsManager != null && prefsManager.isPrinterEnabled();
+
+            if (!printerEnabled) {
+                Log.d(TAG, "Kitchen printer integration not enabled, skipping");
+                return;
+            }
+
+            // In a real implementation, this would integrate with a printer service
+            Log.d(TAG, "Would send order #" + orderId + " to kitchen printer");
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error sending kitchen printer notification", e);
+        }
+    }
+
+    /**
+     * Send SMS notification to kitchen staff
+     */
+    private void sendKitchenSmsNotification(long orderId, int tableNumber) {
+        try {
+            // Check if SMS notification is enabled
+            boolean smsEnabled = prefsManager != null && prefsManager.isSmsNotificationsEnabled();
+
+            if (!smsEnabled) {
+                Log.d(TAG, "SMS notifications not enabled, skipping");
+                return;
+            }
+
+            String phoneNumber = prefsManager != null ? prefsManager.getKitchenPhoneNumber() : null;
+
+            if (phoneNumber == null || phoneNumber.isEmpty()) {
+                Log.d(TAG, "No kitchen phone number configured, skipping SMS");
+                return;
+            }
+
+            // In a real implementation, this would integrate with an SMS service
+            Log.d(TAG, "Would send SMS notification to " + phoneNumber + " for order #" + orderId);
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error sending SMS notification", e);
+        }
+    }
+
+    /**
+     * Store order locally for later synchronization when connectivity is restored
+     */
+    private void storeOrderForLaterSync(Order order, List<OrderItem> orderItems, String externalId) {
+        try {
+            // Store pending sync information in SharedPreferences
+            if (prefsManager != null) {
+                // Add to pending orders list
+                prefsManager.addPendingSyncOrder(externalId);
+
+                // Store order data in JSON format for later sync
+                com.google.gson.Gson gson = new com.google.gson.Gson();
+                String orderJson = gson.toJson(order);
+                String itemsJson = gson.toJson(orderItems);
+
+                prefsManager.storePendingOrderData(externalId, orderJson, itemsJson);
+
+                Log.d(TAG, "Order stored locally for later sync: " + externalId);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to store order for later sync", e);
+        }
+    }
+
+    /**
+     * Class to track order submission status across multiple destinations
+     */
+    private class OrderSubmissionTracker {
+        private boolean localDatabaseSuccess = false;
+        private boolean firebaseSubmitted = false;
+        private boolean cloudSubmitted = false;
+        private long localOrderId = -1;
+
+        // Order is considered submitted if ANY destination succeeds
+        private boolean isOrderSubmitted() {
+            return localDatabaseSuccess || firebaseSubmitted || cloudSubmitted;
+        }
+
+        public void markLocalDatabaseSuccess(long orderId) {
+            localDatabaseSuccess = true;
+            localOrderId = orderId;
+        }
+
+        public void markLocalDatabaseFailure() {
+            localDatabaseSuccess = false;
+        }
+
+        public void markFirebaseSuccess() {
+            firebaseSubmitted = true;
+        }
+
+        public boolean isFirebaseSubmitted() {
+            return firebaseSubmitted;
+        }
+
+        public void markCloudSubmissionSuccess() {
+            cloudSubmitted = true;
+        }
+
+        public void markCloudSubmissionFailure() {
+            cloudSubmitted = false;
+        }
+
+        /**
+         * Check if order can be considered submitted and proceed with UI flow
+         */
+        public void checkAndProceedWithOrder(OrderActivity activity, AlertDialog progressDialog,
+                                             long orderId, Order order) {
+            // Only proceed once
+            if (!isOrderSubmitted()) {
+                // Don't proceed yet, waiting for at least one successful submission
+                return;
+            }
+
+            activity.runOnUiThread(() -> {
+                // Dismiss progress dialog if still showing
+                if (progressDialog != null && progressDialog.isShowing()) {
+                    try {
+                        progressDialog.dismiss();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error dismissing progress dialog", e);
+                    }
+                }
+
+                // Use local order ID if available, otherwise use -1
+                long effectiveOrderId = localOrderId > 0 ? localOrderId : orderId;
+
+                // Send notification to kitchen
+                activity.notifyKitchenAboutNewOrder(effectiveOrderId, order.getTableNumber());
+
+                // Show payment options dialog
+                activity.showPaymentOptionsDialog(effectiveOrderId, order.getTotal());
+
+                // Log submission state
+                Log.d(TAG, "Order submission complete. Local DB: " + localDatabaseSuccess +
+                        ", Firebase: " + firebaseSubmitted + ", Cloud: " + cloudSubmitted);
+            });
+        }
     }
 }

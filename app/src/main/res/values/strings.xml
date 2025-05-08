@@ -19,13 +19,13 @@
     <string name="registers">Register</string>
     <string name="full_name">Full Name</string>
     <string name="email">Email</string>
-    <string name="already_have_an_account_login">already have an acount login</string>
+    <string name="already_have_an_account_login">Already have an account? Login</string>
     <string name="Confirm_Password">Confirm Password</string>
     <string name="add_item">Add Item</string>
     <string name="warning_icon">warning</string>
     <string name="low_stock_warning">low stock warning</string>
     <string name="availability">availability</string>
-    <string name="order_status">ordeer</string>
+    <string name="order_status">Order Status</string>
     <string name="customer_icon">icon</string>
     <string name="party_size">party size</string>
     <string name="reservation_time">reservation time</string>
@@ -40,23 +40,28 @@
     <string name="Email">Email</string>
     <string name="search_menu_items">Search Menu Items</string>
     <string name="welcome_message">welcome</string>
-    <string name="view_orders">view order</string>
+    <string name="view_orders">view orders</string>
     <string name="click_me">Click Me</string>
     <string name="default_notification_channel_id">finedine_notifications</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <!-- Settings strings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_system">System Default</string>
+    <string name="settings_app_version">App Version</string>
+    <string name="settings_certificate">Certificate Fingerprints</string>
+    <string name="settings_show">Show</string>
+    <string name="settings_cancel">Cancel</string>
 
     <!-- Plurals -->
     <plurals name="party_size">
         <item quantity="one">1 person</item>
         <item quantity="other">%d people</item>
     </plurals>
-
-    <string-array name="user_roles">
-        <item>Customer</item>
-        <item>Chef</item>
-        <item>Waiter</item>
-        <item>Manager</item>
-        <item>Admin</item>
-    </string-array>
 </resources>

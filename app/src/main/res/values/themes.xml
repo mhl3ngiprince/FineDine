@@ -66,6 +66,35 @@
         <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
     </style>
 
+    <!-- Special theme for splash screen -->
+    <style name="Theme.SplashScreen" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/bg_luxury_pattern</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowDisablePreview">false</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <!-- Force dark status bar icons for better visibility -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- Prevent system UI from drawing over the splash -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <!-- Add these items for smoother initialization -->
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+        <!-- Disable any complex Material theme components for splash -->
+        <item name="textInputStyle">@null</item>
+        <item name="elevationOverlayEnabled">false</item>
+        <!-- Set simpler text appearance to avoid extra processing -->
+        <item name="android:textViewStyle">@android:style/Widget.TextView</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <!-- AppCompat compatibility -->
+        <item name="colorPrimary">@color/restaurant_primary</item>
+        <item name="colorPrimaryDark">@color/restaurant_primary_dark</item>
+        <item name="colorAccent">@color/restaurant_accent</item>
+    </style>
+
     <!-- Custom component styles -->
     <style name="FineDineActionBar" parent="Widget.MaterialComponents.ActionBar.Primary">
         <item name="background">@color/restaurant_primary</item>
@@ -138,4 +167,69 @@
 
     <!-- Legacy theme for compatibility -->
     <style name="Theme.FineDineRMS" parent="Theme.MaterialComponents.NoActionBar" />
+
+    <!-- AppCompat theme for legacy screens -->
+    <style name="Theme.FineDineAppCompat" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/restaurant_primary</item>
+        <item name="colorPrimaryDark">@color/restaurant_primary_dark</item>
+        <item name="colorAccent">@color/restaurant_accent</item>
+        <item name="android:windowBackground">@color/restaurant_bg</item>
+        <item name="android:textColorPrimary">@color/restaurant_text_primary</item>
+        <item name="android:textColorSecondary">@color/restaurant_text_secondary</item>
+        <item name="buttonStyle">@style/Widget.AppCompat.Button</item>
+        <item name="editTextStyle">@style/Widget.AppCompat.EditText</item>
+        <item name="android:textViewStyle">@style/Widget.AppCompat.TextView</item>
+        <!-- Additional compatibility items -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <!-- Material compatibility bridges -->
+        <item name="materialButtonStyle">@style/Widget.AppCompat.Button</item>
+        <item name="textInputStyle">@style/Widget.AppCompat.EditText</item>
+        <!-- Card compatibility -->
+        <item name="cardViewStyle">@style/CardView</item>
+        <item name="cardBackgroundColor">@color/restaurant_card_bg</item>
+        <item name="cardCornerRadius">8dp</item>
+        <item name="cardElevation">4dp</item>
+        <!-- Navigation support -->
+        <item name="drawableTint">@color/restaurant_accent</item>
+        <item name="chipStyle">@style/Widget.AppCompat.Button.Small</item>
+        <item name="bottomNavigationStyle">@style/Widget.Design.BottomNavigationView</item>
+    </style>
+
+    <!-- Navigation-compatible theme that combines AppCompat with Material Design elements -->
+    <style name="Theme.FineDineNavigation" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/restaurant_primary</item>
+        <item name="colorPrimaryDark">@color/restaurant_primary_dark</item>
+        <item name="colorAccent">@color/restaurant_accent</item>
+        <item name="android:windowBackground">@color/restaurant_bg</item>
+        <item name="android:textColorPrimary">@color/restaurant_text_primary</item>
+        <item name="android:textColorSecondary">@color/restaurant_text_secondary</item>
+        <item name="colorError">@color/restaurant_error</item>
+
+        <!-- Navigation support -->
+        <item name="bottomNavigationStyle">@style/Widget.MaterialComponents.BottomNavigationView
+        </item>
+        <item name="chipStyle">@style/Widget.MaterialComponents.Chip.Action</item>
+        <item name="chipGroupStyle">@style/Widget.MaterialComponents.ChipGroup</item>
+
+        <!-- Make sure drawer works properly -->
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">true</item>
+        <item name="color">@color/restaurant_text_light</item>
+    </style>
+
+    <!-- Custom AppCompat styles for Material-like components -->
+    <style name="AppCompatMaterialButton" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">@color/text_white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+    </style>
 </resources>

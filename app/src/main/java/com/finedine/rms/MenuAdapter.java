@@ -113,9 +113,6 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
             calories.setText(String.format("%dcal", item.calories));
             spiceLevel.setText(item.spiceLevel);
 
-            RequestOptions requestOptions = new RequestOptions();
-            requestOptions.centerCrop();
-
             int imageResource = item.imageResourceId;
             if (imageResource <= 0) {
                 imageResource = R.drawable.placeholder_food;
@@ -128,47 +125,21 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
 
             // Try loading from resource first, fallback to URL if available
             try {
-                // Use direct image resource setting instead of Glide for reliability
+                // Use Glide for all image loading for consistency and better performance
                 if (imageResource > 0) {
-                    try {
-                        // Try to set the image directly
-                        itemImage.setImageResource(imageResource);
-                        android.util.Log.d("MenuAdapter", "Set image directly for: " + item.name);
-                    } catch (Exception e) {
-                        android.util.Log.e("MenuAdapter", "Error setting image resource directly: " + e.getMessage());
-                        loadWithGlide(imageResource, item);
-                    }
+                    loadWithGlide(imageResource, item);
                 } else if (item.imageUrl != null && !item.imageUrl.isEmpty()) {
                     loadWithGlide(item.imageUrl, item);
                 } else {
-                    itemImage.setImageResource(R.drawable.placeholder_food);
+                    // Fallback to placeholder
+                    loadWithGlide(R.drawable.placeholder_food, item);
                 }
             } catch (Exception e) {
                 android.util.Log.e("MenuAdapter", "Error loading image: " + e.getMessage());
-                itemImage.setImageResource(R.drawable.placeholder_food);
+                loadWithGlide(R.drawable.placeholder_food, item);
             }
 
             itemImage.setVisibility(View.VISIBLE);
-
-            if (item.name.contains("Scallop")) {
-                itemImage.setImageResource(R.drawable.scallops);
-            } else if (item.name.contains("Foie") || item.name.contains("Torchon")) {
-                itemImage.setImageResource(R.drawable.torchon);
-            } else if (item.name.contains("Wagyu") || item.name.contains("Tenderloin")) {
-                itemImage.setImageResource(R.drawable.tenderloin);
-            } else if (item.name.contains("Lobster")) {
-                itemImage.setImageResource(R.drawable.lobster);
-            } else if (item.name.contains("Truffle") || item.name.contains("Risotto")) {
-                itemImage.setImageResource(R.drawable.black_truffle_risotto_recipe);
-            } else if (item.name.contains("Soufflé")) {
-                itemImage.setImageResource(R.drawable.marniersuffle);
-            } else if (item.name.contains("Chocolate")) {
-                itemImage.setImageResource(R.drawable.chocolate_symphony);
-            } else if (item.name.contains("Champagne")) {
-                itemImage.setImageResource(R.drawable.dom_perigon);
-            } else if (item.name.contains("Coffee")) {
-                itemImage.setImageResource(R.drawable.greek_coffee_demitasse_cup);
-            }
 
             // Set double click behavior to show details
             itemView.setOnLongClickListener(v -> {

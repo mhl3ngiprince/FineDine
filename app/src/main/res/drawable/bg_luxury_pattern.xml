@@ -3,7 +3,7 @@
     <!-- Base background color -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="@color/luxe_charcoal" />
+            <solid android:color="@color/med_bg_white" />
         </shape>
     </item>
 
@@ -13,8 +13,8 @@
             <gradient
                 android:angle="135"
                 android:startColor="#00000000"
-                android:centerColor="#10331A10"
-                android:endColor="#20331A10"
+                android:centerColor="#101A6B96"
+                android:endColor="#201A6B96"
                 android:type="linear" />
         </shape>
     </item>
@@ -24,14 +24,14 @@
         <color android:color="@android:color/transparent" />
     </item>
 
-    <!-- Enhanced golden gradient overlay -->
+    <!-- Enhanced blue gradient overlay -->
     <item>
         <shape android:shape="rectangle">
             <gradient
                 android:angle="315"
                 android:startColor="#00000000"
-                android:centerColor="#15D4AF37"
-                android:endColor="#25D4AF37"
+                android:centerColor="#151A6B96"
+                android:endColor="#251A6B96"
                 android:type="linear" />
         </shape>
     </item>
@@ -44,7 +44,7 @@
             <gradient
                 android:type="radial"
                 android:gradientRadius="400dp"
-                android:startColor="#20D4AF37"
+                android:startColor="#203F88C5"
                 android:endColor="#00000000" />
         </shape>
     </item>
@@ -56,7 +56,7 @@
                 android:type="radial"
                 android:gradientRadius="800dp"
                 android:startColor="#00000000"
-                android:endColor="#90000000"
+                android:endColor="#151A6B96"
                 android:centerX="0.5"
                 android:centerY="0.5" />
         </shape>

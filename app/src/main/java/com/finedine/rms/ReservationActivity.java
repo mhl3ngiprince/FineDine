@@ -36,11 +36,10 @@ public class ReservationActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_reservation);
 
         try {
-            // Setup navigation panel
-            setupNavigationPanel("Reservations");
+            // Setup modern navigation panel
+            setupModernNavigationPanel("Reservations", R.layout.activity_reservation);
 
             // Initialize input fields
             etSpecialRequests = findViewById(R.id.etSpecialRequests);
@@ -98,7 +97,7 @@ public class ReservationActivity extends BaseActivity {
                         selectedMinute = minute;
                         updateDateTimeDisplay();
                     },
-                    selectedHour, selectedMinute, true);
+                    selectedHour, selectedMinute, false); // Changed to false for 12-hour format
             timePicker.show();
         } catch (Exception e) {
             Log.e(TAG, "Error selecting time", e);
@@ -139,7 +138,11 @@ public class ReservationActivity extends BaseActivity {
             }
 
             if (timeText != null) {
-                timeText.setText(String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute));
+                String formattedTime = String.format(Locale.getDefault(), "%02d:%02d %s",
+                        selectedHour % 12 == 0 ? 12 : selectedHour % 12,
+                        selectedMinute,
+                        selectedHour < 12 ? "AM" : "PM");
+                timeText.setText(formattedTime);
             }
 
             if (partyText != null) {
@@ -224,10 +227,12 @@ public class ReservationActivity extends BaseActivity {
 
                             // Build confirmation message
                             String confirmationMessage = String.format(
-                                    "Your reservation for %d people on %s at %s has been confirmed! Reservation #%d",
+                                    "Your reservation for %d people on %s at %02d:%02d %s has been confirmed! Reservation #%d",
                                     partySize,
                                     dateFormat.format(selectedDate.getTime()),
-                                    formattedTime,
+                                    selectedHour % 12 == 0 ? 12 : selectedHour % 12,
+                                    selectedMinute,
+                                    selectedHour < 12 ? "AM" : "PM",
                                     finalReservationId
                             );
 

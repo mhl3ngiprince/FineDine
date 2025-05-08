@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="guest_numbers">guest_numbers</string-array>
+    <string-array name="user_roles">
+        <item>Customer</item>
+        <item>Waiter</item>
+        <item>Chef</item>
+        <item>Manager</item>
+        <item>Admin</item>
+    </string-array>
 </resources>

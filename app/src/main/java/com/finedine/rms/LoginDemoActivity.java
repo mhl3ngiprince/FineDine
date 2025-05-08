@@ -8,23 +8,23 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 /**
  * Simple standalone login activity
  */
-public class LoginDemoActivity extends AppCompatActivity {
+public class LoginDemoActivity extends BaseActivity {
 
     private static final String TAG = "LoginDemoActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
 
         Log.d(TAG, "LoginDemoActivity creating");
 
         try {
+            // Setup modern navigation panel
+            setupModernNavigationPanel("Login", R.layout.activity_login);
+
             // Find views
             EditText emailInput = findViewById(R.id.emailInput);
             EditText passwordInput = findViewById(R.id.passwordInput);

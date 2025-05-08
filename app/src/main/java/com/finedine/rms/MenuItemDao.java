@@ -33,6 +33,9 @@ public interface MenuItemDao {
     @Query("SELECT * FROM menu_items WHERE item_id = :id")
     MenuItem getById(int id);
 
+    @Query("SELECT * FROM menu_items WHERE item_id = :id")
+    MenuItem getItemById(int id);
+
     @Query("SELECT * FROM menu_items WHERE name = :name LIMIT 1")
     MenuItem getByName(String name);
 
@@ -44,6 +47,9 @@ public interface MenuItemDao {
 
     @Query("SELECT * FROM menu_items WHERE name LIKE '%' || :searchTerm || '%' OR description LIKE '%' || :searchTerm || '%'")
     List<MenuItem> searchMenuItems(String searchTerm);
+
+    @Query("SELECT * FROM menu_items WHERE name LIKE :nameLike")
+    List<MenuItem> searchByName(String nameLike);
 
     @Query("UPDATE menu_items SET availability = :availability WHERE item_id = :itemId")
     void updateAvailability(int itemId, boolean availability);

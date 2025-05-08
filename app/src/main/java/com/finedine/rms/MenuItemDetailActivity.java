@@ -48,6 +48,7 @@ public class MenuItemDetailActivity extends BaseActivity {
         try {
             Intent intent = new Intent(context, MenuItemDetailActivity.class);
             intent.putExtra("item_id", menuItem.getItem_id());
+            // Don't use FLAG_ACTIVITY_CLEAR_TOP to prevent finishing the parent activity
             context.startActivity(intent);
             Log.d("MenuItemDetailActivity", "Launching detail view for: " + menuItem.getName() + " (ID: " + menuItem.getItem_id() + ")");
         } catch (Exception e) {
@@ -59,11 +60,10 @@ public class MenuItemDetailActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_menu_item_detail);
 
         try {
-            // Setup navigation panel
-            setupNavigationPanel("Menu Item Detail");
+            // Setup modern navigation panel
+            setupModernNavigationPanel("Menu Item Detail", R.layout.activity_menu_item_detail);
 
             // Initialize views
             ivMenuItemImage = findViewById(R.id.ivMenuItemDetailImage);
@@ -395,7 +395,7 @@ public class MenuItemDetailActivity extends BaseActivity {
                         Toast.makeText(MenuItemDetailActivity.this,
                                 "Order placed successfully! Kitchen is being notified.",
                                 Toast.LENGTH_LONG).show();
-                        finish();
+                        // Removed finish() to prevent activity from closing
                     });
                 }
             } catch (Exception e) {
@@ -416,5 +416,41 @@ public class MenuItemDetailActivity extends BaseActivity {
             Toast.makeText(this, quantity + "x " + item.name + " added to your order", Toast.LENGTH_SHORT).show();
             finish();
         });
+    }
+
+    /**
+     * Override onBackPressed to ensure proper navigation when user presses back button
+     */
+    @Override
+    public void onBackPressed() {
+        Log.d(TAG, "Back button pressed in MenuItemDetailActivity");
+        super.onBackPressed();
+    }
+
+    /**
+     * Save instance state to preserve menu item data during lifecycle events
+     */
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (menuItem != null) {
+            outState.putInt("item_id", menuItem.getItem_id());
+            Log.d(TAG, "Saved menu item state: " + menuItem.getItem_id());
+        }
+    }
+
+    /**
+     * Restore instance state when activity is recreated
+     */
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null && savedInstanceState.containsKey("item_id")) {
+            int itemId = savedInstanceState.getInt("item_id", -1);
+            if (itemId > 0) {
+                Log.d(TAG, "Restoring menu item state: " + itemId);
+                loadMenuItemById(itemId);
+            }
+        }
     }
 }

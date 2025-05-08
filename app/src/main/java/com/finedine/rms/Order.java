@@ -5,9 +5,14 @@ import androidx.room.Entity;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import androidx.room.Ignore;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 @Entity(tableName = "orders",indices = {@Index(value = {"orderId"}, unique = true)})
 public class Order {
+
+    private static final String TAG = "Order";
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "orderId")
@@ -32,37 +37,58 @@ public class Order {
     public int waiterId;
     private double total;
 
+    @ColumnInfo(name = "completionTime")
+    private long completionTime;
+
+    @ColumnInfo(name = "externalId")
+    private String externalId;
+
     @Ignore
     public Order(int tableNumber, String status) {
         this.tableNumber = tableNumber;
         this.status = status;
         this.timestamp = System.currentTimeMillis();
         this.orderTime = System.currentTimeMillis();
+        this.waiterId = 1; // Default waiter ID
     }
 
     public Order() {
+        // Initialize with defaults to avoid null values
+        this.status = "pending";
+        this.timestamp = System.currentTimeMillis();
+        this.orderTime = System.currentTimeMillis();
+        this.customerName = "Guest";
+        this.waiterId = 1; // Default waiter ID
     }
 
     // Getters and setters
     public long getOrderId() { return orderId; }
     public void setOrderId(long orderId) { this.orderId = orderId; }
+
     public int getTableNumber() { return tableNumber; }
     public void setTableNumber(int tableNumber) { this.tableNumber = tableNumber; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+
+    public String getStatus() {
+        return status != null ? status : "pending";
+    }
+
+    public void setStatus(String status) {
+        this.status = status != null ? status : "pending";
+    }
+
     public long getTimestamp() { return timestamp; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
 
     public String getCustomerName() {
-        return customerName;
+        return customerName != null ? customerName : "Guest";
     }
 
     public void setCustomerName(String customerName) {
-        this.customerName = customerName;
+        this.customerName = customerName != null ? customerName : "Guest";
     }
 
     public String getCustomerPhone() {
-        return customerPhone;
+        return customerPhone != null ? customerPhone : "";
     }
 
     public void setCustomerPhone(String customerPhone) {
@@ -70,7 +96,7 @@ public class Order {
     }
 
     public String getCustomerEmail() {
-        return customerEmail;
+        return customerEmail != null ? customerEmail : "";
     }
 
     public void setCustomerEmail(String customerEmail) {
@@ -78,7 +104,7 @@ public class Order {
     }
 
     public String getCustomerNotes() {
-        return customerNotes;
+        return customerNotes != null ? customerNotes : "";
     }
 
     public void setCustomerNotes(String customerNotes) {
@@ -109,7 +135,78 @@ public class Order {
         this.total = total;
     }
 
+    public long getCompletionTime() {
+        return completionTime;
+    }
+
+    public void setCompletionTime(long completionTime) {
+        this.completionTime = completionTime;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
+    }
+
     public void notifyCustomer() {
         // Add notification logic here
+        try {
+            Log.d(TAG, "Notification sent to customer: " + getCustomerName() + " for order: " + getOrderId());
+        } catch (Exception e) {
+            Log.e(TAG, "Error notifying customer", e);
+        }
+    }
+
+    /**
+     * Validate order data and ensure all required fields have values
+     *
+     * @return true if the order is valid
+     */
+    public boolean validate() {
+        try {
+            // Make sure we have required values
+            if (tableNumber <= 0) {
+                Log.e(TAG, "Invalid table number: " + tableNumber);
+                return false;
+            }
+
+            // Make sure status is valid
+            if (status == null || status.isEmpty()) {
+                status = "pending";
+            }
+
+            // Make sure customer has a name
+            if (customerName == null || customerName.isEmpty()) {
+                customerName = "Guest";
+            }
+
+            // Set timestamps if not already set
+            if (timestamp <= 0) {
+                timestamp = System.currentTimeMillis();
+            }
+
+            if (orderTime <= 0) {
+                orderTime = System.currentTimeMillis();
+            }
+
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "Error validating order", e);
+            return false;
+        }
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "Order{" +
+                "orderId=" + orderId +
+                ", tableNumber=" + tableNumber +
+                ", status='" + status + '\'' +
+                ", customerName='" + customerName + '\'' +
+                '}';
     }
 }

@@ -4,51 +4,60 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/modern_restaurant_bg"
+    android:background="@drawable/bg_luxury_pattern"
     tools:context=".SplashActivityNew">
 
-    <View
-        android:id="@+id/backgroundOverlay"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="#99000000"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/ivLogo"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/logoCardView"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:contentDescription="Fine Dine Logo"
-        android:src="@drawable/logo_finedine"
+        android:layout_gravity="center"
+        app:cardCornerRadius="100dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="@color/luxe_burgundy"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.4" />
+        app:layout_constraintVertical_bias="0.4">
+
+        <ImageView
+            android:id="@+id/ivLogo"
+            android:layout_width="170dp"
+            android:layout_height="170dp"
+            android:layout_gravity="center"
+            android:padding="16dp"
+            android:contentDescription="Fine Dine Logo"
+            android:src="@drawable/logoj" />
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="end|bottom"
+            android:background="@drawable/corner_gold" />
+    </androidx.cardview.widget.CardView>
 
     <TextView
         android:id="@+id/tvAppName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:fontFamily="sans-serif-medium"
+        android:fontFamily="serif"
         android:text="FINE DINE"
-        android:textColor="@color/restaurant_accent"
+        android:textColor="@color/luxe_gold"
         android:textSize="32sp"
         android:textStyle="bold"
+        android:letterSpacing="0.1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ivLogo" />
+        app:layout_constraintTop_toBottomOf="@+id/logoCardView" />
 
     <TextView
         android:id="@+id/tvTagline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:fontFamily="sans-serif"
+        android:fontFamily="sans-serif-light"
         android:text="Restaurant Management System"
         android:textColor="@color/text_white"
         android:textSize="16sp"
@@ -58,13 +67,11 @@
 
     <ProgressBar
         android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="200dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="80dp"
         android:indeterminate="true"
-        android:max="100"
-        android:progress="0"
+        android:indeterminateTint="@color/luxe_gold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -74,12 +81,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:fontFamily="sans-serif"
+        android:fontFamily="serif-light"
         android:text="Version 1.0"
-        android:textColor="@color/text_white"
+        android:textColor="@color/luxe_gold"
         android:textSize="12sp"
+        android:alpha="0.8"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <service
+        android:name=".MyFirebaseMessagingService"
+        android:exported="false"
+        android:enabled="true"
+        tools:ignore="MissingClass">
+        <intent-filter>
+            <action android:name="com.google.firebase.MESSAGING_EVENT" />
+        </intent-filter>
+    </service>
+    
+    <!-- Firebase fallback services -->
+    <service
+        android:name=".FirebaseFallbackService"
+        android:exported="false">
+        <intent-filter>
+            <action android:name="com.finedine.rms.FIREBASE_FALLBACK" />
+        </intent-filter>
+    </service>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

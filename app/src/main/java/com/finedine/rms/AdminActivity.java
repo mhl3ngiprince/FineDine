@@ -18,6 +18,13 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import com.finedine.rms.utils.EmailSender;
 import com.finedine.rms.utils.SharedPrefsManager;
+import com.finedine.rms.utils.BackupUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 
 public class AdminActivity extends BaseActivity {
     private static final String TAG = "AdminActivity";
@@ -28,13 +35,9 @@ public class AdminActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_admin);
 
-        // Setup navigation panel
-        setupNavigationPanel("Administration");
-
-        // Setup drawer menu
-        setupDrawerMenu();
+        // Use modern navigation panel
+        setupModernNavigationPanel("Administration", R.layout.activity_admin);
 
         try {
             // Initialize TextViews for counts
@@ -87,13 +90,13 @@ public class AdminActivity extends BaseActivity {
 
             if (cardEmailSettings != null) {
                 cardEmailSettings.setOnClickListener(v -> {
-                    onEmailSettingsClicked(v);
+                    configureEmailSettings();
                 });
             }
 
             if (cardBackup != null) {
                 cardBackup.setOnClickListener(v -> {
-                    onBackupClicked(v);
+                    showBackupDialog();
                 });
             }
 
@@ -117,12 +120,69 @@ public class AdminActivity extends BaseActivity {
         }
     }
 
-    public void onEmailSettingsClicked(View view) {
-        configureEmailSettings();
+    private void showBackupDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Backup & Restore");
+
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_backup, null);
+        builder.setView(dialogView);
+
+        builder.setPositiveButton("Backup Now", (dialog, which) -> {
+            Toast.makeText(this, "Backup initiated", Toast.LENGTH_SHORT).show();
+            BackupUtils.backupDatabase(this);
+        });
+
+        builder.setNegativeButton("Restore", (dialog, which) -> {
+            Toast.makeText(this, "Restore initiated", Toast.LENGTH_SHORT).show();
+            BackupUtils.restoreDatabase(this);
+        });
+
+        builder.setNeutralButton("Cancel", null);
+        builder.show();
     }
 
-    public void onBackupClicked(View view) {
-        Toast.makeText(this, "Backup/Restore functionality coming soon", Toast.LENGTH_SHORT).show();
+    private void backupDatabase() {
+        try {
+            File sd = getExternalFilesDir(null);
+            File data = getDatabasePath("rms.db");
+            File backup = new File(sd, "rms_backup.db");
+
+            if (data.exists()) {
+                FileChannel src = new FileInputStream(data).getChannel();
+                FileChannel dst = new FileOutputStream(backup).getChannel();
+                dst.transferFrom(src, 0, src.size());
+                src.close();
+                dst.close();
+                Toast.makeText(this, "Backup successful", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Error: Database file not found", Toast.LENGTH_SHORT).show();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Error backing up database", e);
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void restoreDatabase() {
+        try {
+            File sd = getExternalFilesDir(null);
+            File data = getDatabasePath("rms.db");
+            File backup = new File(sd, "rms_backup.db");
+
+            if (backup.exists()) {
+                FileChannel src = new FileInputStream(backup).getChannel();
+                FileChannel dst = new FileOutputStream(data).getChannel();
+                dst.transferFrom(src, 0, src.size());
+                src.close();
+                dst.close();
+                Toast.makeText(this, "Restore successful", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Error: Backup file not found", Toast.LENGTH_SHORT).show();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Error restoring database", e);
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
@@ -196,6 +256,13 @@ public class AdminActivity extends BaseActivity {
         TextInputEditText etOutlookEmail = dialogView.findViewById(R.id.etOutlookEmail);
         TextInputEditText etOutlookPassword = dialogView.findViewById(R.id.etOutlookPassword);
 
+        // Load existing settings if available
+        SharedPrefsManager prefs = SharedPrefsManager.getInstance(this);
+        etGmailEmail.setText(prefs.getEmail());
+        etGmailPassword.setText(prefs.getEmailPassword());
+        etOutlookEmail.setText(prefs.getSecondaryEmail());
+        etOutlookPassword.setText(prefs.getSecondaryEmailPassword());
+
         builder.setPositiveButton("Save", (dialog, which) -> {
             // Save the email settings
             String gmailEmail = etGmailEmail.getText().toString().trim();
@@ -203,18 +270,65 @@ public class AdminActivity extends BaseActivity {
             String outlookEmail = etOutlookEmail.getText().toString().trim();
             String outlookPassword = etOutlookPassword.getText().toString().trim();
 
-            if (!gmailEmail.isEmpty() && !gmailPassword.isEmpty() &&
-                    !outlookEmail.isEmpty() && !outlookPassword.isEmpty()) {
-
-                // Save credentials - use gmail as the primary email
-                EmailSender.setEmailCredentials(this, gmailEmail);
-                Toast.makeText(this, "Email settings saved", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Please fill in all email settings", Toast.LENGTH_SHORT).show();
+            if (!isValidEmail(gmailEmail)) {
+                etGmailEmail.setError("Invalid email format");
+                return;
             }
+
+            if (gmailPassword.isEmpty()) {
+                etGmailPassword.setError("Password required");
+                return;
+            }
+
+            if (!outlookEmail.isEmpty() && !isValidEmail(outlookEmail)) {
+                etOutlookEmail.setError("Invalid email format");
+                return;
+            }
+
+            if (!outlookEmail.isEmpty() && outlookPassword.isEmpty()) {
+                etOutlookPassword.setError("Password required");
+                return;
+            }
+
+            // Save credentials
+            prefs.setEmailCredentials(gmailEmail, gmailPassword);
+            if (!outlookEmail.isEmpty() && !outlookPassword.isEmpty()) {
+                prefs.setSecondaryEmailCredentials(outlookEmail, outlookPassword);
+            }
+            EmailSender.setEmailCredentials(this, gmailEmail);
+            Toast.makeText(this, "Email settings saved", Toast.LENGTH_SHORT).show();
         });
 
         builder.setNegativeButton("Cancel", null);
+        builder.setNeutralButton("Test Connection", (dialog, which) -> {
+            String email = etGmailEmail.getText().toString().trim();
+            String password = etGmailPassword.getText().toString().trim();
+
+            if (!isValidEmail(email)) {
+                etGmailEmail.setError("Invalid email format");
+                return;
+            }
+
+            if (password.isEmpty()) {
+                etGmailPassword.setError("Password required");
+                return;
+            }
+
+            new Thread(() -> {
+                boolean success = EmailSender.testConnection(email, password);
+                runOnUiThread(() -> {
+                    if (success) {
+                        Toast.makeText(this, "Connection successful", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(this, "Connection failed. Check credentials and network", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }).start();
+        });
         builder.show();
+    }
+
+    private boolean isValidEmail(CharSequence target) {
+        return target != null && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 }

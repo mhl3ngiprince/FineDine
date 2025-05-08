@@ -78,6 +78,47 @@
             android:textColorHint="@color/text_gray" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- Button Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="24dp">
+
+        <!-- Cancel Button -->
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancel"
+            android:layout_marginEnd="4dp"
+            android:backgroundTint="@color/med_blue_light"
+            android:textColor="@color/white" />
+
+        <!-- View Details Button -->
+        <Button
+            android:id="@+id/btnViewDetails"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="View Details"
+            android:layout_marginHorizontal="4dp"
+            android:backgroundTint="@color/med_blue"
+            android:textColor="@color/white" />
+
+        <!-- Add to Cart Button -->
+        <Button
+            android:id="@+id/btnAddToCart"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Add to Cart"
+            android:layout_marginStart="4dp"
+            android:backgroundTint="@color/luxe_gold"
+            android:textColor="@color/luxe_dark" />
+    </LinearLayout>
+
     <!-- Gold corner accent -->
     <ImageView
         android:layout_width="24dp"

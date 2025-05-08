@@ -15,98 +15,152 @@
         android:roundIcon="@drawable/logoj"
         android:name=".FineDineApplication"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MaterialComponents">
+        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
-        <!-- Splash Activity -->
+        <!-- Splash Activity - restored as launcher -->
         <activity
             android:name=".SplashActivityNew"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar">
+            android:theme="@style/Theme.SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- Emergency Launcher Activity - kept as backup but not used -->
+        <!-- Emergency Launcher Activity - kept as backup -->
         <activity
             android:name=".EmergencyLauncherActivity"
             android:exported="false"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"></activity>
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
 
-        <!-- Logout Activity -->
+        <!-- Emergency Activity for crash recovery -->
         <activity
-            android:name=".LogoutActivity"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar"
-            android:noHistory="true" />
+            android:name=".EmergencyActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <!-- Login Activity -->
         <activity
             android:name=".LoginActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+            android:theme="@style/Theme.FineDineAppCompat" />
+
+        <!-- Logout Activity -->
+        <activity
+            android:name=".LogoutActivity"
+            android:theme="@style/Theme.FineDineAppCompat"
+            android:noHistory="true" />
 
         <!-- All available activities for navigation -->
         <activity
             android:name=".RegisterActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+            android:theme="@style/Theme.FineDineAppCompat" />
 
         <activity
             android:name=".ForgotPasswordActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+            android:theme="@style/Theme.FineDineAppCompat" />
 
         <activity
             android:name=".AdminActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+            android:theme="@style/Theme.FineDineAppCompat" />
 
         <activity
             android:name=".ManagerDashboardActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".KitchenActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".OrderActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".ReservationActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".InventoryActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".MenuManagementActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".StaffManagementActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+            android:theme="@style/Theme.FineDineNavigation" />
 
         <activity
             android:name=".SettingsActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar"
+            android:theme="@style/Theme.FineDineAppCompat"
             android:label="Settings" />
 
         <activity
             android:name=".MenuItemDetailActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
+            android:theme="@style/Theme.FineDineAppCompat" />
+
+        <activity
+            android:name=".ReviewsActivity"
+            android:exported="true"
+            android:theme="@style/Theme.FineDineAppCompat"
+            android:label="Reviews" />
+
+        <activity
+            android:name=".EditStaffActivity"
+            android:exported="true"
+            android:theme="@style/Theme.FineDineAppCompat"
+            android:label="Edit Staff" />
+
+        <activity
+            android:name=".BackupActivity"
+            android:exported="true"
+            android:theme="@style/Theme.FineDineAppCompat"
+            android:label="Backup &amp; Restore" />
+
+        <activity
+            android:name=".EmailSettingsActivity"
+            android:exported="true"
+            android:theme="@style/Theme.FineDineAppCompat"
+            android:label="Email Settings" />
+
+        <activity
+            android:name=".CustomerMenuActivity"
+            android:exported="true"
+            android:theme="@style/Theme.FineDineNavigation"
+            android:label="Menu" />
+
+        <activity
+            android:name=".PaymentActivity"
+            android:exported="true"
+            android:theme="@style/Theme.FineDineAppCompat"
+            android:label="Payment" />
+
+        <activity
+            android:name=".CartActivity"
+            android:exported="true"
+            android:theme="@style/Theme.FineDineAppCompat"
+            android:label="Your Cart" />
+
+        <activity
+            android:name=".CustomerMenu"
+            android:exported="true"
+            android:theme="@style/Theme.FineDineAppCompat"
+            android:label="Menu" />
 
         <!-- Firebase Messaging Service -->
         <service

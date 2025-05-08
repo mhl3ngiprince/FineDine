@@ -21,12 +21,15 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.View
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tvName, tvQuantity;
+        public TextView tvPrice, tvNotes;
         public ImageButton btnDelete;
 
         public ViewHolder(View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tvOrderItemName);
             tvQuantity = itemView.findViewById(R.id.tvOrderItemQuantity);
+            tvPrice = itemView.findViewById(R.id.tvOrderItemPrice);
+            tvNotes = itemView.findViewById(R.id.tvOrderItemNotes);
             btnDelete = itemView.findViewById(R.id.ibDeleteOrderItem);
         }
     }
@@ -50,6 +53,21 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.View
 
         holder.tvName.setText(item.getName());
         holder.tvQuantity.setText("x" + item.getQuantity());
+
+        // Set price
+        if (holder.tvPrice != null) {
+            holder.tvPrice.setText(String.format("R%.2f", item.getPrice()));
+        }
+
+        // Set notes if available
+        if (holder.tvNotes != null) {
+            if (item.getNotes() != null && !item.getNotes().isEmpty()) {
+                holder.tvNotes.setText(item.getNotes());
+                holder.tvNotes.setVisibility(View.VISIBLE);
+            } else {
+                holder.tvNotes.setVisibility(View.GONE);
+            }
+        }
 
         // Delete button click listener
         holder.btnDelete.setOnClickListener(v -> {

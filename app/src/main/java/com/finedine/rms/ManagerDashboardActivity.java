@@ -1,5 +1,6 @@
 package com.finedine.rms;
 
+import android.app.DatePickerDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Color;
@@ -14,36 +15,33 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ManagerDashboardActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class ManagerDashboardActivity extends BaseActivity {
     private static final String TAG = "ManagerDashboard";
 
     // UI components
-    private DrawerLayout drawerLayout;
-    private NavigationView navigationView;
-    private BottomNavigationView bottomNavigationView;
+    private Toolbar toolbar;
     private TextView managerNameText;
     private TextView tvTotalSales, tvSalesChange, tvComparisonPeriod;
     private TextView tvDineInSales, tvTakeawaySales, tvDeliverySales;
     private TextView tvDineInPercentage, tvTakeawayPercentage, tvDeliveryPercentage;
-    private TextView tvActiveOrdersCount, tvTablesAvailable, tvStaffOnDuty, tvReservationsCount;
     private TextView tvAvgOrderValue, tvAvgOrderChange;
     private TextView tvOrderCount, tvOrderCountChange;
     private TextView tvTableTurnover, tvTableTurnoverChange;
+    private TextView tvActiveOrdersCount, tvTablesAvailable, tvStaffOnDuty, tvReservationsCount;
     private TextView periodToday, periodWeek, periodMonth, periodQuarter, periodYear;
     private View salesChartView;
     private View salesDistributionChart;
@@ -51,22 +49,50 @@ public class ManagerDashboardActivity extends BaseActivity implements Navigation
     private TextView currentTimeText;
     private Button btnDate;
 
+    private DrawerLayout drawerLayout;
+
     // Selected time period
     private String selectedPeriod = "today";
+    private String userRole;
 
     private Timer timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_manager_dashboard);
 
         try {
+            userRole = getIntent().getStringExtra("user_role");
+            if (userRole == null || userRole.isEmpty()) {
+                userRole = "manager"; // Default role for this activity
+            }
+
+            // Check if user is a manager - restrict access to others
+            if (!"manager".equalsIgnoreCase(userRole)) {
+                Log.w(TAG, "Unauthorized attempt to access Manager Dashboard by role: " + userRole);
+                Toast.makeText(this, "Access denied. Only managers can access this area.", Toast.LENGTH_SHORT).show();
+
+                // Redirect to appropriate activity based on role
+                Intent redirectIntent;
+                if ("admin".equalsIgnoreCase(userRole)) {
+                    redirectIntent = new Intent(this, AdminActivity.class);
+                } else if ("chef".equalsIgnoreCase(userRole)) {
+                    redirectIntent = new Intent(this, KitchenActivity.class);
+                } else {
+                    // Waiter or Customer
+                    redirectIntent = new Intent(this, OrderActivity.class);
+                }
+                redirectIntent.putExtra("user_role", userRole);
+                startActivity(redirectIntent);
+                finish();
+                return;
+            }
+
+            // Use the original navigation panel
+            setupModernNavigationPanel("Dashboard", R.layout.activity_manager_dashboard);
+
             // Initialize UI components
             initializeUI();
-
-            // Setup toolbar and navigation
-            setupNavigation();
 
             // Setup click listeners
             setupClickListeners();
@@ -87,17 +113,6 @@ public class ManagerDashboardActivity extends BaseActivity implements Navigation
     }
 
     private void initializeUI() {
-        // Setup Toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        // Initialize DrawerLayout
-        drawerLayout = findViewById(R.id.drawer_layout);
-        navigationView = findViewById(R.id.nav_view);
-
-        // Bottom Navigation
-        bottomNavigationView = findViewById(R.id.bottomNavigation);
-
         // Sales Overview components
         managerNameText = findViewById(R.id.managerNameText);
         tvTotalSales = findViewById(R.id.tvTotalSales);
@@ -147,74 +162,66 @@ public class ManagerDashboardActivity extends BaseActivity implements Navigation
         // Date button
         btnDate = findViewById(R.id.btnDate);
 
-        // Set manager name
+        // Set manager name and welcome message
         String managerName = getIntent().getStringExtra("user_name");
-        if (managerName == null) managerName = "Michael Johnson";
-        managerNameText.setText(managerName);
-    }
-
-    private void setupNavigation() {
-        // Setup drawer toggle
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawerLayout, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-
-        // Setup navigation view listener
-        navigationView.setNavigationItemSelectedListener(this);
-
-        // Setup bottom navigation
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-
-            if (itemId == R.id.navigation_dashboard) {
-                // Already on dashboard
-                return true;
-            } else if (itemId == R.id.navigation_orders) {
-                navigateToActivitySafely(OrderActivity.class, "Orders");
-                return true;
-            } else if (itemId == R.id.navigation_reservation) {
-                navigateToActivitySafely(ReservationActivity.class, "Reservations");
-                return true;
-            } else if (itemId == R.id.navigation_menu) {
-                navigateToActivitySafely(MenuManagementActivity.class, "Menu Management");
-                return true;
-            } else if (itemId == R.id.navigation_more) {
-                drawerLayout.openDrawer(GravityCompat.START);
-                return true;
+        if (managerName == null || managerName.isEmpty()) {
+            // Try to get from SharedPrefsManager if available
+            if (prefsManager != null) {
+                managerName = prefsManager.getUserName();
             }
+            // Use default if still null
+            if (managerName == null || managerName.isEmpty()) {
+                managerName = "Michael Johnson";
+            }
+        }
+        managerNameText.setText(managerName);
 
-            return false;
-        });
+        // Find and update the welcome text
+        TextView welcomeText = findViewById(R.id.welcomeText);
+        if (welcomeText != null) {
+            welcomeText.setText("Welcome back, " + managerName + "!");
+        }
 
-        // Set current selected item
-        bottomNavigationView.setSelectedItemId(R.id.navigation_dashboard);
-
-        // Menu button opens drawer
-        ImageView menuButton = findViewById(R.id.menuButton);
-        menuButton.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+        drawerLayout = findViewById(R.id.drawer_layout);
     }
 
     private void setupClickListeners() {
         // Quick action buttons
-        btnNewOrder.setOnClickListener(v -> navigateToActivitySafely(OrderActivity.class, "New Order"));
-        btnNewReservation.setOnClickListener(v -> navigateToActivitySafely(ReservationActivity.class, "New Reservation"));
+        btnNewOrder.setOnClickListener(v -> {
+            Intent intent = new Intent(this, OrderActivity.class);
+            intent.putExtra("new_order", true);
+            navigateToActivitySafely(OrderActivity.class, "New Order");
+        });
+        btnNewReservation.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ReservationActivity.class);
+            intent.putExtra("new_reservation", true);
+            navigateToActivitySafely(ReservationActivity.class, "New Reservation");
+        });
         btnInventory.setOnClickListener(v -> navigateToActivitySafely(InventoryActivity.class, "Inventory"));
         btnMenu.setOnClickListener(v -> navigateToActivitySafely(MenuManagementActivity.class, "Menu Management"));
 
         // Status containers
-        findViewById(R.id.activeOrdersContainer).setOnClickListener(v -> navigateToActivitySafely(OrderActivity.class, "Active Orders"));
-        findViewById(R.id.tablesContainer).setOnClickListener(v -> navigateToActivitySafely(ReservationActivity.class, "Table Management"));
+        findViewById(R.id.activeOrdersContainer).setOnClickListener(v -> {
+            Intent intent = new Intent(this, OrderActivity.class);
+            intent.putExtra("show_active", true);
+            navigateToActivitySafely(OrderActivity.class, "Active Orders");
+        });
+        findViewById(R.id.tablesContainer).setOnClickListener(v -> {
+            Intent intent = new Intent(this, ReservationActivity.class);
+            intent.putExtra("show_tables", true);
+            navigateToActivitySafely(ReservationActivity.class, "Table Management");
+        });
         findViewById(R.id.staffContainer).setOnClickListener(v -> navigateToActivitySafely(StaffManagementActivity.class, "Staff Management"));
-        findViewById(R.id.reservationsContainer).setOnClickListener(v -> navigateToActivitySafely(ReservationActivity.class, "Reservations"));
+        findViewById(R.id.reservationsContainer).setOnClickListener(v -> {
+            Intent intent = new Intent(this, ReservationActivity.class);
+            intent.putExtra("show_reservations", true);
+            navigateToActivitySafely(ReservationActivity.class, "Reservations");
+        });
 
         // View more buttons
         findViewById(R.id.btnViewMoreSales).setOnClickListener(v -> {
-            // Since there's no dedicated sales activity yet, show an informative toast
-            Toast.makeText(this, "Detailed sales reports coming soon", Toast.LENGTH_SHORT).show();
-
-            // For now, just refresh the dashboard with year period to show more data
             changePeriod("year");
+            Toast.makeText(this, "Viewing sales data for the year", Toast.LENGTH_SHORT).show();
         });
         findViewById(R.id.btnViewAllItems).setOnClickListener(v -> navigateToActivitySafely(MenuManagementActivity.class, "Menu Items"));
 
@@ -225,36 +232,34 @@ public class ManagerDashboardActivity extends BaseActivity implements Navigation
         periodQuarter.setOnClickListener(v -> changePeriod("quarter"));
         periodYear.setOnClickListener(v -> changePeriod("year"));
 
-        // Menu button opens drawer
-        ImageView menuButton = findViewById(R.id.menuButton);
-        menuButton.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
-
-        // Profile button navigates to settings
-        ImageView profileButton = findViewById(R.id.profileButton);
-        profileButton.setOnClickListener(v -> navigateToActivitySafely(SettingsActivity.class, "Settings"));
-
-        // Notification button
-        ImageView notificationButton = findViewById(R.id.notificationButton);
-        notificationButton.setOnClickListener(v -> Toast.makeText(this, "Notifications coming soon", Toast.LENGTH_SHORT).show());
-
         // Date button shows date selection
         btnDate.setOnClickListener(v -> {
-            // Show a simple toast for now
-            Toast.makeText(this, "Date selection coming soon", Toast.LENGTH_SHORT).show();
-
-            // For a complete implementation, you could show a DatePickerDialog:
-            /*
             Calendar cal = Calendar.getInstance();
             new DatePickerDialog(this, 
                 (view, year, month, dayOfMonth) -> {
                     Calendar selectedDate = Calendar.getInstance();
                     selectedDate.set(year, month, dayOfMonth);
-                    // Process the selected date
+
+                    // Format date for button
+                    SimpleDateFormat displayFormat = new SimpleDateFormat("EEE, MMM d", Locale.getDefault());
+                    String dateStr = displayFormat.format(selectedDate.getTime());
+                    btnDate.setText(dateStr + " ▼");
+
+                    // Format for API/database query
+                    SimpleDateFormat apiFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                    String apiDateStr = apiFormat.format(selectedDate.getTime());
+
+                    // Load data for selected date
+                    loadDateSpecificData(apiDateStr);
+
+                    // Update selected period to custom date
+                    selectedPeriod = "custom";
+                    updatePeriodUI();
                 },
                 cal.get(Calendar.YEAR),
                 cal.get(Calendar.MONTH),
-                cal.get(Calendar.DAY_OF_MONTH)).show();
-            */
+                    cal.get(Calendar.DAY_OF_MONTH))
+                    .show();
         });
     }
 
@@ -461,17 +466,74 @@ public class ManagerDashboardActivity extends BaseActivity implements Navigation
         loadDashboardData();
     }
 
+    private void loadDateSpecificData(String dateStr) {
+        // In a real app, this would fetch data from a database or API for the specific date
+        // For now, we'll just show custom sales figures
+
+        // Show a loading indicator
+        Toast.makeText(this, "Loading data for " + dateStr, Toast.LENGTH_SHORT).show();
+
+        // Update sales data with random values for demo purposes
+        tvTotalSales.setText("R " + (9000 + new Random().nextInt(4000)) + ".50");
+        tvSalesChange.setText("+" + (5 + new Random().nextInt(10)) + ".2%");
+        tvComparisonPeriod.setText("vs previous day");
+
+        // Update all other metrics with random data
+        tvDineInSales.setText("R " + (6000 + new Random().nextInt(3000)) + ".75");
+        tvTakeawaySales.setText("R " + (2000 + new Random().nextInt(2000)) + ".50");
+        tvDeliverySales.setText("R " + (1000 + new Random().nextInt(1000)) + ".25");
+
+        // Update percentages
+        int dineInPercent = 55 + new Random().nextInt(20);
+        int takeawayPercent = (100 - dineInPercent) / 2;
+        int deliveryPercent = 100 - dineInPercent - takeawayPercent;
+
+        tvDineInPercentage.setText(dineInPercent + "%");
+        tvTakeawayPercentage.setText(takeawayPercent + "%");
+        tvDeliveryPercentage.setText(deliveryPercent + "%");
+    }
+
+    private void updatePeriodUI() {
+        // Reset all period buttons to normal state
+        periodToday.setBackgroundResource(R.drawable.bg_period_normal);
+        periodWeek.setBackgroundResource(R.drawable.bg_period_normal);
+        periodMonth.setBackgroundResource(R.drawable.bg_period_normal);
+        periodQuarter.setBackgroundResource(R.drawable.bg_period_normal);
+        periodYear.setBackgroundResource(R.drawable.bg_period_normal);
+
+        periodToday.setTextColor(getResources().getColor(R.color.restaurant_text_secondary, null));
+        periodWeek.setTextColor(getResources().getColor(R.color.restaurant_text_secondary, null));
+        periodMonth.setTextColor(getResources().getColor(R.color.restaurant_text_secondary, null));
+        periodQuarter.setTextColor(getResources().getColor(R.color.restaurant_text_secondary, null));
+        periodYear.setTextColor(getResources().getColor(R.color.restaurant_text_secondary, null));
+
+        // If we have a standard period selected, highlight it
+        if (selectedPeriod.equals("today")) {
+            periodToday.setBackgroundResource(R.drawable.bg_period_selected);
+            periodToday.setTextColor(Color.WHITE);
+        } else if (selectedPeriod.equals("week")) {
+            periodWeek.setBackgroundResource(R.drawable.bg_period_selected);
+            periodWeek.setTextColor(Color.WHITE);
+        } else if (selectedPeriod.equals("month")) {
+            periodMonth.setBackgroundResource(R.drawable.bg_period_selected);
+            periodMonth.setTextColor(Color.WHITE);
+        } else if (selectedPeriod.equals("quarter")) {
+            periodQuarter.setBackgroundResource(R.drawable.bg_period_selected);
+            periodQuarter.setTextColor(Color.WHITE);
+        } else if (selectedPeriod.equals("year")) {
+            periodYear.setBackgroundResource(R.drawable.bg_period_selected);
+            periodYear.setTextColor(Color.WHITE);
+        }
+        // For custom date, none of the period buttons should be highlighted
+    }
+
     private void navigateToActivitySafely(Class<?> activityClass, String actionName) {
         try {
             Log.d(TAG, "Navigating to: " + activityClass.getSimpleName() + " - " + actionName);
             Intent intent = new Intent(this, activityClass);
 
             // Pass the user role
-            String role = getIntent().getStringExtra("user_role");
-            if (role == null || role.isEmpty()) {
-                role = "manager"; // Default role for this activity
-            }
-            intent.putExtra("user_role", role);
+            intent.putExtra("user_role", userRole);
 
             // Pass username if available
             String userName = getIntent().getStringExtra("user_name");
@@ -510,47 +572,8 @@ public class ManagerDashboardActivity extends BaseActivity implements Navigation
     }
 
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation drawer item clicks
-        int id = item.getItemId();
-
-        try {
-            if (id == R.id.nav_dashboard) {
-                // Already on dashboard
-            } else if (id == R.id.nav_orders) {
-                navigateToActivitySafely(OrderActivity.class, "Orders");
-            } else if (id == R.id.nav_reservation) {
-                navigateToActivitySafely(ReservationActivity.class, "Reservations");
-            } else if (id == R.id.nav_staff) {
-                navigateToActivitySafely(StaffManagementActivity.class, "Staff Management");
-            } else if (id == R.id.nav_menu) {
-                navigateToActivitySafely(MenuManagementActivity.class, "Menu Management");
-            } else if (id == R.id.nav_inventory) {
-                navigateToActivitySafely(InventoryActivity.class, "Inventory");
-            } else if (id == R.id.nav_reviews) {
-                // Navigate to ReviewsActivity
-                navigateToActivitySafely(ReviewsActivity.class, "Reviews");
-            } else if (id == R.id.nav_settings) {
-                // Navigate to SettingsActivity 
-                navigateToActivitySafely(SettingsActivity.class, "Settings");
-            } else if (id == R.id.nav_logout) {
-                logout();
-                return true; // Return early as logout handles its own drawer closing
-            }
-
-            drawerLayout.closeDrawer(GravityCompat.START);
-            return true;
-        } catch (Exception e) {
-            Log.e(TAG, "Error in navigation: " + e.getMessage());
-            Toast.makeText(this, "Navigation error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            drawerLayout.closeDrawer(GravityCompat.START);
-            return false;
-        }
-    }
-
-    @Override
     public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+        if (drawerLayout != null && drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
             // Show a confirmation dialog before exiting
@@ -571,9 +594,6 @@ public class ManagerDashboardActivity extends BaseActivity implements Navigation
         try {
             // Refresh dashboard data when returning to this activity
             loadDashboardData();
-
-            // Ensure bottom navigation shows the correct selection
-            bottomNavigationView.setSelectedItemId(R.id.navigation_dashboard);
 
             // Update current time
             updateCurrentTime();

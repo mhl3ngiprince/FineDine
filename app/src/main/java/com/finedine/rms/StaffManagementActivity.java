@@ -30,20 +30,14 @@ public class StaffManagementActivity extends BaseActivity implements StaffAdapte
     private static final int EDIT_STAFF_REQUEST = 0;
     private RecyclerView rvStaff;
     private StaffAdapter adapter;
-    private DrawerLayout drawerLayout;
-    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_staff_management);
 
         try {
-            // Setup navigation panel
-            setupNavigationPanel("Staff Management");
-
-            // Setup drawer menu
-            setupDrawerMenu();
+            // Setup modern navigation panel
+            setupModernNavigationPanel("Staff Management", R.layout.activity_staff_management);
 
             // Initialize RecyclerView
             rvStaff = findViewById(R.id.rvStaff);
@@ -116,12 +110,21 @@ public class StaffManagementActivity extends BaseActivity implements StaffAdapte
     public void onEditClick(User staff) {
         // Launch edit staff activity
         try {
-            Intent intent = new Intent(this, EditStaffActivity.class);
+            Log.d(TAG, "Launching EditStaffActivity for staff ID: " + staff.user_id);
+            Intent intent = new Intent(StaffManagementActivity.this, EditStaffActivity.class);
             intent.putExtra("staff_id", staff.user_id);
-            startActivityForResult(intent, EDIT_STAFF_REQUEST);
+
+            // For better debugging
+            if (isActivityAvailable(intent)) {
+                startActivityForResult(intent, EDIT_STAFF_REQUEST);
+                Log.d(TAG, "Started EditStaffActivity successfully");
+            } else {
+                Log.e(TAG, "EditStaffActivity is not available or not registered in AndroidManifest.xml");
+                Toast.makeText(this, "Error: Staff edit screen is not available", Toast.LENGTH_SHORT).show();
+            }
         } catch (Exception e) {
-            Log.e(TAG, "Error launching edit staff activity", e);
-            Toast.makeText(this, "Error opening edit screen", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Error launching edit staff activity: " + e.getMessage(), e);
+            Toast.makeText(this, "Error opening edit screen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -233,31 +236,33 @@ public class StaffManagementActivity extends BaseActivity implements StaffAdapte
      */
     private void addNewStaff() {
         try {
-            // Create a new empty user, add to database, then edit it
-            AppDatabase db = AppDatabase.getDatabase(this);
-            if (db == null) {
-                Toast.makeText(this, "Database not initialized", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            // Create a simple user object with default values that won't cause crashes
-            final User newUser = new User();
-            newUser.name = "New Staff Member";
-            newUser.email = "";
-            newUser.password_hash = "";
-            newUser.role = "waiter";
-            newUser.phone = "";
-            newUser.hireDate = "";
-            newUser.notes = "";
+            Log.d(TAG, "Adding new staff member");
 
             // Launch activity directly without saving yet - safer approach
-            Intent intent = new Intent(this, EditStaffActivity.class);
+            Intent intent = new Intent(StaffManagementActivity.this, EditStaffActivity.class);
             intent.putExtra("is_new_staff", true);
-            startActivityForResult(intent, EDIT_STAFF_REQUEST);
 
+            // For better debugging
+            if (isActivityAvailable(intent)) {
+                startActivityForResult(intent, EDIT_STAFF_REQUEST);
+                Log.d(TAG, "Started EditStaffActivity for new staff member");
+            } else {
+                Log.e(TAG, "EditStaffActivity is not available or not registered in AndroidManifest.xml");
+                Toast.makeText(this, "Error: Staff edit screen is not available", Toast.LENGTH_SHORT).show();
+            }
         } catch (Exception e) {
-            Log.e(TAG, "Error launching add staff flow", e);
+            Log.e(TAG, "Error launching add staff flow: " + e.getMessage(), e);
             Toast.makeText(this, "Error adding new staff member: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * Check if an activity is available through Intent resolution
+     *
+     * @param intent The intent to check
+     * @return true if the activity is available, false otherwise
+     */
+    private boolean isActivityAvailable(Intent intent) {
+        return intent.resolveActivity(getPackageManager()) != null;
     }
 }

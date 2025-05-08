@@ -10,7 +10,7 @@
     <!-- Include Navigation Panel -->
     <include
         android:id="@+id/navigation_panel"
-        layout="@layout/navigation_panel"
+        layout="@layout/modern_navigation_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

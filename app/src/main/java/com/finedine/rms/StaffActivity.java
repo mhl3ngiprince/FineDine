@@ -2,15 +2,11 @@ package com.finedine.rms;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -26,7 +21,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StaffActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class StaffActivity extends BaseActivity {
 
     private DrawerLayout drawerLayout;
     private RecyclerView recyclerView;
@@ -38,23 +33,14 @@ public class StaffActivity extends AppCompatActivity implements NavigationView.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_staff);
+
+        // Setup modern navigation panel
+        setupModernNavigationPanel("Staff Management", R.layout.activity_staff);
 
         // Initialize Firebase
         db = FirebaseFirestore.getInstance();
         
-        // Initialize UI components
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        
         drawerLayout = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, 
-                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
         
         // Setup RecyclerView
         recyclerView = findViewById(R.id.recyclerView);
@@ -106,17 +92,6 @@ public class StaffActivity extends AppCompatActivity implements NavigationView.O
     }
     
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation item clicks
-        int id = item.getItemId();
-        
-        // Add navigation handling code here
-        
-        drawerLayout.closeDrawer(GravityCompat.START);
-        return true;
-    }
-    
-    @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
@@ -160,9 +135,9 @@ public class StaffActivity extends AppCompatActivity implements NavigationView.O
     // Inner class for RecyclerView adapter
     private static class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.StaffViewHolder> {
         private final List<StaffMember> staffList;
-        private final AppCompatActivity activity;
-        
-        public StaffAdapter(AppCompatActivity activity, List<StaffMember> staffList) {
+        private final BaseActivity activity;
+
+        public StaffAdapter(BaseActivity activity, List<StaffMember> staffList) {
             this.activity = activity;
             this.staffList = staffList;
         }

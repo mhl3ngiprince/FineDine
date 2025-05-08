@@ -14,6 +14,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -40,11 +41,10 @@ public class CreateReservationActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_reservation);
 
         try {
-            // Setup navigation panel
-            setupNavigationPanel("Create Reservation");
+            // Use modern navigation panel
+            setupModernNavigationPanel("Create Reservation", R.layout.activity_create_reservation);
 
             // Initialize Firebase
             db = FirebaseFirestore.getInstance();
@@ -165,12 +165,31 @@ public class CreateReservationActivity extends BaseActivity {
                             calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
                             calendar.set(Calendar.MINUTE, minute);
                             updateTimeField();
+
+                            // Show feedback about selected time
+                            String timeFeedback;
+                            if (hourOfDay < 11) {
+                                timeFeedback = "Morning reservation selected";
+                            } else if (hourOfDay < 15) {
+                                timeFeedback = "Lunch time reservation selected";
+                            } else if (hourOfDay < 18) {
+                                timeFeedback = "Afternoon reservation selected";
+                            } else {
+                                timeFeedback = "Evening reservation selected";
+                            }
+                            Toast.makeText(CreateReservationActivity.this,
+                                    timeFeedback, Toast.LENGTH_SHORT).show();
                         }
                     },
-                    calendar.get(Calendar.HOUR_OF_DAY),
-                    calendar.get(Calendar.MINUTE),
+                    // Set initial time to next available hour
+                    calendar.get(Calendar.HOUR_OF_DAY) + 1,
+                    0, // Start at top of hour
                     false
             );
+
+            // Set business hours (11am to 10pm)
+            timePickerDialog.updateTime(11, 0);
+            timePickerDialog.setTitle("Select Reservation Time");
             timePickerDialog.show();
         } catch (Exception e) {
             Log.e(TAG, "Error showing time picker", e);
@@ -179,15 +198,17 @@ public class CreateReservationActivity extends BaseActivity {
     }
     
     private void updateDateField() {
-        String format = "MM/dd/yyyy";
+        String format = "EEE, MMM d, yyyy";
         SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.US);
         dateEditText.setText(sdf.format(calendar.getTime()));
+        dateEditText.setTextColor(ContextCompat.getColor(this, android.R.color.black));
     }
     
     private void updateTimeField() {
-        String format = "hh:mm a";
+        String format = "h:mm a";
         SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.US);
         timeEditText.setText(sdf.format(calendar.getTime()));
+        timeEditText.setTextColor(ContextCompat.getColor(this, android.R.color.black));
     }
     
     private void saveReservation() {

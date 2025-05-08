@@ -1,5 +1,6 @@
 package com.finedine.rms;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -38,7 +39,7 @@ public class MenuItem {
     public static final int IMG_WAGYU = R.drawable.tenderloin;
     public static final int IMG_LOBSTER = R.drawable.lobster;
     public static final int IMG_TRUFFLE_RISOTTO = R.drawable.black_truffle_risotto_recipe;
-    public static final int IMG_VENISON = R.drawable.tenderloin; // Using tenderloin as fallback
+    public static final int IMG_VENISON = R.drawable.tenderloin;
     public static final int IMG_SOUFFLE = R.drawable.marniersuffle;
     public static final int IMG_CHOCOLATE = R.drawable.chocolate_symphony;
     public static final int IMG_CHAMPAGNE = R.drawable.dom_perigon;
@@ -76,7 +77,7 @@ public class MenuItem {
                         "Fresh seasonal oysters with champagne mignonette",
                         110.00,
                         true,
-                        getValidResourceId(IMG_PLACEHOLDER),
+                        getValidResourceId(R.drawable.oyster),
                         CATEGORY_STARTERS,
                         10,
                         190,
@@ -87,7 +88,7 @@ public class MenuItem {
                         "Alaskan king crab legs with citrus butter and sea salt",
                         180.00,
                         true,
-                        getValidResourceId(IMG_PLACEHOLDER),
+                        getValidResourceId(R.drawable.crab_leg),
                         CATEGORY_STARTERS,
                         15,
                         220,
@@ -122,7 +123,7 @@ public class MenuItem {
                         "45-day dry-aged prime ribeye with bone marrow crust and bordelaise sauce",
                         190.00,
                         true,
-                        getValidResourceId(IMG_PLACEHOLDER),
+                        getValidResourceId(IMG_WAGYU),
                         CATEGORY_MAIN,
                         35,
                         680,
@@ -133,7 +134,7 @@ public class MenuItem {
                         "Miso-glazed Chilean sea bass with yuzu beurre blanc",
                         210.00,
                         true,
-                        getValidResourceId(IMG_PLACEHOLDER),
+                        getValidResourceId(IMG_LOBSTER),
                         CATEGORY_MAIN,
                         25,
                         420,
@@ -192,7 +193,7 @@ public class MenuItem {
                         "Vanilla bean, chocolate, and raspberry ice cream with meringue flambé",
                         85.00,
                         true,
-                        getValidResourceId(IMG_PLACEHOLDER),
+                        getValidResourceId(R.drawable.baked_alaska),
                         CATEGORY_DESSERTS,
                         25,
                         450,
@@ -203,7 +204,7 @@ public class MenuItem {
                         "Valrhona dark chocolate soufflé with vanilla crème anglaise",
                         75.00,
                         true,
-                        getValidResourceId(IMG_PLACEHOLDER),
+                        getValidResourceId(R.drawable.chocolate_souffle),
                         CATEGORY_DESSERTS,
                         20,
                         380,
@@ -238,7 +239,7 @@ public class MenuItem {
                         "Three 1oz pours of rare Japanese, Scotch, and American whiskeys",
                         160.00,
                         true,
-                        getValidResourceId(IMG_PLACEHOLDER),
+                        getValidResourceId(R.drawable.rare_whiskey_flight),
                         CATEGORY_BEVERAGES,
                         5,
                         135,
@@ -249,7 +250,7 @@ public class MenuItem {
                         "Choose three cocktails from our award-winning mixology menu",
                         95.00,
                         true,
-                        getValidResourceId(IMG_PLACEHOLDER),
+                        getValidResourceId(R.drawable.signature_cocktail_selection),
                         CATEGORY_BEVERAGES,
                         10,
                         180,
@@ -268,6 +269,10 @@ public class MenuItem {
 
     /**
      * Ensures valid image resource ID or falls back to placeholder
+     * Handles cases where:
+     * - Resource ID is 0 or negative
+     * - Resource name contains invalid characters
+     * - Resource might not exist in current configuration
      */
     private static int getValidResourceId(int resourceId) {
         try {
@@ -276,6 +281,20 @@ public class MenuItem {
                 Log.w("MenuItem", "Invalid resource ID: " + resourceId + ", using placeholder");
                 return IMG_PLACEHOLDER;
             }
+
+            // Additional validation for resource existence
+            String resName = "";
+            try {
+                resName = FineDineApplication.getAppContext().getResources().getResourceName(resourceId);
+                if (resName == null || resName.contains("invalid") || resName.contains("null")) {
+                    Log.w("MenuItem", "Invalid resource name: " + resName + ", using placeholder");
+                    return IMG_PLACEHOLDER;
+                }
+            } catch (Resources.NotFoundException e) {
+                Log.w("MenuItem", "Resource not found: " + resourceId + ", using placeholder");
+                return IMG_PLACEHOLDER;
+            }
+
             return resourceId;
         } catch (Exception e) {
             Log.e("MenuItem", "Error validating resource ID", e);

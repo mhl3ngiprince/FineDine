@@ -7,7 +7,10 @@ import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import androidx.room.Ignore;
 
-@Entity(tableName = "order_items", indices = {@Index("orderId")},
+@Entity(tableName = "order_items", indices = {
+        @Index("orderId"),
+        @Index("menu_item_id")
+},
         foreignKeys = {
                 @ForeignKey(entity = Order.class,
                         parentColumns = "orderId",
@@ -16,7 +19,7 @@ import androidx.room.Ignore;
                         deferred = true),
                 @ForeignKey(entity = MenuItem.class,
                         parentColumns = "item_id",
-                        childColumns = "item_id",
+                        childColumns = "menu_item_id",
                         onDelete = ForeignKey.NO_ACTION,
                         deferred = true)
         })
@@ -30,6 +33,9 @@ public class OrderItem {
     private long orderId;
     private String notes;
     private double price;
+
+    @ColumnInfo(name = "menu_item_id")
+    private Integer menuItemId;
 
     public OrderItem() {
         // Default constructor required for Room
@@ -73,5 +79,13 @@ public class OrderItem {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public Integer getMenuItemId() {
+        return menuItemId;
+    }
+
+    public void setMenuItemId(Integer menuItemId) {
+        this.menuItemId = menuItemId;
     }
 }

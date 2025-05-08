@@ -45,6 +45,62 @@ android {
             excludes += "/META-INF/NOTICE*"
         }
     }
+
+    applicationVariants.all {
+        val variant = this
+        val task = tasks.register("print${variant.name.capitalize()}CertificateFingerprint") {
+            doLast {
+                val keystorePath = if (variant.name.contains("release")) {
+                    // Path to your release keystore if applicable
+                    "${project.projectDir}/your-release-key.jks"
+                } else {
+                    // Default debug keystore path
+                    "${System.getProperty("user.home")}/.android/debug.keystore"
+                }
+
+                val keystorePassword = if (variant.name.contains("release")) {
+                    // Your release keystore password
+                    "your-release-password"
+                } else {
+                    // Default debug keystore password
+                    "android"
+                }
+
+                val keystoreAlias = if (variant.name.contains("release")) {
+                    // Your release key alias
+                    "your-key-alias"
+                } else {
+                    // Default debug key alias
+                    "androiddebugkey"
+                }
+
+                exec {
+                    workingDir = project.rootDir
+                    if (org.gradle.internal.os.OperatingSystem.current().isWindows) {
+                        commandLine(
+                            "cmd",
+                            "/c",
+                            "keytool -list -v -keystore \"$keystorePath\" -alias $keystoreAlias -storepass $keystorePassword -keypass $keystorePassword"
+                        )
+                    } else {
+                        commandLine(
+                            "bash",
+                            "-c",
+                            "keytool -list -v -keystore $keystorePath -alias $keystoreAlias -storepass $keystorePassword -keypass $keystorePassword"
+                        )
+                    }
+                }
+            }
+            group = "Verification"
+            description = "Prints the ${variant.name} certificate fingerprints for Firebase setup"
+        }
+    }
+}
+
+tasks.register("printCertificateFingerprint") {
+    dependsOn("printDebugCertificateFingerprint")
+    group = "Verification"
+    description = "Prints the debug certificate fingerprints for Firebase setup"
 }
 
 dependencies {
@@ -68,6 +124,12 @@ dependencies {
     // Retrofit for API calls
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // Navigation components
+    implementation("androidx.navigation:navigation-fragment:2.7.7")
+    implementation("androidx.navigation:navigation-ui:2.7.7")
+    implementation("androidx.drawerlayout:drawerlayout:1.2.0")
+    implementation("com.google.android.material:material:1.11.0")
 
     // Firebase dependencies (using BoM to manage versions)
     implementation(platform("com.google.firebase:firebase-bom:33.12.0"))

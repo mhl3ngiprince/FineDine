@@ -184,4 +184,14 @@
     <color name="restaurant_accent_transparent">#40E08D3C</color>
     <!-- Blue and White Theme -->
     <color name="blue">#1A6B96</color>
+
+    <!-- Restaurant Order Status Colors -->
+    <color name="restaurant_primary_color">@color/med_blue</color>
+    <color name="restaurant_secondary_color">@color/med_coral</color>
+    <color name="restaurant_success_color">@color/green</color>
+    <color name="restaurant_pending_color">@color/transparent_blue</color>
+    <color name="restaurant_preparing_color">@color/med_bg_blue</color>
+    <color name="restaurant_ready_color">@color/restaurant_success</color>
+    <color name="restaurant_completed_color">@color/restaurant_success</color>
+    <color name="restaurant_default_color">@color/med_white</color>
 </resources>
