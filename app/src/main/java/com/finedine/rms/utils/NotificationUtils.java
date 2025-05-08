@@ -183,6 +183,38 @@ public class NotificationUtils {
         }
     }
 
+    /**
+     * Create and show a basic notification without any advanced options
+     * Static helper method for emergency fallback notifications
+     */
+    public static void createBasicNotification(Context context, String title, String message, String channelId) {
+        try {
+            // If context is null we can't do anything
+            if (context == null) return;
+
+            // Create the notification builder
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelId)
+                    .setSmallIcon(R.drawable.ic_notification)
+                    .setContentTitle(title)
+                    .setContentText(message)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setAutoCancel(true);
+
+            // Show notification if we have permission
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
+                        PackageManager.PERMISSION_GRANTED) {
+                    notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+                }
+            } else {
+                notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+            }
+        } catch (Exception e) {
+            Log.e("NotificationUtils", "Error creating basic notification: " + e.getMessage(), e);
+        }
+    }
+
     public void sendReservationNotification(Context context, String customerName, String time) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, NEW_ORDER_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_warning)

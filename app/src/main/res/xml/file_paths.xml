@@ -30,4 +30,9 @@
     <external-files-path
         name="camera_output"
         path="Pictures/" />
+
+    <!-- For receipt PDF files -->
+    <external-path
+        name="receipts"
+        path="Download/" />
 </paths>

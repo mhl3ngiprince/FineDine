@@ -33,6 +33,12 @@ public class Order {
     @ColumnInfo(name = "customerNotes")
     private String customerNotes;
 
+    @ColumnInfo(name = "totalAmount")
+    private double totalAmount;
+
+    @ColumnInfo(name = "specialInstructions")
+    private String specialInstructions;
+
     private long orderTime;
     public int waiterId;
     private double total;
@@ -50,6 +56,8 @@ public class Order {
         this.timestamp = System.currentTimeMillis();
         this.orderTime = System.currentTimeMillis();
         this.waiterId = 1; // Default waiter ID
+        this.totalAmount = 0.0;
+        this.specialInstructions = "";
     }
 
     public Order() {
@@ -59,6 +67,8 @@ public class Order {
         this.orderTime = System.currentTimeMillis();
         this.customerName = "Guest";
         this.waiterId = 1; // Default waiter ID
+        this.totalAmount = 0.0;
+        this.specialInstructions = "";
     }
 
     // Getters and setters
@@ -109,6 +119,22 @@ public class Order {
 
     public void setCustomerNotes(String customerNotes) {
         this.customerNotes = customerNotes;
+    }
+
+    public double getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(double totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    public String getSpecialInstructions() {
+        return specialInstructions != null ? specialInstructions : "";
+    }
+
+    public void setSpecialInstructions(String specialInstructions) {
+        this.specialInstructions = specialInstructions;
     }
 
     public long getOrderTime() {
@@ -192,6 +218,8 @@ public class Order {
                 orderTime = System.currentTimeMillis();
             }
 
+            if (specialInstructions == null) specialInstructions = "";
+
             return true;
         } catch (Exception e) {
             Log.e(TAG, "Error validating order", e);
@@ -206,6 +234,8 @@ public class Order {
                 "orderId=" + orderId +
                 ", tableNumber=" + tableNumber +
                 ", status='" + status + '\'' +
+                ", totalAmount=" + totalAmount +
+                ", specialInstructions='" + specialInstructions + '\'' +
                 ", customerName='" + customerName + '\'' +
                 '}';
     }

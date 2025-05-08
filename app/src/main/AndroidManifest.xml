@@ -56,12 +56,12 @@
         <activity
             android:name=".RegisterActivity"
             android:exported="true"
-            android:theme="@style/Theme.FineDineAppCompat" />
+            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
 
         <activity
             android:name=".ForgotPasswordActivity"
             android:exported="true"
-            android:theme="@style/Theme.FineDineAppCompat" />
+            android:theme="@style/Theme.MaterialComponents.NoActionBar" />
 
         <activity
             android:name=".AdminActivity"
@@ -96,7 +96,14 @@
         <activity
             android:name=".MenuManagementActivity"
             android:exported="true"
-            android:theme="@style/Theme.FineDineNavigation" />
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
+            android:label="Menu" />
+
+        <activity
+            android:name=".ReceiptActivity"
+            android:exported="true"
+            android:theme="@style/Theme.FineDineAppCompat"
+            android:label="Receipt" />
 
         <activity
             android:name=".StaffManagementActivity"
@@ -159,7 +166,7 @@
         <activity
             android:name=".CustomerMenu"
             android:exported="true"
-            android:theme="@style/Theme.FineDineAppCompat"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
             android:label="Menu" />
 
         <!-- Firebase Messaging Service -->

@@ -91,6 +91,10 @@ public class AppDatabase {
         return roomDatabase != null ? roomDatabase.reviewDao() : null;
     }
 
+    public ReceiptDao receiptDao() {
+        return roomDatabase != null ? roomDatabase.receiptDao() : null;
+    }
+
     /**
      * Close the database connection
      */

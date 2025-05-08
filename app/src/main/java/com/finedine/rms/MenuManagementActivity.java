@@ -6,11 +6,17 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,11 +32,27 @@ public class MenuManagementActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "Starting MenuManagementActivity");
         super.onCreate(savedInstanceState);
+        setupModernNavigationPanel("Menu Management", R.layout.activity_menu_management);
+        Log.d(TAG, "Content view set using setupModernNavigationPanel");
+
+        // Fix the menu button - find and properly set its click handler
+        setupMenuButtonClickHandler();
 
         try {
-            // Setup modern navigation panel
-            setupModernNavigationPanel("Menu Management", R.layout.activity_menu_management);
+            // Set title in action bar if available
+            setTitle("Menu Management");
+
+            // Ensure the background color is set properly
+            View rootView = findViewById(android.R.id.content);
+            if (rootView != null) {
+                rootView.setBackgroundColor(getResources().getColor(R.color.white));
+            }
+
+            // Set window background explicitly to avoid black screen
+            getWindow().setBackgroundDrawableResource(R.color.white);
+            Log.d(TAG, "Background color set");
 
             // Initialize RecyclerView
             rvMenuItems = findViewById(R.id.rvMenuItems);
@@ -40,6 +62,8 @@ public class MenuManagementActivity extends BaseActivity {
                 // Create an emergency fallback RecyclerView to avoid null pointer exceptions
                 rvMenuItems = new RecyclerView(this);
                 Toast.makeText(this, "Using emergency fallback menu view", Toast.LENGTH_SHORT).show();
+            } else {
+                Log.d(TAG, "RecyclerView initialized successfully");
             }
 
             // Set layout manager safely
@@ -93,9 +117,28 @@ public class MenuManagementActivity extends BaseActivity {
 
             // Load menu items
             loadMenuItems();
+            Log.d(TAG, "MenuManagementActivity initialized successfully");
         } catch (Exception e) {
             Log.e(TAG, "Error initializing MenuManagementActivity", e);
             Toast.makeText(this, "Error initializing menu screen", Toast.LENGTH_SHORT).show();
+
+            // Create an emergency layout to avoid black screen
+            LinearLayout emergencyLayout = new LinearLayout(this);
+            emergencyLayout.setBackgroundColor(getResources().getColor(R.color.white));
+            emergencyLayout.setOrientation(LinearLayout.VERTICAL);
+
+            TextView errorText = new TextView(this);
+            errorText.setText("Error loading menu management. Please try again.");
+            errorText.setPadding(50, 100, 50, 20);
+
+            Button retryButton = new Button(this);
+            retryButton.setText("Retry");
+            retryButton.setOnClickListener(v -> recreate());
+
+            emergencyLayout.addView(errorText);
+            emergencyLayout.addView(retryButton);
+
+            setContentView(emergencyLayout);
         }
     }
 
@@ -749,6 +792,71 @@ public class MenuManagementActivity extends BaseActivity {
             }
         } catch (Exception e) {
             Log.e(TAG, "Error filtering menu items", e);
+        }
+    }
+
+    /**
+     * Set up the menu button click handler properly to prevent crashes
+     */
+    private void setupMenuButtonClickHandler() {
+        try {
+            // First, find the top menuButton that would be in the toolbar
+            ImageView menuButton = findViewById(R.id.menuButton);
+            if (menuButton != null) {
+                Log.d(TAG, "Found menu button in toolbar, setting up click listener");
+                menuButton.setOnClickListener(v -> {
+                    Log.d(TAG, "Menu button clicked");
+                    Toast.makeText(this, "Menu options", Toast.LENGTH_SHORT).show();
+                    // Show a simple menu options popup or dialog instead of trying to open drawer
+                    showSimpleMenuOptions(v);
+                });
+            }
+
+            // Also find any bottom navigation view and handle its menu item
+            BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
+            if (bottomNavigationView != null) {
+                Log.d(TAG, "Found bottom navigation, setting up on item selected listener");
+                bottomNavigationView.setOnItemSelectedListener(item -> {
+                    int itemId = item.getItemId();
+                    Log.d(TAG, "Bottom navigation item selected: " + item.getTitle());
+
+                    if (itemId == R.id.navigation_menu) {
+                        // Already on menu screen, do nothing
+                        return true;
+                    }
+
+                    // Handle other navigation items through the BaseActivity navigation
+                    return false;
+                });
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting up menu button handler", e);
+        }
+    }
+
+    /**
+     * Show a simple menu options popup instead of trying to use the drawer
+     */
+    private void showSimpleMenuOptions(View anchorView) {
+        try {
+            android.widget.PopupMenu popup = new android.widget.PopupMenu(this, anchorView);
+
+            // Add menu items programmatically
+            popup.getMenu().add("Search");
+            popup.getMenu().add("Sort");
+            popup.getMenu().add("Filter");
+            popup.getMenu().add("Refresh");
+            popup.getMenu().add("Settings");
+
+            popup.setOnMenuItemClickListener(item -> {
+                Toast.makeText(this, "Selected: " + item.getTitle(), Toast.LENGTH_SHORT).show();
+                return true;
+            });
+
+            popup.show();
+        } catch (Exception e) {
+            Log.e(TAG, "Error showing menu options", e);
+            Toast.makeText(this, "Menu options unavailable", Toast.LENGTH_SHORT).show();
         }
     }
 }

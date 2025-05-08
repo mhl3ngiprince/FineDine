@@ -9,6 +9,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.finedine.rms.utils.EmailSender;
+import com.finedine.rms.utils.LayoutUtils;
 import com.finedine.rms.utils.NotificationUtils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -81,8 +86,17 @@ public class KitchenActivity extends BaseActivity {
                 return;
             }
 
-            // Use modern navigation panel
-            setupModernNavigationPanel("Kitchen Orders", R.layout.activity_kitchen);
+            // Use modern navigation panel with layout safety
+            try {
+                setupModernNavigationPanel("Kitchen Orders", R.layout.activity_kitchen);
+            } catch (Exception e) {
+                // If modern navigation panel fails, use direct layout loading with safety
+                Log.e(TAG, "Error setting up navigation panel", e);
+                if (!LayoutUtils.safeSetContentView(this, R.layout.activity_kitchen, "Kitchen Orders")) {
+                    // If even the safe content view fails, just return - the utility will display an error screen
+                    return;
+                }
+            }
 
             // Initialize database
             appDatabase = ((FineDineApplication) getApplication()).getDatabase();
@@ -101,15 +115,22 @@ public class KitchenActivity extends BaseActivity {
             // Create notification channels
             createNotificationChannels();
 
-            // Set up UI components
-            recyclerView = findViewById(R.id.kitchenOrdersList);
-            swipeRefreshLayout = findViewById(R.id.swipeRefresh);
-            emptyView = findViewById(R.id.emptyView);
-            kitchenNameView = findViewById(R.id.kitchenName);
-            timeView = findViewById(R.id.timeView);
-            dateView = findViewById(R.id.dateView);
-            refreshButton = findViewById(R.id.refreshFab);
-            orderCountView = findViewById(R.id.orderCountView);
+            // Set up UI components with safety checks
+            recyclerView = LayoutUtils.safelyFindView(this, R.id.kitchenOrdersList, "Kitchen Orders List");
+            swipeRefreshLayout = LayoutUtils.safelyFindView(this, R.id.swipeRefresh, "Swipe Refresh");
+            emptyView = LayoutUtils.safelyFindView(this, R.id.emptyView, "Empty View");
+            kitchenNameView = LayoutUtils.safelyFindView(this, R.id.kitchenName, "Kitchen Name");
+            timeView = LayoutUtils.safelyFindView(this, R.id.timeView, "Time View");
+            dateView = LayoutUtils.safelyFindView(this, R.id.dateView, "Date View");
+            refreshButton = LayoutUtils.safelyFindView(this, R.id.refreshFab, "Refresh Button");
+            orderCountView = LayoutUtils.safelyFindView(this, R.id.orderCountView, "Order Count");
+
+            // Verify critical views are available
+            if (!LayoutUtils.checkRequiredViews(recyclerView, swipeRefreshLayout, emptyView)) {
+                Log.e(TAG, "Critical UI components missing - creating emergency UI");
+                createEmergencyUI();
+                return;
+            }
 
             // Initialize activeOrders
             activeOrders = new ArrayList<>();
@@ -127,7 +148,9 @@ public class KitchenActivity extends BaseActivity {
             swipeRefreshLayout.setOnRefreshListener(this::refreshOrders);
 
             // Setup refresh button
-            refreshButton.setOnClickListener(v -> refreshOrders());
+            if (refreshButton != null) {
+                refreshButton.setOnClickListener(v -> refreshOrders());
+            }
 
             // Initial data load
             updateDateTime();
@@ -144,7 +167,9 @@ public class KitchenActivity extends BaseActivity {
         } catch (Exception e) {
             Log.e("KitchenActivity", "Error initializing Kitchen: " + e.getMessage(), e);
             Toast.makeText(this, "Error initializing Kitchen screen", Toast.LENGTH_LONG).show();
-            finish();
+
+            // Create emergency UI as last resort
+            createEmergencyUI();
         }
     }
 
@@ -553,5 +578,149 @@ public class KitchenActivity extends BaseActivity {
             knownOrdersStringBuilder.deleteCharAt(knownOrdersStringBuilder.length() - 1);
         }
         sharedPreferences.edit().putString(KNOWN_ORDERS_KEY, knownOrdersStringBuilder.toString()).apply();
+    }
+
+    /**
+     * Create a simplified emergency UI if normal layout fails to load correctly
+     * This ensures the kitchen can still see and process orders
+     */
+    private void createEmergencyUI() {
+        try {
+            // Clear any existing layout first
+            setContentView(new LinearLayout(this)); // Temporary blank layout
+
+            // Create a basic layout
+            LinearLayout mainLayout = new LinearLayout(this);
+            mainLayout.setOrientation(LinearLayout.VERTICAL);
+            mainLayout.setPadding(20, 20, 20, 20);
+
+            // Add title
+            TextView titleView = new TextView(this);
+            titleView.setText("Kitchen Orders (Emergency Mode)");
+            titleView.setTextSize(20);
+            titleView.setPadding(0, 0, 0, 20);
+            mainLayout.addView(titleView);
+
+            // Add manual refresh button
+            Button refreshButton = new Button(this);
+            refreshButton.setText("Refresh Orders");
+            refreshButton.setOnClickListener(v -> refreshOrders());
+            mainLayout.addView(refreshButton);
+
+            // Create simple list container
+            LinearLayout ordersContainer = new LinearLayout(this);
+            ordersContainer.setOrientation(LinearLayout.VERTICAL);
+            ordersContainer.setPadding(10, 10, 10, 10);
+
+            // Add a scrollable container
+            ScrollView scrollView = new ScrollView(this);
+            scrollView.addView(ordersContainer);
+            mainLayout.addView(scrollView);
+
+            // Set this as main layout
+            setContentView(mainLayout);
+
+            // We'll reuse the container to show orders
+            activeOrders = new ArrayList<>();
+
+            // Manual loading of orders
+            TextView loadingText = new TextView(this);
+            loadingText.setText("Loading orders...");
+            ordersContainer.addView(loadingText);
+
+            // Set up a timer to refresh
+            refreshTimer = new Timer();
+            refreshTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    if (databaseExecutor != null && appDatabase != null) {
+                        databaseExecutor.execute(() -> {
+                            try {
+                                // Get pending orders
+                                List<Order> pendingOrders = appDatabase.orderDao().getOrdersByStatus("pending");
+                                List<Order> preparingOrders = appDatabase.orderDao().getOrdersByStatus("preparing");
+
+                                // Combine orders
+                                final List<Order> allOrders = new ArrayList<>();
+                                if (pendingOrders != null) allOrders.addAll(pendingOrders);
+                                if (preparingOrders != null) allOrders.addAll(preparingOrders);
+
+                                // Update UI
+                                runOnUiThread(() -> {
+                                    // Clear existing orders
+                                    ordersContainer.removeAllViews();
+
+                                    if (allOrders.isEmpty()) {
+                                        TextView noOrdersText = new TextView(KitchenActivity.this);
+                                        noOrdersText.setText("No orders waiting");
+                                        ordersContainer.addView(noOrdersText);
+                                    } else {
+                                        // Create a basic view for each order
+                                        for (Order order : allOrders) {
+                                            addEmergencyOrderView(ordersContainer, order);
+                                        }
+                                    }
+                                });
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error refreshing emergency orders", e);
+                            }
+                        });
+                    }
+                }
+            }, 0, 10000); // 10 seconds refresh
+
+            Toast.makeText(this, "Using emergency kitchen view", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to create emergency UI", e);
+            // Use the layout utils as last resort
+            LayoutUtils.createEmergencyLayout(this, "Kitchen Orders");
+        }
+    }
+
+    /**
+     * Add a simple order view to the container in emergency mode
+     */
+    private void addEmergencyOrderView(ViewGroup container, Order order) {
+        try {
+            if (order == null || container == null) return;
+
+            // Create a card-like layout for the order
+            LinearLayout orderCard = new LinearLayout(this);
+            orderCard.setOrientation(LinearLayout.VERTICAL);
+            orderCard.setPadding(15, 15, 15, 15);
+            orderCard.setBackgroundColor(0xFFEEEEEE); // Light gray background
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.setMargins(0, 0, 0, 15); // Add margin to bottom
+            orderCard.setLayoutParams(params);
+
+            // Order info text
+            TextView orderInfo = new TextView(this);
+            String status = order.getStatus();
+            orderInfo.setText("Order #" + order.getOrderId() +
+                    " - Table " + order.getTableNumber() +
+                    " - Status: " + status);
+            orderInfo.setTextSize(16);
+            orderCard.addView(orderInfo);
+
+            // Add action buttons based on status
+            if ("pending".equals(status)) {
+                Button startButton = new Button(this);
+                startButton.setText("Start Preparing");
+                startButton.setOnClickListener(v -> handleOrderAction(order, "start"));
+                orderCard.addView(startButton);
+            } else if ("preparing".equals(status)) {
+                Button readyButton = new Button(this);
+                readyButton.setText("Mark Ready");
+                readyButton.setOnClickListener(v -> handleOrderAction(order, "ready"));
+                orderCard.addView(readyButton);
+            }
+
+            container.addView(orderCard);
+        } catch (Exception e) {
+            Log.e(TAG, "Error adding emergency order view", e);
+        }
     }
 }

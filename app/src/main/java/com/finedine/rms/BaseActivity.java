@@ -781,14 +781,186 @@ public class BaseActivity extends AppCompatActivity {
      * @param activityTitle   Title to display in the toolbar
      * @param contentLayoutId Layout resource ID for the activity's content
      */
+    /**
+     * Create a simple emergency layout to avoid black screen
+     */
+    private void createEmergencyLayout(String activityTitle) {
+        try {
+            // Create a basic linear layout
+            LinearLayout emergencyLayout = new LinearLayout(this);
+            emergencyLayout.setOrientation(LinearLayout.VERTICAL);
+            emergencyLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT));
+            emergencyLayout.setGravity(android.view.Gravity.CENTER);
+            emergencyLayout.setPadding(30, 50, 30, 50);
+
+            // Add a title
+            TextView titleView = new TextView(this);
+            titleView.setText(activityTitle);
+            titleView.setTextSize(24);
+            titleView.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+            titleView.setGravity(android.view.Gravity.CENTER);
+            titleView.setPadding(20, 20, 20, 40);
+            emergencyLayout.addView(titleView);
+
+            // Add an error message
+            TextView errorView = new TextView(this);
+            errorView.setText("Unable to load the regular view. Please restart the app.");
+            errorView.setTextSize(16);
+            errorView.setGravity(android.view.Gravity.CENTER);
+            errorView.setPadding(20, 20, 20, 40);
+            emergencyLayout.addView(errorView);
+
+            // Add a back button
+            Button backButton = new Button(this);
+            backButton.setText("Go Back");
+            backButton.setOnClickListener(v -> onBackPressed());
+            emergencyLayout.addView(backButton);
+
+            // Set as content view
+            setContentView(emergencyLayout);
+
+            Log.d(TAG, "Emergency layout created for: " + activityTitle);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to create emergency layout", e);
+        }
+    }
+
+    /**
+     * Setup navigation view with error handling
+     */
+    private void setupNavigationView() {
+        if (navigationView == null) {
+            Log.w(TAG, "Navigation view not found in layout");
+            return;
+        }
+
+        try {
+            navigationView.setNavigationItemSelectedListener(item -> {
+                try {
+                    // Handle navigation view item clicks
+                    int id = item.getItemId();
+
+                    if (id == R.id.nav_dashboard) {
+                        navigateToActivitySafely(ManagerDashboardActivity.class);
+                    } else if (id == R.id.nav_orders) {
+                        navigateToActivitySafely(OrderActivity.class);
+                    } else if (id == R.id.nav_reservation) {
+                        navigateToActivitySafely(ReservationActivity.class);
+                    } else if (id == R.id.nav_staff) {
+                        navigateToActivitySafely(StaffManagementActivity.class);
+                    } else if (id == R.id.nav_menu) {
+                        // Direct all users to MenuManagementActivity
+                        navigateToActivitySafely(MenuManagementActivity.class);
+                    } else if (id == R.id.nav_inventory) {
+                        navigateToActivitySafely(InventoryActivity.class);
+                    } else if (id == R.id.nav_reviews) {
+                        navigateToActivitySafely(ReviewsActivity.class);
+                    } else if (id == R.id.nav_settings) {
+                        navigateToActivitySafely(SettingsActivity.class);
+                    } else if (id == R.id.nav_logout) {
+                        logout();
+                        return true;
+                    }
+
+                    // Close the drawer
+                    if (drawerLayout != null) {
+                        drawerLayout.closeDrawer(GravityCompat.START);
+                    }
+                    return true;
+                } catch (Exception e) {
+                    Log.e(TAG, "Error in navigation item click", e);
+                    Toast.makeText(this, "Navigation error", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting up navigation listener", e);
+            Toast.makeText(this, "Error setting up navigation", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Setup bottom navigation with error handling
+     */
+    private void setupBottomNavigation() {
+        if (bottomNavigationView == null) {
+            Log.w(TAG, "Bottom navigation view not found in layout");
+            return;
+        }
+
+        try {
+            bottomNavigationView.setOnItemSelectedListener(item -> {
+                try {
+                    int itemId = item.getItemId();
+
+                    if (itemId == R.id.navigation_dashboard) {
+                        navigateToActivitySafely(ManagerDashboardActivity.class);
+                        return true;
+                    } else if (itemId == R.id.navigation_orders) {
+                        navigateToActivitySafely(OrderActivity.class);
+                        return true;
+                    } else if (itemId == R.id.navigation_reservation) {
+                        navigateToActivitySafely(ReservationActivity.class);
+                        return true;
+                    } else if (itemId == R.id.navigation_menu) {
+                        // Direct all users to MenuManagementActivity for consistent experience
+                        navigateToActivitySafely(MenuManagementActivity.class);
+                        return true;
+                    } else if (itemId == R.id.navigation_more) {
+                        if (drawerLayout != null) {
+                            drawerLayout.openDrawer(GravityCompat.START);
+                        } else {
+                            Log.e(TAG, "Drawer layout is null, can't open drawer");
+                            Toast.makeText(BaseActivity.this,
+                                    "Navigation error: Drawer not available",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        return true;
+                    }
+
+                    return false;
+                } catch (Exception e) {
+                    Log.e(TAG, "Error in bottom navigation selection", e);
+                    Toast.makeText(BaseActivity.this,
+                            "Navigation error",
+                            Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting up bottom navigation", e);
+            Toast.makeText(this, "Error setting up navigation", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     protected void setupModernNavigationPanel(String activityTitle, int contentLayoutId) {
         // First set a simple layout as a failsafe, so we don't get black screens
-        setContentView(R.layout.modern_navigation_panel);
+        try {
+            setContentView(R.layout.modern_navigation_panel);
+            Log.d(TAG, "Base navigation panel set successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to set failsafe layout: " + e.getMessage(), e);
+            // Create emergency layout to prevent black screen
+            createEmergencyLayout(activityTitle);
+            return;
+        }
+
         try {
             // Handle manager dashboard separately due to its complex layout
             if (this instanceof ManagerDashboardActivity) {
                 // For ManagerDashboardActivity, we use the full layout and just set up navigation elements
-                setContentView(contentLayoutId);
+                try {
+                    setContentView(contentLayoutId);
+                    Log.d(TAG, "Dashboard layout set successfully");
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to load dashboard layout: " + e.getMessage(), e);
+                    Toast.makeText(this, "Error loading dashboard layout", Toast.LENGTH_SHORT).show();
+                    return; // Keep the failsafe layout
+                }
 
                 // Find and initialize the navigation components
                 drawerLayout = findViewById(R.id.drawer_layout);
@@ -799,20 +971,26 @@ public class BaseActivity extends AppCompatActivity {
                 Toolbar toolbar = findViewById(R.id.toolbar);
                 if (toolbar != null) {
                     setSupportActionBar(toolbar);
-                    getSupportActionBar().setDisplayShowTitleEnabled(false);
+                    if (getSupportActionBar() != null) {
+                        getSupportActionBar().setDisplayShowTitleEnabled(false);
+                    }
 
                     // Set the title text if it exists
                     TextView titleText = findViewById(R.id.titleText);
                     if (titleText != null) {
                         titleText.setText(activityTitle);
+                    } else {
+                        Log.w(TAG, "titleText view not found in toolbar");
                     }
 
                     // Add welcome message if user is logged in
                     addWelcomeMessage();
+                } else {
+                    Log.w(TAG, "Toolbar not found in dashboard layout");
                 }
             } else {
                 // For other activities, use the standard navigation panel + content approach
-                setContentView(R.layout.modern_navigation_panel);
+                // Content view already set to navigation panel as failsafe at start of method
 
                 // Find and initialize the navigation components
                 drawerLayout = findViewById(R.id.drawer_layout);
@@ -823,27 +1001,49 @@ public class BaseActivity extends AppCompatActivity {
                 Toolbar toolbar = findViewById(R.id.toolbar);
                 if (toolbar != null) {
                     setSupportActionBar(toolbar);
-                    getSupportActionBar().setDisplayShowTitleEnabled(false);
+                    if (getSupportActionBar() != null) {
+                        getSupportActionBar().setDisplayShowTitleEnabled(false);
+                    }
 
                     // Set the title text
                     TextView titleText = findViewById(R.id.titleText);
                     if (titleText != null) {
                         titleText.setText(activityTitle);
+                    } else {
+                        Log.w(TAG, "titleText view not found in toolbar");
                     }
 
                     // Add welcome message if user is logged in
                     addWelcomeMessage();
+                } else {
+                    Log.w(TAG, "Toolbar not found in navigation panel layout");
                 }
 
                 // Inflate the content layout into the content frame
-                if (contentLayoutId != 0) {
+                if (contentLayoutId > 0) {
                     View contentFrame = findViewById(R.id.content_frame);
                     if (contentFrame != null && contentFrame instanceof ViewGroup) {
-                        getLayoutInflater().inflate(contentLayoutId, (ViewGroup) contentFrame);
+                        try {
+                            getLayoutInflater().inflate(contentLayoutId, (ViewGroup) contentFrame);
+                            Log.d(TAG, "Content layout inflated successfully");
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error inflating content layout: " + e.getMessage(), e);
+                            Toast.makeText(this, "Error loading content. Please restart the app.", Toast.LENGTH_SHORT).show();
+                            return; // Return early, leaving the base navigation panel
+                        }
                     } else {
                         Log.e(TAG, "Content frame not found in navigation panel layout");
-                        setContentView(contentLayoutId); // Fallback
+                        try {
+                            setContentView(contentLayoutId); // Fallback
+                            Log.d(TAG, "Fallback to direct content layout");
+                        } catch (Exception e) {
+                            Log.e(TAG, "Cannot load content layout: " + e.getMessage(), e);
+                            // We'll keep using the navigation panel layout without content
+                            return;
+                        }
                     }
+                } else {
+                    Log.w(TAG, "No content layout ID provided (or invalid ID: " + contentLayoutId + ")");
                 }
             }
 
@@ -885,102 +1085,12 @@ public class BaseActivity extends AppCompatActivity {
             Log.d(TAG, "Navigation listeners successfully configured");
 
             // Set up navigation view with error handling
-            if (navigationView != null) {
-                try {
-                    navigationView.setNavigationItemSelectedListener(item -> {
-                        try {
-                            // Handle navigation view item clicks
-                            int id = item.getItemId();
-
-                            if (id == R.id.nav_dashboard) {
-                                navigateToActivitySafely(ManagerDashboardActivity.class);
-                            } else if (id == R.id.nav_orders) {
-                                navigateToActivitySafely(OrderActivity.class);
-                            } else if (id == R.id.nav_reservation) {
-                                navigateToActivitySafely(ReservationActivity.class);
-                            } else if (id == R.id.nav_staff) {
-                                navigateToActivitySafely(StaffManagementActivity.class);
-                            } else if (id == R.id.nav_menu) {
-                                // Direct all users to MenuManagementActivity
-                                navigateToActivitySafely(MenuManagementActivity.class);
-                            } else if (id == R.id.nav_inventory) {
-                                navigateToActivitySafely(InventoryActivity.class);
-                            } else if (id == R.id.nav_reviews) {
-                                navigateToActivitySafely(ReviewsActivity.class);
-                            } else if (id == R.id.nav_settings) {
-                                navigateToActivitySafely(SettingsActivity.class);
-                            } else if (id == R.id.nav_logout) {
-                                logout();
-                                return true;
-                            }
-
-                            // Close the drawer
-                            if (drawerLayout != null) {
-                                drawerLayout.closeDrawer(GravityCompat.START);
-                            }
-                            return true;
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error in navigation item click", e);
-                            return false;
-                        }
-                    });
-                } catch (Exception e) {
-                    Log.e(TAG, "Error setting up navigation listener", e);
-                }
-            } else {
-                Log.w(TAG, "Navigation view not found in layout");
-            }
+            setupNavigationView();
 
             // Set up bottom navigation with error handling
-            if (bottomNavigationView != null) {
-                try {
-                    bottomNavigationView.setOnItemSelectedListener(item -> {
-                        try {
-                            int itemId = item.getItemId();
-  
-                            if (itemId == R.id.navigation_dashboard) {
-                                navigateToActivitySafely(ManagerDashboardActivity.class);
-                                return true;
-                            } else if (itemId == R.id.navigation_orders) {
-                                navigateToActivitySafely(OrderActivity.class);
-                                return true;
-                            } else if (itemId == R.id.navigation_reservation) {
-                                navigateToActivitySafely(ReservationActivity.class);
-                                return true;
-                            } else if (itemId == R.id.navigation_menu) {
-                                // Direct all users to MenuManagementActivity for consistent experience
-                                navigateToActivitySafely(MenuManagementActivity.class);
-                                return true;
-                            } else if (itemId == R.id.navigation_more) {
-                                if (drawerLayout != null) {
-                                    drawerLayout.openDrawer(GravityCompat.START);
-                                } else {
-                                    Log.e(TAG, "Drawer layout is null, can't open drawer");
-                                    Toast.makeText(BaseActivity.this,
-                                            "Navigation error: Drawer not available",
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                                return true;
-                            }
+            setupBottomNavigation();
 
-                            return false;
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error in bottom navigation selection", e);
-                            Toast.makeText(BaseActivity.this,
-                                    "Navigation error",
-                                    Toast.LENGTH_SHORT).show();
-                            return false;
-                        }
-                    });
-                } catch (Exception e) {
-                    Log.e(TAG, "Error setting up bottom navigation", e);
-                }
-
-                // Set the selected item based on current activity
-                setSelectedBottomNavigationItem();
-            }
-
-            // Set up navigation listeners
+            // Set navigation listeners
             setupNavigationListeners();
 
             // Set the selected bottom navigation item based on current activity
@@ -1014,6 +1124,45 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     /**
+     * Provides a safety mechanism to ensure layouts are never null
+     * and the screen never goes black
+     */
+    protected void safeSetContentView(int layoutResID, String activityTitle) {
+        try {
+            setContentView(layoutResID);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to set content view: " + e.getMessage(), e);
+
+            try {
+                // Create an emergency layout to display
+                LinearLayout layout = new LinearLayout(this);
+                layout.setOrientation(LinearLayout.VERTICAL);
+                layout.setPadding(50, 100, 50, 50);
+
+                TextView titleView = new TextView(this);
+                titleView.setText(activityTitle != null ? activityTitle : "Error");
+                titleView.setTextSize(22);
+                layout.addView(titleView);
+
+                TextView msgView = new TextView(this);
+                msgView.setText("Error loading view. Please try again.");
+                msgView.setPadding(0, 20, 0, 20);
+                layout.addView(msgView);
+
+                Button backButton = new Button(this);
+                backButton.setText("Go Back");
+                backButton.setOnClickListener(v -> onBackPressed());
+                layout.addView(backButton);
+
+                setContentView(layout);
+                Toast.makeText(this, "Error loading the view", Toast.LENGTH_SHORT).show();
+            } catch (Exception ex) {
+                Log.e(TAG, "Failed to create emergency layout", ex);
+            }
+        }
+    }
+
+/**
      * Set the selected item in the bottom navigation based on current activity
      */
     private void setSelectedBottomNavigationItem() {
@@ -1868,7 +2017,7 @@ public class BaseActivity extends AppCompatActivity {
     /**
      * Show a date picker dialog and update the view with selected date
      */
-    protected void showDatePicker(View dateView) {
+    public void showDatePicker(View dateView) {
         try {
             // Get current date
             final Calendar calendar = Calendar.getInstance();
@@ -1893,6 +2042,16 @@ public class BaseActivity extends AppCompatActivity {
                     },
                     year, month, day);
 
+            // Set calendar display mode to digital calendar
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                // Use calendar view mode
+                datePickerDialog.getDatePicker().setCalendarViewShown(true);
+                datePickerDialog.getDatePicker().setSpinnersShown(false);
+            }
+
+            // Set minimum date to today
+            datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+
             datePickerDialog.show();
         } catch (Exception e) {
             Log.e(TAG, "Error showing date picker", e);
@@ -1903,16 +2062,17 @@ public class BaseActivity extends AppCompatActivity {
     /**
      * Show a time picker dialog and update the view with selected time
      */
-    protected void showTimePicker(View timeView) {
+    public void showTimePicker(View timeView) {
         try {
             // Get current time
             final Calendar calendar = Calendar.getInstance();
             int hour = calendar.get(Calendar.HOUR_OF_DAY);
             int minute = calendar.get(Calendar.MINUTE);
 
-            // Create and show time picker dialog
+            // Create and show time picker dialog with digital clock style
             TimePickerDialog timePickerDialog = new TimePickerDialog(
                     this,
+                    TimePickerDialog.THEME_DEVICE_DEFAULT_DARK, // Use dark theme for digital appearance
                     (view, selectedHour, selectedMinute) -> {
                         // Format the selected time in AM/PM format
                         Calendar time = Calendar.getInstance();
@@ -1928,6 +2088,10 @@ public class BaseActivity extends AppCompatActivity {
                     },
                     hour, minute, false); // false for 12 hour (AM/PM) format
 
+            // Set the style to be digital clock-like
+            timePickerDialog.setTitle("Select Time");
+
+            // Show time picker
             timePickerDialog.show();
         } catch (Exception e) {
             Log.e(TAG, "Error showing time picker", e);

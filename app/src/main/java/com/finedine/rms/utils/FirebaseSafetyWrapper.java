@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.finedine.rms.EmergencyActivity;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.UserProfileChangeRequest;
@@ -69,7 +70,11 @@ public class FirebaseSafetyWrapper {
                     Log.e(TAG, "Error checking Firebase resources: " + ex.getMessage(), ex);
                 }
 
-                Toast.makeText(context, "Authentication service unavailable", Toast.LENGTH_SHORT).show();
+                if (context instanceof androidx.appcompat.app.AppCompatActivity) {
+                    EmergencyActivity.launch((androidx.appcompat.app.AppCompatActivity) context, "Firebase authentication unavailable");
+                } else {
+                    Toast.makeText(context, "Authentication service unavailable", Toast.LENGTH_SHORT).show();
+                }
             }
 
             return false;
@@ -92,6 +97,11 @@ public class FirebaseSafetyWrapper {
             return auth;
         } catch (Exception e) {
             Log.e(TAG, "Failed to get FirebaseAuth instance: " + e.getMessage(), e);
+            if (context instanceof androidx.appcompat.app.AppCompatActivity) {
+                EmergencyActivity.launch((androidx.appcompat.app.AppCompatActivity) context, "Firebase authentication unavailable");
+            } else {
+                Toast.makeText(context, "Authentication service unavailable", Toast.LENGTH_SHORT).show();
+            }
             return null;
         }
     }
@@ -109,6 +119,11 @@ public class FirebaseSafetyWrapper {
             return FirebaseFirestore.getInstance();
         } catch (Exception e) {
             Log.e(TAG, "Failed to get FirebaseFirestore instance", e);
+            if (context instanceof androidx.appcompat.app.AppCompatActivity) {
+                EmergencyActivity.launch((androidx.appcompat.app.AppCompatActivity) context, "Firebase database unavailable");
+            } else {
+                Toast.makeText(context, "Database service unavailable", Toast.LENGTH_SHORT).show();
+            }
             return null;
         }
     }
@@ -126,6 +141,11 @@ public class FirebaseSafetyWrapper {
             return FirebaseStorage.getInstance();
         } catch (Exception e) {
             Log.e(TAG, "Failed to get FirebaseStorage instance", e);
+            if (context instanceof androidx.appcompat.app.AppCompatActivity) {
+                EmergencyActivity.launch((androidx.appcompat.app.AppCompatActivity) context, "Firebase storage unavailable");
+            } else {
+                Toast.makeText(context, "Storage service unavailable", Toast.LENGTH_SHORT).show();
+            }
             return null;
         }
     }
@@ -198,6 +218,11 @@ public class FirebaseSafetyWrapper {
 
         } catch (Exception e) {
             Log.e(TAG, "Error in saveToFirestore", e);
+            if (context instanceof androidx.appcompat.app.AppCompatActivity) {
+                EmergencyActivity.launch((androidx.appcompat.app.AppCompatActivity) context, "Error saving data: " + e.getMessage());
+            } else {
+                Toast.makeText(context, "Error saving data", Toast.LENGTH_SHORT).show();
+            }
             if (callback != null) {
                 callback.onFailure("Error: " + e.getMessage());
             }
@@ -255,6 +280,11 @@ public class FirebaseSafetyWrapper {
                     });
         } catch (Exception e) {
             Log.e(TAG, "Error updating user profile", e);
+            if (context instanceof androidx.appcompat.app.AppCompatActivity) {
+                EmergencyActivity.launch((androidx.appcompat.app.AppCompatActivity) context, "Error updating profile");
+            } else {
+                Toast.makeText(context, "Error updating profile", Toast.LENGTH_SHORT).show();
+            }
             if (callback != null) {
                 callback.onFailure("Error: " + e.getMessage());
             }
@@ -322,6 +352,11 @@ public class FirebaseSafetyWrapper {
                     });
         } catch (Exception e) {
             Log.e(TAG, "Error uploading image", e);
+            if (context instanceof androidx.appcompat.app.AppCompatActivity) {
+                EmergencyActivity.launch((androidx.appcompat.app.AppCompatActivity) context, "Error uploading image");
+            } else {
+                Toast.makeText(context, "Error uploading image", Toast.LENGTH_SHORT).show();
+            }
             if (callback != null) {
                 callback.onFailure("Error: " + e.getMessage());
             }

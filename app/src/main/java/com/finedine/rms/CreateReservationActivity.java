@@ -9,7 +9,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -63,11 +65,20 @@ public class CreateReservationActivity extends BaseActivity {
             guestsSpinner = findViewById(R.id.guestsSpinner);
             saveButton = findViewById(R.id.saveButton);
 
+            // Verify that required UI components are found
+            if (dateEditText == null || timeEditText == null ||
+                    customerNameEditText == null || guestsSpinner == null || saveButton == null) {
+                Toast.makeText(this, "Error loading reservation form elements", Toast.LENGTH_SHORT).show();
+                // Create a fallback minimal layout with essential fields rather than showing black screen
+                createEmergencyReservationForm();
+                return;
+            }
+
             // Set up date picker dialog
             dateEditText.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showDatePickerDialog();
+                    showDatePicker(dateEditText);
                 }
             });
 
@@ -75,7 +86,7 @@ public class CreateReservationActivity extends BaseActivity {
             timeEditText.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showTimePickerDialog();
+                    showTimePicker(timeEditText);
                 }
             });
 
@@ -93,6 +104,8 @@ public class CreateReservationActivity extends BaseActivity {
         } catch (Exception e) {
             Log.e(TAG, "Error initializing CreateReservationActivity", e);
             Toast.makeText(this, "Error initializing reservation screen", Toast.LENGTH_SHORT).show();
+            // Create a fallback layout if initialization fails
+            createEmergencyReservationForm();
         }
     }
 
@@ -330,7 +343,118 @@ public class CreateReservationActivity extends BaseActivity {
         
         return valid;
     }
-    
+
+    private void createEmergencyReservationForm() {
+        try {
+            // Create a simple linear layout
+            LinearLayout layout = new LinearLayout(this);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            layout.setPadding(30, 50, 30, 30);
+
+            // Add title
+            TextView titleText = new TextView(this);
+            titleText.setText("Create Reservation");
+            titleText.setTextSize(24);
+            titleText.setPadding(0, 0, 0, 30);
+            layout.addView(titleText);
+
+            // Add date field
+            TextView dateLabel = new TextView(this);
+            dateLabel.setText("Date:");
+            layout.addView(dateLabel);
+
+            dateEditText = new EditText(this);
+            dateEditText.setHint("Select Date");
+            dateEditText.setFocusable(false);
+            dateEditText.setOnClickListener(v -> showDatePickerDialog());
+            layout.addView(dateEditText);
+
+            // Add time field
+            TextView timeLabel = new TextView(this);
+            timeLabel.setText("Time:");
+            timeLabel.setPadding(0, 20, 0, 0);
+            layout.addView(timeLabel);
+
+            timeEditText = new EditText(this);
+            timeEditText.setHint("Select Time");
+            timeEditText.setFocusable(false);
+            timeEditText.setOnClickListener(v -> showTimePickerDialog());
+            layout.addView(timeEditText);
+
+            // Add name field
+            TextView nameLabel = new TextView(this);
+            nameLabel.setText("Name:");
+            nameLabel.setPadding(0, 20, 0, 0);
+            layout.addView(nameLabel);
+
+            customerNameEditText = new EditText(this);
+            customerNameEditText.setHint("Your Name");
+            layout.addView(customerNameEditText);
+
+            // Add phone field
+            TextView phoneLabel = new TextView(this);
+            phoneLabel.setText("Phone:");
+            phoneLabel.setPadding(0, 20, 0, 0);
+            layout.addView(phoneLabel);
+
+            phoneEditText = new EditText(this);
+            phoneEditText.setHint("Phone Number");
+            phoneEditText.setInputType(android.text.InputType.TYPE_CLASS_PHONE);
+            layout.addView(phoneEditText);
+
+            // Add button
+            Button saveButtonEmergency = new Button(this);
+            saveButtonEmergency.setText("Save Reservation");
+            saveButtonEmergency.setBackgroundColor(getResources().getColor(R.color.luxe_burgundy));
+            saveButtonEmergency.setPadding(20, 20, 20, 20);
+            saveButtonEmergency.setOnClickListener(v -> saveReservation());
+            LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
+            buttonParams.setMargins(0, 40, 0, 0);
+            saveButtonEmergency.setLayoutParams(buttonParams);
+            layout.addView(saveButtonEmergency);
+
+            // Back button
+            Button backButton = new Button(this);
+            backButton.setText("Go Back");
+            backButton.setOnClickListener(v -> onBackPressed());
+            layout.addView(backButton);
+
+            // Set this as the content view
+            setContentView(layout);
+
+            // Initialize other required variables
+            calendar = Calendar.getInstance();
+
+            // Initialize Firebase components
+            db = FirebaseFirestore.getInstance();
+            mAuth = FirebaseAuth.getInstance();
+
+            Toast.makeText(this, "Using simplified reservation form", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to create emergency reservation form", e);
+            // If even this fails, show a simple error message
+            TextView errorText = new TextView(this);
+            errorText.setText("Error loading reservation form. Please try again later.");
+            errorText.setPadding(50, 100, 50, 50);
+            setContentView(errorText);
+
+            // Add back button
+            Button backButton = new Button(this);
+            backButton.setText("Go Back");
+            backButton.setOnClickListener(v -> onBackPressed());
+
+            // Create a layout to hold both views
+            LinearLayout errorLayout = new LinearLayout(this);
+            errorLayout.setOrientation(LinearLayout.VERTICAL);
+            errorLayout.addView(errorText);
+            errorLayout.addView(backButton);
+
+            setContentView(errorLayout);
+        }
+    }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();

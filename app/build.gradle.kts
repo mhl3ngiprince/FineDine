@@ -16,7 +16,11 @@ android {
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments["room.schemaLocation"] = "$projectDir/schemas"
+                arguments += mapOf(
+                    "room.schemaLocation" to "$projectDir/schemas",
+                    "room.incremental" to "true",
+                    "room.expandProjection" to "true"
+                )
             }
         }
 
@@ -34,8 +38,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     packaging {
@@ -129,33 +133,44 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment:2.7.7")
     implementation("androidx.navigation:navigation-ui:2.7.7")
     implementation("androidx.drawerlayout:drawerlayout:1.2.0")
-    implementation("com.google.android.material:material:1.11.0")
 
-    // Firebase dependencies (using BoM to manage versions)
+    // Firebase dependencies using BoM
     implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
-    implementation("com.google.firebase:firebase-analytics-ktx")
-    implementation(libs.firebase.auth.ktx)
-    implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-storage")
     implementation("com.google.firebase:firebase-messaging")
+
+    // Firebase Database (ensure these are explicitly included)
+    implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-database-ktx")
+
+    // Other Firebase modules
+    implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.inappmessaging)
     implementation(libs.material)
 
-    // Image loading
-    implementation("com.github.bumptech.glide:glide:4.15.1")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
+    // Glide for image loading
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
+    // JavaMail for email functionality
+    implementation("com.sun.mail:android-mail:1.6.6")
+    implementation("com.sun.mail:android-activation:1.6.6")
 
     // CSV handling
     implementation("com.opencsv:opencsv:5.6")
+
+    // JSON parsing
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Security
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
-    // RecyclerView
+    // UI components
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")

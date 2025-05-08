@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">Fine Dine</string>
     <string name="login_subtitle">Exceptional Dining Experience</string>
     <string name="login">Login</string>
@@ -39,25 +39,63 @@
     <string name="tod">TODO</string>
     <string name="Email">Email</string>
     <string name="search_menu_items">Search Menu Items</string>
+    <string name="profile_button" translatable="false">Profile</string>
     <string name="welcome_message">welcome</string>
     <string name="view_orders">view orders</string>
     <string name="click_me">Click Me</string>
     <string name="default_notification_channel_id">finedine_notifications</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_settings">Settings</string>
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+
+    <!-- Profile strings -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_edit">Edit Profile</string>
+    <string name="profile_save">Save Changes</string>
+    <string name="profile_cancel">Cancel</string>
+    <string name="profile_first_name">First Name</string>
+    <string name="profile_last_name">Last Name</string>
+    <string name="profile_phone_number">Phone Number</string>
+    <string name="profile_address">Address</string>
+    <string name="profile_picture">Profile Picture</string>
+    <string name="profile_picture_description" tools:ignore="UnusedResources">Upload a profile picture to personalize your account</string>
+    <string name="profile_picture_upload" tools:ignore="UnusedResources">Upload Picture</string>
+    <string name="profile_picture_remove" tools:ignore="UnusedResources">Remove Picture</string>
+    <string name="profile_change_password">Change Password</string>
+    <string name="profile_notification_settings">Notification Settings</string>
+    <string name="profile_language_preference">Language Preference</string>
+    <string name="profile_help_center">Help Center</string>
 
     <!-- Settings strings -->
     <string name="settings_title">Settings</string>
-    <string name="settings_theme">Theme</string>
+    <string name="settings_app_version">App Version</string>
     <string name="settings_language">Language</string>
+    <string name="settings_notification">Notification</string>
+    <string name="settings_help">Help</string>
+    <string name="settings_terms_of_service">Terms of Service</string>
+    <string name="settings_privacy_policy">Privacy Policy</string>
+    <string name="settings_logout">Logout</string>
+    <string name="settings_delete_account">Delete Account</string>
+    <string name="settings_change_password">Change Password</string>
+    <string name="settings_change_profile_picture">Change Profile Picture</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_spanish">Spanish</string>
+    <string name="settings_language_french">French</string>
     <string name="settings_notifications">Notifications</string>
+    <string name="settings_theme">Theme</string>
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
-    <string name="settings_theme_system">System Default</string>
-    <string name="settings_app_version">App Version</string>
+    <string name="settings_theme_system">System default</string>
+    <string name="settings_cancel">Cancel</string>
     <string name="settings_certificate">Certificate Fingerprints</string>
     <string name="settings_show">Show</string>
-    <string name="settings_cancel">Cancel</string>
+    <string name="username">Username</string>
+    <string name="username_hint">Enter your username</string>
+    <string name="email_field">Email</string>
+    <string name="email_hint">Enter your email address</string>
 
     <!-- Plurals -->
     <plurals name="party_size">

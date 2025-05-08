@@ -193,11 +193,11 @@ public class AdminActivity extends BaseActivity {
             drawerLayout = findViewById(R.id.drawer_layout);
             navigationView = findViewById(R.id.nav_view);
 
-            // Set up toolbar if it exists
+            // Set up toolbar
             Toolbar toolbar = findViewById(R.id.toolbar);
-            if (toolbar != null) {
-                setSupportActionBar(toolbar);
-            }
+            setSupportActionBar(toolbar);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
 
             // Set up drawer toggle if drawer layout exists
             if (drawerLayout != null && navigationView != null) {

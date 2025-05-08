@@ -420,4 +420,25 @@ public class MenuItem {
     public void setSpiceLevel(String spiceLevel) {
         this.spiceLevel = spiceLevel;
     }
+
+    // Additional getters needed by FirebaseDatabaseHelper
+    public String getTitle() {
+        return name; // Returns name as title
+    }
+
+    public String getImage() {
+        return imageUrl; // Returns imageUrl
+    }
+
+    public boolean isIs_available() {
+        return availability;
+    }
+
+    public boolean getAvailability() {
+        return availability;
+    }
+
+    public int getItemId() {
+        return item_id;
+    }
 }

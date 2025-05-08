@@ -9,13 +9,6 @@
     android:background="@color/med_bg_white"
     tools:context=".AdminActivity">
 
-    <!-- Include Navigation Panel -->
-    <include
-        android:id="@+id/navigation_panel"
-        layout="@layout/modern_navigation_panel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">

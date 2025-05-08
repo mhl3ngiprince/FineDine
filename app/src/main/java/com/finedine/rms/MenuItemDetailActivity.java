@@ -76,6 +76,18 @@ public class MenuItemDetailActivity extends BaseActivity {
             tvSpiceLevel = findViewById(R.id.tvMenuItemDetailSpiceLevel);
             btnOrderNow = findViewById(R.id.btnOrderNow);
 
+            // Validate that we have the minimum necessary views
+            if (ivMenuItemImage == null || tvMenuItemName == null ||
+                    tvMenuItemDescription == null || btnOrderNow == null) {
+                Log.e(TAG, "Critical UI components not found in layout");
+                // Check which components are missing
+                if (ivMenuItemImage == null) Log.e(TAG, "ivMenuItemImage is null");
+                if (tvMenuItemName == null) Log.e(TAG, "tvMenuItemName is null");
+                if (tvMenuItemDescription == null) Log.e(TAG, "tvMenuItemDescription is null");
+                if (btnOrderNow == null) Log.e(TAG, "btnOrderNow is null");
+                throw new IllegalStateException("Layout inflation incomplete - critical UI components missing");
+            }
+
             // Enable back navigation
             androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
             if (toolbar != null) {
@@ -105,6 +117,7 @@ public class MenuItemDetailActivity extends BaseActivity {
         } catch (Exception e) {
             Log.e(TAG, "Error initializing MenuItemDetailActivity", e);
             Toast.makeText(this, "Error loading menu item details", Toast.LENGTH_SHORT).show();
+            finish(); // Close the activity if setup fails
         }
     }
 

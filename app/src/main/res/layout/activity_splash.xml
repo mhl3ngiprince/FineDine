@@ -90,23 +90,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <service
-        android:name=".MyFirebaseMessagingService"
-        android:exported="false"
-        android:enabled="true"
-        tools:ignore="MissingClass">
-        <intent-filter>
-            <action android:name="com.google.firebase.MESSAGING_EVENT" />
-        </intent-filter>
-    </service>
-    
-    <!-- Firebase fallback services -->
-    <service
-        android:name=".FirebaseFallbackService"
-        android:exported="false">
-        <intent-filter>
-            <action android:name="com.finedine.rms.FIREBASE_FALLBACK" />
-        </intent-filter>
-    </service>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

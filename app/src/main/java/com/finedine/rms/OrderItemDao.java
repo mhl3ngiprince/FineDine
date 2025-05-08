@@ -22,6 +22,9 @@ public interface OrderItemDao {
     @Query("SELECT * FROM order_items WHERE orderId= :orderId")
     List<OrderItem> getItemsByOrderId(long orderId);
 
+    @Query("SELECT * FROM order_items WHERE orderId= :orderId")
+    List<OrderItem> getItemsForOrder(long orderId);
+
     @Query("SELECT * FROM order_items")
     List<OrderItem> getAllOrderItems();
 

@@ -34,6 +34,9 @@ public class OrderItem {
     private String notes;
     private double price;
 
+    @ColumnInfo(name = "specialInstructions")
+    private String specialInstructions;
+
     @ColumnInfo(name = "menu_item_id")
     private Integer menuItemId;
 
@@ -47,6 +50,7 @@ public class OrderItem {
         this.quantity = quantity;
         this.orderId = orderId;
         this.notes = "";
+        this.specialInstructions = "";
     }
 
     // Getters and setters
@@ -87,5 +91,13 @@ public class OrderItem {
 
     public void setMenuItemId(Integer menuItemId) {
         this.menuItemId = menuItemId;
+    }
+
+    public String getSpecialInstructions() {
+        return specialInstructions != null ? specialInstructions : "";
+    }
+
+    public void setSpecialInstructions(String specialInstructions) {
+        this.specialInstructions = specialInstructions != null ? specialInstructions : "";
     }
 }

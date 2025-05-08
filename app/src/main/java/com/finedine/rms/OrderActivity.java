@@ -1375,11 +1375,41 @@ public class OrderActivity extends BaseActivity {
 
     private void processPayment(long orderId, double total) {
         try {
+            // Launch the payment activity
+            Intent paymentIntent = new Intent(this, PaymentActivity.class);
+            paymentIntent.putExtra("order_id", orderId);
+            paymentIntent.putExtra("amount", total);
+            paymentIntent.putExtra("order_status", "pending");
+            paymentIntent.putExtra("order_reference", "ORD-" + orderId);
+            startActivity(paymentIntent);
+
+            // Clear order after sending to payment
+            clearOrder();
+        } catch (Exception e) {
+            Log.e(TAG, "Error processing payment", e);
+            Toast.makeText(this, "Error processing payment", Toast.LENGTH_SHORT).show();
+
+            // Show manual payment completion dialog as fallback
+            showPaymentCompletionDialog(orderId, total);
+        }
+    }
+
+    private void showPaymentCompletionDialog(long orderId, double total) {
+        try {
             // Show payment success dialog
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Payment Complete");
             builder.setMessage("Thank you for your payment of R" + String.format("%.2f", total));
-            builder.setPositiveButton("OK", (dialog, which) -> {
+            builder.setPositiveButton("View Receipt", (dialog, which) -> {
+                // Launch receipt activity
+                Intent receiptIntent = new Intent(this, ReceiptActivity.class);
+                receiptIntent.putExtra("order_id", orderId);
+                startActivity(receiptIntent);
+
+                // Clear order
+                clearOrder();
+            });
+            builder.setNegativeButton("Done", (dialog, which) -> {
                 // Clear order after successful payment
                 clearOrder();
                 Toast.makeText(this, "Payment successful! Order #" + orderId, Toast.LENGTH_SHORT).show();
@@ -1387,7 +1417,7 @@ public class OrderActivity extends BaseActivity {
             builder.setCancelable(false);
             builder.show();
         } catch (Exception e) {
-            Log.e(TAG, "Error processing payment", e);
+            Log.e(TAG, "Error showing payment completion dialog", e);
             Toast.makeText(this, "Error processing payment", Toast.LENGTH_SHORT).show();
         }
     }

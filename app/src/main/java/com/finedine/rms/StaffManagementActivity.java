@@ -3,22 +3,20 @@ package com.finedine.rms;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.finedine.rms.StaffAdapter;
 import com.finedine.rms.AppDatabase;
 import com.finedine.rms.User;
-import com.google.firebase.database.annotations.Nullable;
 import com.finedine.rms.R;
-
 import android.util.Log;
 import android.widget.Toast;
-
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
-
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.Collections;

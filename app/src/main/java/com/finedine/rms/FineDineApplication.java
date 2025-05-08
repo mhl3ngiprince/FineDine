@@ -80,6 +80,9 @@ public class FineDineApplication extends Application {
             }, 1000);
         });
 
+        // Verify critical layout resources exist
+        verifyLayoutResources();
+
         // Ensure we catch any exception but still continue app initialization
         try {
             // Call super.onCreate() first to ensure proper initialization
@@ -562,6 +565,36 @@ public class FineDineApplication extends Application {
         } catch (Exception e) {
             Log.e(TAG, "Error checking FCM availability", e);
             return false;
+        }
+    }
+
+    /**
+     * Verify that critical layout resources exist to prevent crashes
+     */
+    private void verifyLayoutResources() {
+        String[] criticalLayouts = {
+                "activity_login",
+                "activity_register",
+                "activity_forgot_password",
+                "activity_manager_dashboard",
+                "activity_kitchen",
+                "activity_order"
+        };
+
+        boolean allLayoutsAvailable = true;
+
+        for (String layoutName : criticalLayouts) {
+            int resId = getResources().getIdentifier(layoutName, "layout", getPackageName());
+            if (resId == 0) {
+                Log.e(TAG, "Critical layout missing: " + layoutName);
+                allLayoutsAvailable = false;
+            }
+        }
+
+        if (!allLayoutsAvailable) {
+            Log.e(TAG, "Some critical layouts are missing! App may crash when navigating");
+        } else {
+            Log.d(TAG, "All critical layouts are available");
         }
     }
 }

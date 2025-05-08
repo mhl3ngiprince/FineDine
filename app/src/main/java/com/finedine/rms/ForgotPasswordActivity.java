@@ -22,7 +22,7 @@ import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 
-public class ForgotPasswordActivity extends BaseActivity {
+public class ForgotPasswordActivity extends AppCompatActivity {
 
     private static final String TAG = "ForgotPasswordActivity";
 
@@ -35,40 +35,22 @@ public class ForgotPasswordActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        try {
-            super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "Starting ForgotPasswordActivity");
+        setContentView(R.layout.activity_forgot_password);
 
-            // Set emergency error handler
-            Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
-                Log.e(TAG, "Uncaught exception in ForgotPasswordActivity", throwable);
-                EmergencyActivity.launch(this, "Error in password reset process. Please try again later.");
-            });
+        // Ensure the window background is properly set
+        getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_luxury_pattern));
+        Log.d(TAG, "Content view set successfully");
 
-            // Set content view with try-catch to handle layout inflation errors
-            try {
-                setContentView(R.layout.activity_forgot_password);
-            } catch (Exception e) {
-                Log.e(TAG, "Error setting content view", e);
-                EmergencyActivity.launch(this, "Error loading password reset screen.");
-                finish();
-                return;
-            }
+        // Initialize UI components with null checks
+        initializeViews();
 
-            // Initialize UI components with null checks
-            initializeViews();
+        // Initialize Firebase Auth safely
+        initializeFirebase();
 
-            // Initialize Firebase Auth safely
-            initializeFirebase();
-
-            // Set click listeners safely
-            setupClickListeners();
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error in onCreate: " + e.getMessage(), e);
-            Toast.makeText(this, "Error initializing password reset", Toast.LENGTH_SHORT).show();
-            EmergencyActivity.launch(this, "Error initializing password reset. Please try again later.");
-            finish();
-        }
+        // Set click listeners safely
+        setupClickListeners();
     }
 
     /**
@@ -76,6 +58,7 @@ public class ForgotPasswordActivity extends BaseActivity {
      */
     private void initializeViews() {
         try {
+            Log.d(TAG, "Initializing views");
             emailEditText = findViewById(R.id.emailInput);
             resetButton = findViewById(R.id.resetButton);
             backButton = findViewById(R.id.backButton);
@@ -97,6 +80,7 @@ public class ForgotPasswordActivity extends BaseActivity {
             if (progressBar != null) {
                 progressBar.setVisibility(View.GONE);
             }
+            Log.d(TAG, "All views initialized successfully");
         } catch (Exception e) {
             Log.e(TAG, "Error initializing views", e);
             throw e; // Rethrow to be caught in onCreate
@@ -144,7 +128,6 @@ public class ForgotPasswordActivity extends BaseActivity {
         try {
             if (emailEditText == null) {
                 Toast.makeText(this, "Error: Form not initialized properly", Toast.LENGTH_SHORT).show();
-                EmergencyActivity.launch(this, "Error initializing password reset form.");
                 return;
             }
 
@@ -172,18 +155,24 @@ public class ForgotPasswordActivity extends BaseActivity {
             // Show progress
             showProgress(true);
 
-            // If using demo accounts
-            if (email.equals("admin@finedine.com") ||
-                    email.equals("manager@finedine.com") ||
-                    email.equals("chef@finedine.com") ||
-                    email.equals("waiter@finedine.com") ||
-                    email.equals("customer@finedine.com")) {
-                showSuccessMessage("Password reset instructions sent to demo account email (for demo purposes only).");
+            // Check for demo accounts - always show success for these predefined accounts
+            if (email.equals("admin@finedine.com") || email.equals("admin") ||
+                    email.equals("manager@finedine.com") || email.equals("manager") ||
+                    email.equals("chef@finedine.com") || email.equals("chef") ||
+                    email.equals("waiter@finedine.com") || email.equals("waiter") ||
+                    email.equals("customer@finedine.com") || email.equals("customer")) {
+                // Just wait a moment to simulate processing
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    showSuccessMessage("Password reset instructions sent to demo account email (for demo purposes only). For demo accounts, the password is same as username.");
+                }, 1500);
                 return;
             }
 
-            // First try to send email through our own email service
-            sendCustomResetEmail(email);
+            // For all other emails, also show success since this is a demo app
+            // In a real app, we would check if the email exists in our system
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                sendCustomResetEmail(email);
+            }, 1000);
         } catch (Exception e) {
             Log.e(TAG, "Error attempting password reset", e);
             showErrorMessage("Error attempting password reset. Please try again later.");

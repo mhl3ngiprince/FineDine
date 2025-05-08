@@ -37,7 +37,7 @@ import com.finedine.rms.utils.NetworkUtils;
 import com.finedine.rms.utils.RoleManager;
 import com.finedine.rms.utils.SharedPrefsManager;
 
-public class RegisterActivity extends BaseActivity {
+public class RegisterActivity extends AppCompatActivity {
     
     private static final String TAG = "RegisterActivity";
     
@@ -57,48 +57,31 @@ public class RegisterActivity extends BaseActivity {
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        try {
-            super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "Starting RegisterActivity");
+        setContentView(R.layout.activity_register);
 
-            // Set a default error handler for this activity
-            Thread.currentThread().setUncaughtExceptionHandler((thread, throwable) -> {
-                Log.e(TAG, "Uncaught exception in RegisterActivity", throwable);
-                EmergencyActivity.launch(this, "Error in registration process. Please try again later.");
-            });
+        // Ensure the window background is properly set
+        getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_luxury_pattern));
+        Log.d(TAG, "Content view set successfully");
 
-            // Set content view with try-catch to handle layout inflation errors
-            try {
-                setContentView(R.layout.activity_register);
-            } catch (Exception e) {
-                Log.e(TAG, "Error setting content view", e);
-                EmergencyActivity.launch(this, "Error loading registration screen.");
-                finish();
-                return;
-            }
+        // Initialize views first (so UI is visible even if Firebase fails)
+        initializeViews();
 
-            // Initialize views first (so UI is visible even if Firebase fails)
-            initializeViews();
+        // Set up role spinner with user_roles array
+        setupSpinner();
 
-            // Set up role spinner with user_roles array
-            setupSpinner();
+        // Initialize Firebase safely
+        initializeFirebaseSafely();
 
-            // Initialize Firebase safely
-            initializeFirebaseSafely();
+        // Initialize SharedPrefsManager
+        prefsManager = new SharedPrefsManager(this);
 
-            // Initialize SharedPrefsManager
-            prefsManager = new SharedPrefsManager(this);
+        // Set user as not logged in when entering register screen
+        prefsManager.setUserLoggedIn(false);
 
-            // Set user as not logged in when entering register screen
-            prefsManager.setUserLoggedIn(false);
-
-            // Set up click listeners
-            setupClickListeners();
-        } catch (Exception e) {
-            Log.e(TAG, "Error initializing register activity", e);
-            Toast.makeText(this, "Error initializing registration. Please try again.", Toast.LENGTH_LONG).show();
-            EmergencyActivity.launch(this, "Error initializing registration. Please try again later.");
-            finish();
-        }
+        // Set up click listeners
+        setupClickListeners();
     }
 
     /**
@@ -106,6 +89,7 @@ public class RegisterActivity extends BaseActivity {
      */
     private void initializeViews() {
         try {
+            Log.d(TAG, "Initializing views");
             emailEditText = findViewById(R.id.emailInput);
             passwordEditText = findViewById(R.id.passwordInput);
             confirmPasswordEditText = findViewById(R.id.confirmPasswordInput);
@@ -118,8 +102,10 @@ public class RegisterActivity extends BaseActivity {
             // Check for critical views
             if (emailEditText == null || passwordEditText == null ||
                     confirmPasswordEditText == null || registerButton == null) {
+                Log.e(TAG, "Critical UI elements missing in RegisterActivity");
                 throw new RuntimeException("Critical UI elements missing in RegisterActivity");
             }
+            Log.d(TAG, "All views initialized successfully");
         } catch (Exception e) {
             Log.e(TAG, "Error initializing views", e);
             throw e; // Rethrow to be caught in onCreate
@@ -231,7 +217,12 @@ public class RegisterActivity extends BaseActivity {
                 return;
             }
 
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            // Allow simple usernames without email validation for demo accounts
+            boolean isValidEmail = Patterns.EMAIL_ADDRESS.matcher(email).matches();
+            boolean isSimpleUsername = email.equals("admin") || email.equals("manager") ||
+                    email.equals("chef") || email.equals("waiter") || email.equals("customer");
+
+            if (!isValidEmail && !isSimpleUsername) {
                 emailEditText.setError("Please enter a valid email");
                 emailEditText.requestFocus();
                 return;
@@ -243,8 +234,8 @@ public class RegisterActivity extends BaseActivity {
                 return;
             }
 
-            if (password.length() < 6) {
-                passwordEditText.setError("Password must be at least 6 characters");
+            if (password.length() < 4) { // Reduced minimum length for demo accounts
+                passwordEditText.setError("Password must be at least 4 characters");
                 passwordEditText.requestFocus();
                 return;
             }
@@ -271,6 +262,18 @@ public class RegisterActivity extends BaseActivity {
 
             // Map the selected role to our constants
             final String roleToUse = mapSelectedRole(selectedRole);
+
+            // Demo accounts handling - instant success
+            if (isSimpleUsername || email.contains("finedine.com")) {
+                // Register with same credentials for demo accounts
+                Toast.makeText(this, "Creating demo account...", Toast.LENGTH_SHORT).show();
+
+                // Small delay to simulate registration
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    registerLocally(email, password, name, roleToUse);
+                }, 1500);
+                return;
+            }
 
             // Default registration approach
             if (mAuth != null) {

@@ -37,10 +37,12 @@
                         android:layout_height="48dp"
                         android:layout_centerVertical="true"
                         android:padding="12dp"
+                        android:contentDescription="@string/navigation_drawer_open"
                         android:src="@drawable/ic_menu"
                         app:tint="@color/restaurant_text_light" />
 
                     <TextView
+                        android:id="@+id/titleText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
@@ -59,6 +61,7 @@
                         android:layout_marginEnd="16dp"
                         android:background="@drawable/circle_avatar_bg"
                         android:padding="8dp"
+                        android:contentDescription="@string/profile_button"
                         android:src="@drawable/ic_person" />
 
                 </RelativeLayout>
@@ -92,6 +95,7 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tvReservationTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="New Reservation"
@@ -111,6 +115,7 @@
 
                 <!-- Customer Information Card -->
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/customerInfoCard"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
@@ -125,6 +130,7 @@
                         android:padding="16dp">
 
                         <TextView
+                            android:id="@+id/tvCustomerInfoTitle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
@@ -141,6 +147,7 @@
                             app:boxStrokeColor="@color/restaurant_primary"
                             app:hintTextColor="@color/restaurant_primary"
                             app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+                            app:startIconContentDescription="Person icon"
                             app:startIconTint="@color/restaurant_text_secondary"
                             app:boxBackgroundColor="@color/restaurant_card_bg">
 
@@ -148,6 +155,7 @@
                                 android:id="@+id/etCustomerName"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:inputType="textPersonName"
                                 android:textColor="@color/restaurant_text_primary" />
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -160,6 +168,7 @@
                             app:boxStrokeColor="@color/restaurant_primary"
                             app:hintTextColor="@color/restaurant_primary"
                             app:startIconDrawable="@android:drawable/ic_menu_call"
+                            app:startIconContentDescription="Phone icon"
                             app:startIconTint="@color/restaurant_text_secondary"
                             app:boxBackgroundColor="@color/restaurant_card_bg">
 
@@ -180,6 +189,7 @@
                             app:boxStrokeColor="@color/restaurant_primary"
                             app:hintTextColor="@color/restaurant_primary"
                             app:startIconDrawable="@android:drawable/ic_dialog_email"
+                            app:startIconContentDescription="Email icon"
                             app:startIconTint="@color/restaurant_text_secondary"
                             app:boxBackgroundColor="@color/restaurant_card_bg">
 
@@ -195,6 +205,7 @@
 
                 <!-- Reservation Details Card -->
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/reservationDetailsCard"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
@@ -239,7 +250,8 @@
                                 android:insetBottom="0dp"
                                 app:strokeColor="@color/restaurant_primary"
                                 app:cornerRadius="8dp"
-                                android:layout_marginEnd="8dp" />
+                                android:layout_marginEnd="8dp"
+                                android:contentDescription="@string/reservation_date" />
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btnTime"
@@ -250,12 +262,13 @@
                                 android:text="Select Time"
                                 android:textColor="@color/restaurant_primary"
                                 android:drawableStart="@drawable/ic_clock"
-                                android:drawableTint="@color/restaurant_primary"
+                                app:drawableTint="@color/restaurant_primary"
                                 android:drawablePadding="8dp"
                                 android:insetTop="0dp"
                                 android:insetBottom="0dp"
                                 app:strokeColor="@color/restaurant_primary"
-                                app:cornerRadius="8dp" />
+                                app:cornerRadius="8dp"
+                                android:contentDescription="@string/reservation_time" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -272,6 +285,7 @@
                                 android:orientation="vertical">
 
                                 <TextView
+                                    android:id="@+id/tvSelectedDateLabel"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Selected Date"
@@ -294,6 +308,7 @@
                                 android:orientation="vertical">
 
                                 <TextView
+                                    android:id="@+id/tvSelectedTimeLabel"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Selected Time"
@@ -318,6 +333,7 @@
                             app:boxStrokeColor="@color/restaurant_primary"
                             app:hintTextColor="@color/restaurant_primary"
                             app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+                            app:startIconContentDescription="Group icon"
                             app:startIconTint="@color/restaurant_text_secondary"
                             app:boxBackgroundColor="@color/restaurant_card_bg">
 
@@ -326,15 +342,17 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="number"
-                                android:clickable="false"
+                                android:clickable="true"
                                 android:focusable="false"
-                                android:textColor="@color/restaurant_text_primary" />
+                                android:textColor="@color/restaurant_text_primary"
+                                android:contentDescription="@string/party_size" />
                         </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
                 <!-- Special Requests Card -->
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/specialRequestsCard"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="24dp"
@@ -349,6 +367,7 @@
                         android:padding="16dp">
 
                         <TextView
+                            android:id="@+id/tvSpecialRequestsTitle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Special Requests"
@@ -388,8 +407,10 @@
                     android:backgroundTint="@color/restaurant_primary"
                     android:textColor="@color/restaurant_text_light"
                     app:cornerRadius="8dp"
-                    android:paddingVertical="14dp"
-                    android:elevation="2dp" />
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp"
+                    android:contentDescription="Submit reservation form"
+                    app:elevation="2dp" />
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 
@@ -402,9 +423,10 @@
             android:layout_margin="16dp"
             android:src="@drawable/ic_add"
             app:backgroundTint="@color/restaurant_accent"
-            android:tint="@color/restaurant_text_light"
+            app:tint="@color/restaurant_text_light"
             app:borderWidth="0dp"
             app:elevation="6dp"
+            android:contentDescription="Add new reservation"
             app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
 
         <!-- Bottom Navigation -->
